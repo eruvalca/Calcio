@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Calcio.AppHost/Calcio.AppHost.csproj" />
+  <Project Path="Calcio.ServiceDefaults/Calcio.ServiceDefaults.csproj" />
+  <Project Path="Calcio/Calcio.Client/Calcio.Client.csproj" />
+  <Project Path="Calcio/Calcio/Calcio.csproj" />
+</Solution>
