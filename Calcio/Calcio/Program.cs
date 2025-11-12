@@ -5,6 +5,7 @@ using Calcio.Client.Pages;
 using Calcio.Components;
 using Calcio.Components.Account;
 using Calcio.Data;
+using Calcio.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 

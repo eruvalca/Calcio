@@ -1,30 +1,29 @@
 ﻿<script type="module" src="@Assets["Components/Layout/ReconnectModal.razor.js"]"></script>
 
-<dialog id="components-reconnect-modal" data-nosnippet>
-    <div class="components-reconnect-container">
-        <div class="components-rejoining-animation" aria-hidden="true">
-            <div></div>
-            <div></div>
+<dialog id="components-reconnect-modal" class="p-4 rounded shadow bg-white border-0" data-nosnippet>
+    <div class="d-flex flex-column align-items-center gap-3 w-100">
+        <div class="components-rejoining-animation spinner-border text-primary" role="status" aria-hidden="true">
+            <span class="visually-hidden">Rejoining...</span>
         </div>
-        <p class="components-reconnect-first-attempt-visible">
+        <p class="components-reconnect-first-attempt-visible text-center">
             Rejoining the server...
         </p>
-        <p class="components-reconnect-repeated-attempt-visible">
+        <p class="components-reconnect-repeated-attempt-visible text-center">
             Rejoin failed... trying again in <span id="components-seconds-to-next-attempt"></span> seconds.
         </p>
-        <p class="components-reconnect-failed-visible">
+        <p class="components-reconnect-failed-visible text-center">
             Failed to rejoin.<br />Please retry or reload the page.
         </p>
-        <button id="components-reconnect-button" class="components-reconnect-failed-visible">
+        <button id="components-reconnect-button" class="btn btn-primary components-reconnect-failed-visible">
             Retry
         </button>
-        <p class="components-pause-visible">
+        <p class="components-pause-visible text-center">
             The session has been paused by the server.
         </p>
-        <button id="components-resume-button" class="components-pause-visible">
+        <button id="components-resume-button" class="btn btn-primary components-pause-visible">
             Resume
         </button>
-        <p class="components-resume-failed-visible">
+        <p class="components-resume-failed-visible text-center">
             Failed to resume the session.<br />Please reload the page.
         </p>
     </div>

@@ -1,5 +1,10 @@
 using System.Security.Claims;
 using System.Text.Json;
+
+using Calcio.Components.Account.Pages;
+using Calcio.Components.Account.Pages.Manage;
+using Calcio.Data;
+
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -7,11 +12,8 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
-using Calcio.Components.Account.Pages;
-using Calcio.Components.Account.Pages.Manage;
-using Calcio.Data;
 
-namespace Microsoft.AspNetCore.Routing;
+namespace Calcio.Components.Account;
 
 internal static class IdentityComponentsEndpointRouteBuilderExtensions
 {
@@ -123,7 +125,10 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
             }
 
             var userId = await userManager.GetUserIdAsync(user);
-            downloadLogger.LogInformation("User with ID '{UserId}' asked for their personal data.", userId);
+            if (downloadLogger.IsEnabled(LogLevel.Information))
+            {
+                downloadLogger.LogInformation("User with ID '{UserId}' asked for their personal data.", userId);
+            }
 
             // Only include personal data for download
             var personalData = new Dictionary<string, string>();
