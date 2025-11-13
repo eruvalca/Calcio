@@ -48,3 +48,13 @@ window.calcioTheme = (function () {
         }
     };
 })();
+
+export function init(ref){
+    return window.calcioTheme.init(ref);
+}
+export function setPreference(pref){
+    return window.calcioTheme.setPreference(pref);
+}
+export function dispose(){
+    return window.calcioTheme.dispose();
+}

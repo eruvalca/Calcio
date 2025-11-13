@@ -11,6 +11,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Calcio.ServiceDefaults\Calcio.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Calcio.Client\Calcio.Client.csproj" />
+    <ProjectReference Include="..\Calcio.Shared\Calcio.Shared.csproj" />
+    <ProjectReference Include="..\Calcio.UI\Calcio.UI.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />

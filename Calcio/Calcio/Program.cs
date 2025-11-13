@@ -2,7 +2,7 @@ using Calcio.Components;
 using Calcio.Components.Account;
 using Calcio.Data;
 using Calcio.ServiceDefaults;
-using Calcio.Theme.Services;
+using Calcio.UI.Theme.Services;
 
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -72,7 +72,8 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(Calcio.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(typeof(Calcio.Client._Imports).Assembly)
+    .AddAdditionalAssemblies(typeof(Calcio.UI._Imports).Assembly);
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();

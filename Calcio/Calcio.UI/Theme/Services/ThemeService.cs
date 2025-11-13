@@ -1,6 +1,6 @@
 ﻿using Microsoft.JSInterop;
 
-namespace Calcio.Theme.Services;
+namespace Calcio.UI.Theme.Services;
 
 public enum ThemePreference
 {
@@ -11,6 +11,9 @@ public enum ThemePreference
 
 public sealed class ThemeService(IJSRuntime js) : IAsyncDisposable
 {
+    private readonly Lazy<Task<IJSObjectReference>> moduleTask = new(() => js.InvokeAsync<IJSObjectReference>(
+            "import", "./_content/Calcio.UI/theme.js").AsTask());
+
     private DotNetObjectReference<ThemeService>? _dotNetRef;
     private bool _initialized;
 
@@ -18,7 +21,6 @@ public sealed class ThemeService(IJSRuntime js) : IAsyncDisposable
 
     public ThemePreference Current { get; private set; } = ThemePreference.System;
 
-    // Must be called only after component is interactive (OnAfterRenderAsync firstRender + RendererInfo.IsInteractive)
     public async Task InitializeAsync()
     {
         if (_initialized)
@@ -27,10 +29,9 @@ public sealed class ThemeService(IJSRuntime js) : IAsyncDisposable
         }
 
         _dotNetRef = DotNetObjectReference.Create(this);
-        var prefString = await js.InvokeAsync<string>("calcioTheme.init", _dotNetRef);
-        Current = Enum.TryParse(prefString, ignoreCase: true, out ThemePreference parsed)
-            ? parsed
-            : ThemePreference.System;
+        var module = await moduleTask.Value;
+        var prefString = await module.InvokeAsync<string>("init", _dotNetRef);
+        Current = Enum.TryParse(prefString, true, out ThemePreference parsed) ? parsed : ThemePreference.System;
         _initialized = true;
         ThemeChanged?.Invoke(Current);
     }
@@ -44,7 +45,8 @@ public sealed class ThemeService(IJSRuntime js) : IAsyncDisposable
         }
 
         Current = preference;
-        await js.InvokeVoidAsync("calcioTheme.setPreference", preference.ToString());
+        var module = await moduleTask.Value;
+        await module.InvokeVoidAsync("setPreference", preference.ToString());
         ThemeChanged?.Invoke(Current);
     }
 
@@ -59,13 +61,21 @@ public sealed class ThemeService(IJSRuntime js) : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        if (_dotNetRef != null)
+        if (_dotNetRef is not null)
         {
             try
             {
-                await js.InvokeVoidAsync("calcioTheme.dispose");
+                if (moduleTask.IsValueCreated)
+                {
+                    var module = await moduleTask.Value;
+                    await module.InvokeVoidAsync("dispose");
+                    await module.DisposeAsync();
+                }
             }
-            catch { }
+            catch
+            {
+                // Swallow JS disposal exceptions.
+            }
 
             _dotNetRef.Dispose();
         }

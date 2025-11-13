@@ -1,7 +1,8 @@
-﻿@inherits LayoutComponentBase
+﻿@using Calcio.UI.Components.Layout
+@inherits LayoutComponentBase
 
 <div class="container-fluid">
     @Body
 </div>
 
-<NavMenu />
+<NavMenu @rendermode="InteractiveAuto" />
