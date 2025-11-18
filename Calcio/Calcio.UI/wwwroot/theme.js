@@ -4,85 +4,21 @@ window.calcioTheme = (function () {
     let mqlDark = null;
     let unsubscribeEnhancedLoad = null;
 
-    function computeEffective(pref) {
+    function apply(pref) {
         let effective = pref;
         if (pref === 'System') {
-            const matchesDark = (mqlDark && typeof mqlDark.matches === 'boolean')
-                ? mqlDark.matches
-                : window.matchMedia('(prefers-color-scheme: dark)').matches;
-            effective = matchesDark ? 'Dark' : 'Light';
+            effective = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Dark' : 'Light';
         }
-        return effective.toLowerCase();
-    }
-
-    function apply(pref) {
-        const effective = computeEffective(pref);
-        document.documentElement.setAttribute('data-bs-theme', effective);
+        document.documentElement.setAttribute('data-bs-theme', effective.toLowerCase());
     }
 
     function readStored() {
-        try {
-            return localStorage.getItem(storageKey) || 'System';
-        } catch {
-            return 'System';
-        }
-    }
-
-    function writeStored(pref) {
-        try {
-            localStorage.setItem(storageKey, pref);
-        } catch {
-            // ignore storage failures (e.g., private mode)
-        }
-    }
-
-    function syncToStored() {
-        const expected = computeEffective(readStored());
-        const current = document.documentElement.getAttribute('data-bs-theme');
-        if (current !== expected) {
-            isSyncing = true;
-            document.documentElement.setAttribute('data-bs-theme', expected);
-            isSyncing = false;
-        }
-    }
-
-    function attachObservers() {
-        // Observe changes to the data-bs-theme attribute and ensure it stays in sync with storage
-        if (themeObserver) {
-            themeObserver.disconnect();
-        }
-        themeObserver = new MutationObserver(() => {
-            if (isSyncing) {
-                return;
-            }
-            syncToStored();
-        });
-        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-bs-theme'] });
-
-        // Observe if the root element gets replaced (enhanced navigation), then re-attach and sync
-        if (rootObserver) {
-            rootObserver.disconnect();
-        }
-        rootObserver = new MutationObserver(() => {
-            // Re-attach observers to the (potentially) new documentElement
-            // Use a microtask to allow the DOM to settle
-            queueMicrotask(() => {
-                if (document && document.documentElement) {
-                    attachObservers();
-                    syncToStored();
-                }
-            });
-        });
-        // Observing the document for child list changes is sufficient to detect root swaps in enhanced nav
-        rootObserver.observe(document, { childList: true, subtree: false });
+        return localStorage.getItem(storageKey) || 'System';
     }
 
     function onMqChanged() {
         if (dotNetRef) {
-            const matchesDark = (mqlDark && typeof mqlDark.matches === 'boolean')
-                ? mqlDark.matches
-                : window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const mode = matchesDark ? 'Dark' : 'Light';
+            const mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Dark' : 'Light';
             dotNetRef.invokeMethodAsync('SystemThemeChanged', mode);
         }
         const stored = readStored();
@@ -102,11 +38,6 @@ window.calcioTheme = (function () {
     return {
         init: function (ref) {
             dotNetRef = ref;
-
-            // Prepare media query before first apply to avoid creating multiple MediaQueryList instances
-            mqlDark = window.matchMedia('(prefers-color-scheme: dark)');
-            mqlDark.addEventListener('change', onMqChanged);
-
             const stored = readStored();
             apply(stored);
 
@@ -129,7 +60,7 @@ window.calcioTheme = (function () {
             return stored;
         },
         setPreference: function (pref) {
-            writeStored(pref);
+            localStorage.setItem(storageKey, pref);
             apply(pref);
         },
         dispose: function () {
@@ -148,12 +79,12 @@ window.calcioTheme = (function () {
     };
 })();
 
-export function init(ref){
+export function init(ref) {
     return window.calcioTheme.init(ref);
 }
-export function setPreference(pref){
+export function setPreference(pref) {
     return window.calcioTheme.setPreference(pref);
 }
-export function dispose(){
+export function dispose() {
     return window.calcioTheme.dispose();
 }
