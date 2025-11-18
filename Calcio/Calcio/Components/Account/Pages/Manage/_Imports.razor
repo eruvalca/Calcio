@@ -1,2 +1,7 @@
-﻿@layout ManageLayout
-@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+﻿@inherits CancellableComponentBase
+
+@using Calcio.UI.Components
+@using Microsoft.AspNetCore.Authorization
+
+@layout ManageLayout
+@attribute [Authorize]
