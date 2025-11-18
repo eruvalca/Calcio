@@ -2,6 +2,7 @@ window.calcioTheme = (function () {
     const storageKey = 'calcio.theme';
     let dotNetRef = null;
     let mqlDark = null;
+    let unsubscribeEnhancedLoad = null;
 
     function apply(pref) {
         let effective = pref;
@@ -21,9 +22,17 @@ window.calcioTheme = (function () {
             dotNetRef.invokeMethodAsync('SystemThemeChanged', mode);
         }
         const stored = readStored();
+        // If following the system theme, ensure the applied theme updates too.
         if (stored === 'System') {
             apply('System');
         }
+    }
+
+    function onEnhancedLoad() {
+        // Enhanced navigation can revert DOM mutations not present in SSR output.
+        // Re-apply the current preference after an enhanced page update.
+        const stored = readStored();
+        apply(stored);
     }
 
     return {
@@ -31,8 +40,23 @@ window.calcioTheme = (function () {
             dotNetRef = ref;
             const stored = readStored();
             apply(stored);
+
+            // Watch system theme changes when in Auto (System) mode
             mqlDark = window.matchMedia('(prefers-color-scheme: dark)');
             mqlDark.addEventListener('change', onMqChanged);
+
+            // Re-apply theme after Blazor enhanced navigations patch the DOM
+            try {
+                if (window.Blazor && typeof Blazor.addEventListener === 'function') {
+                    // Store unsubscribe (if supported) to detach on dispose
+                    unsubscribeEnhancedLoad = Blazor.addEventListener('enhancedload', onEnhancedLoad);
+                } else if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+                    // Fallback to listen for the DOM event if exposed
+                    document.addEventListener('enhancedload', onEnhancedLoad);
+                    unsubscribeEnhancedLoad = () => document.removeEventListener('enhancedload', onEnhancedLoad);
+                }
+            } catch { /* no-op */ }
+
             return stored;
         },
         setPreference: function (pref) {
@@ -44,6 +68,12 @@ window.calcioTheme = (function () {
                 mqlDark.removeEventListener('change', onMqChanged);
                 mqlDark = null;
             }
+            try {
+                if (typeof unsubscribeEnhancedLoad === 'function') {
+                    unsubscribeEnhancedLoad();
+                }
+            } catch { /* no-op */ }
+            unsubscribeEnhancedLoad = null;
             dotNetRef = null;
         }
     };
