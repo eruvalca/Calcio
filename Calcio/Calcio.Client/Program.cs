@@ -1,4 +1,4 @@
-using Calcio.UI.Theme.Services;
+using Calcio.UI.Services.Theme;
 
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 

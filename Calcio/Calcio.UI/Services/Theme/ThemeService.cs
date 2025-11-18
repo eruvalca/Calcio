@@ -1,6 +1,6 @@
 ﻿using Microsoft.JSInterop;
 
-namespace Calcio.UI.Theme.Services;
+namespace Calcio.UI.Services.Theme;
 
 public enum ThemePreference
 {

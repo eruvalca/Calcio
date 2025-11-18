@@ -2,7 +2,7 @@ using Calcio.Components;
 using Calcio.Components.Account;
 using Calcio.Data;
 using Calcio.ServiceDefaults;
-using Calcio.UI.Theme.Services;
+using Calcio.UI.Services.Theme;
 
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
