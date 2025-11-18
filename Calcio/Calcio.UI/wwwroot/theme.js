@@ -4,6 +4,27 @@ window.calcioTheme = (function () {
     let mqlDark = null;
     let unsubscribeEnhancedLoad = null;
 
+    function isValidPreference(value) {
+        return value === 'Light' || value === 'Dark' || value === 'System';
+    }
+
+    function normalizePreference(value) {
+        if (value == null) {
+            return 'System';
+        }
+        const v = String(value).trim().toLowerCase();
+        if (v === 'light') {
+            return 'Light';
+        }
+        if (v === 'dark') {
+            return 'Dark';
+        }
+        if (v === 'system' || v === 'auto') {
+            return 'System';
+        }
+        return 'System';
+    }
+
     function apply(pref) {
         let effective = pref;
         if (pref === 'System') {
@@ -13,13 +34,18 @@ window.calcioTheme = (function () {
     }
 
     function readStored() {
-        return localStorage.getItem(storageKey) || 'System';
+        const raw = localStorage.getItem(storageKey);
+        const normalized = normalizePreference(raw);
+        // Guard: ensure persisted value is one of the expected tokens.
+        if (!isValidPreference(raw)) {
+            try { localStorage.setItem(storageKey, normalized); } catch { /* no-op */ }
+        }
+        return normalized;
     }
 
     function onMqChanged() {
         if (dotNetRef) {
-            const mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Dark' : 'Light';
-            dotNetRef.invokeMethodAsync('SystemThemeChanged', mode);
+            dotNetRef.invokeMethodAsync('SystemThemeChanged');
         }
         const stored = readStored();
         // If following the system theme, ensure the applied theme updates too.
@@ -33,6 +59,14 @@ window.calcioTheme = (function () {
         // Re-apply the current preference after an enhanced page update.
         const stored = readStored();
         apply(stored);
+    }
+
+    function getEffectiveTheme() {
+        const pref = readStored();
+        const effective = pref === 'System'
+            ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Dark' : 'Light')
+            : pref;
+        return { preference: pref, effective };
     }
 
     return {
@@ -60,9 +94,11 @@ window.calcioTheme = (function () {
             return stored;
         },
         setPreference: function (pref) {
-            localStorage.setItem(storageKey, pref);
-            apply(pref);
+            const normalized = normalizePreference(pref);
+            try { localStorage.setItem(storageKey, normalized); } catch { /* no-op */ }
+            apply(normalized);
         },
+        getEffectiveTheme: function () { return getEffectiveTheme(); },
         dispose: function () {
             if (mqlDark) {
                 mqlDark.removeEventListener('change', onMqChanged);
@@ -84,6 +120,9 @@ export function init(ref) {
 }
 export function setPreference(pref) {
     return window.calcioTheme.setPreference(pref);
+}
+export function getEffectiveTheme() {
+    return window.calcioTheme.getEffectiveTheme();
 }
 export function dispose() {
     return window.calcioTheme.dispose();

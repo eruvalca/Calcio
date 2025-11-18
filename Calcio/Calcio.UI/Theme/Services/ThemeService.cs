@@ -51,7 +51,7 @@ public sealed class ThemeService(IJSRuntime js) : IAsyncDisposable
     }
 
     [JSInvokable]
-    public void SystemThemeChanged(string _)
+    public void SystemThemeChanged()
     {
         if (Current == ThemePreference.System)
         {

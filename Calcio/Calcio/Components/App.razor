@@ -10,10 +10,25 @@
         (function () {
             try {
                 var storageKey = 'calcio.theme';
-                var pref = localStorage.getItem(storageKey) || 'System';
-                var effective = pref === 'System'
+                var raw = localStorage.getItem(storageKey);
+                // Normalize stored preference: accept Light/Dark/System (or legacy 'auto' => System), else default to System
+                var v = (raw == null ? 'system' : String(raw).trim().toLowerCase());
+                if (v === 'auto') {
+                    v = 'system';
+                }
+                if (v !== 'light' && v !== 'dark' && v !== 'system') {
+                    v = 'system';
+                }
+
+                // Persist the normalized canonical value (PascalCase) for consistency with app code
+                var canonical = v === 'light' ? 'Light' : v === 'dark' ? 'Dark' : 'System';
+                if (raw !== canonical) {
+                    try { localStorage.setItem(storageKey, canonical); } catch { }
+                }
+
+                var effective = v === 'system'
                     ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-                    : pref.toLowerCase();
+                    : v;
                 document.documentElement.setAttribute('data-bs-theme', effective);
             } catch (e) { }
         })();
