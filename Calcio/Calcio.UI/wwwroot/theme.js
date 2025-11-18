@@ -4,21 +4,85 @@ window.calcioTheme = (function () {
     let mqlDark = null;
     let unsubscribeEnhancedLoad = null;
 
-    function apply(pref) {
+    function computeEffective(pref) {
         let effective = pref;
         if (pref === 'System') {
-            effective = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Dark' : 'Light';
+            const matchesDark = (mqlDark && typeof mqlDark.matches === 'boolean')
+                ? mqlDark.matches
+                : window.matchMedia('(prefers-color-scheme: dark)').matches;
+            effective = matchesDark ? 'Dark' : 'Light';
         }
-        document.documentElement.setAttribute('data-bs-theme', effective.toLowerCase());
+        return effective.toLowerCase();
+    }
+
+    function apply(pref) {
+        const effective = computeEffective(pref);
+        document.documentElement.setAttribute('data-bs-theme', effective);
     }
 
     function readStored() {
-        return localStorage.getItem(storageKey) || 'System';
+        try {
+            return localStorage.getItem(storageKey) || 'System';
+        } catch {
+            return 'System';
+        }
+    }
+
+    function writeStored(pref) {
+        try {
+            localStorage.setItem(storageKey, pref);
+        } catch {
+            // ignore storage failures (e.g., private mode)
+        }
+    }
+
+    function syncToStored() {
+        const expected = computeEffective(readStored());
+        const current = document.documentElement.getAttribute('data-bs-theme');
+        if (current !== expected) {
+            isSyncing = true;
+            document.documentElement.setAttribute('data-bs-theme', expected);
+            isSyncing = false;
+        }
+    }
+
+    function attachObservers() {
+        // Observe changes to the data-bs-theme attribute and ensure it stays in sync with storage
+        if (themeObserver) {
+            themeObserver.disconnect();
+        }
+        themeObserver = new MutationObserver(() => {
+            if (isSyncing) {
+                return;
+            }
+            syncToStored();
+        });
+        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-bs-theme'] });
+
+        // Observe if the root element gets replaced (enhanced navigation), then re-attach and sync
+        if (rootObserver) {
+            rootObserver.disconnect();
+        }
+        rootObserver = new MutationObserver(() => {
+            // Re-attach observers to the (potentially) new documentElement
+            // Use a microtask to allow the DOM to settle
+            queueMicrotask(() => {
+                if (document && document.documentElement) {
+                    attachObservers();
+                    syncToStored();
+                }
+            });
+        });
+        // Observing the document for child list changes is sufficient to detect root swaps in enhanced nav
+        rootObserver.observe(document, { childList: true, subtree: false });
     }
 
     function onMqChanged() {
         if (dotNetRef) {
-            const mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Dark' : 'Light';
+            const matchesDark = (mqlDark && typeof mqlDark.matches === 'boolean')
+                ? mqlDark.matches
+                : window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const mode = matchesDark ? 'Dark' : 'Light';
             dotNetRef.invokeMethodAsync('SystemThemeChanged', mode);
         }
         const stored = readStored();
@@ -38,6 +102,11 @@ window.calcioTheme = (function () {
     return {
         init: function (ref) {
             dotNetRef = ref;
+
+            // Prepare media query before first apply to avoid creating multiple MediaQueryList instances
+            mqlDark = window.matchMedia('(prefers-color-scheme: dark)');
+            mqlDark.addEventListener('change', onMqChanged);
+
             const stored = readStored();
             apply(stored);
 
@@ -60,7 +129,7 @@ window.calcioTheme = (function () {
             return stored;
         },
         setPreference: function (pref) {
-            localStorage.setItem(storageKey, pref);
+            writeStored(pref);
             apply(pref);
         },
         dispose: function () {
