@@ -28,7 +28,5 @@ public partial class PasskeySubmit(IServiceProvider services)
     public IDictionary<string, object>? AdditionalAttributes { get; set; }
 
     protected override void OnInitialized()
-    {
-        tokens = services.GetService<IAntiforgery>()?.GetTokens(HttpContext);
-    }
+        => tokens = services.GetService<IAntiforgery>()?.GetTokens(HttpContext);
 }

@@ -96,7 +96,7 @@ public partial class EnableAuthenticator(
         authenticatorUri = GenerateQrCodeUri(email!, unformattedKey!);
     }
 
-    private string FormatKey(string unformattedKey)
+    private static string FormatKey(string unformattedKey)
     {
         var result = new StringBuilder();
         int currentPosition = 0;
@@ -105,6 +105,7 @@ public partial class EnableAuthenticator(
             result.Append(unformattedKey.AsSpan(currentPosition, 4)).Append(' ');
             currentPosition += 4;
         }
+
         if (currentPosition < unformattedKey.Length)
         {
             result.Append(unformattedKey.AsSpan(currentPosition));
@@ -113,15 +114,12 @@ public partial class EnableAuthenticator(
         return result.ToString().ToLowerInvariant();
     }
 
-    private string GenerateQrCodeUri(string email, string unformattedKey)
-    {
-        return string.Format(
+    private string GenerateQrCodeUri(string email, string unformattedKey) => string.Format(
             CultureInfo.InvariantCulture,
             AuthenticatorUriFormat,
             urlEncoder.Encode("Microsoft.AspNetCore.Identity.UI"),
             urlEncoder.Encode(email),
             unformattedKey);
-    }
 
     private sealed class InputModel
     {

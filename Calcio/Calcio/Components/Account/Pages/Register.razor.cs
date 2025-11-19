@@ -26,12 +26,12 @@ public partial class Register(
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
 
-    private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+    private string? Message
+        => identityErrors is null
+        ? null
+        : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
-    protected override void OnInitialized()
-    {
-        Input ??= new();
-    }
+    protected override void OnInitialized() => Input ??= new();
 
     public async Task RegisterUser(EditContext editContext)
     {
@@ -85,14 +85,9 @@ public partial class Register(
         }
     }
 
-    private IUserEmailStore<ApplicationUser> GetEmailStore()
-    {
-        if (!userManager.SupportsUserEmail)
-        {
-            throw new NotSupportedException("The default UI requires a user store with email support.");
-        }
-        return (IUserEmailStore<ApplicationUser>)userStore;
-    }
+    private IUserEmailStore<ApplicationUser> GetEmailStore() => !userManager.SupportsUserEmail
+        ? throw new NotSupportedException("The default UI requires a user store with email support.")
+        : (IUserEmailStore<ApplicationUser>)userStore;
 
     private sealed class InputModel
     {

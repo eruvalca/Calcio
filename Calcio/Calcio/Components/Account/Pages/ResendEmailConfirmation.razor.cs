@@ -18,10 +18,7 @@ public partial class ResendEmailConfirmation(
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = default!;
 
-    protected override void OnInitialized()
-    {
-        Input ??= new();
-    }
+    protected override void OnInitialized() => Input ??= new();
 
     private async Task OnValidSubmitAsync()
     {

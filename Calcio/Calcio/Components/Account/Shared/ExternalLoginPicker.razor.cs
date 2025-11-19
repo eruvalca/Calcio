@@ -14,7 +14,5 @@ public partial class ExternalLoginPicker(
     private string? ReturnUrl { get; set; }
 
     protected override async Task OnInitializedAsync()
-    {
-        externalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToArray();
-    }
+        => externalLogins = [.. await signInManager.GetExternalAuthenticationSchemesAsync()];
 }

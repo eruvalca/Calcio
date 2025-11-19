@@ -17,15 +17,12 @@ public partial class ForgotPassword(
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = default!;
 
-    protected override void OnInitialized()
-    {
-        Input ??= new();
-    }
+    protected override void OnInitialized() => Input ??= new();
 
     private async Task OnValidSubmitAsync()
     {
         var user = await userManager.FindByEmailAsync(Input.Email);
-        if (user is null || !(await userManager.IsEmailConfirmedAsync(user)))
+        if (user is null || !await userManager.IsEmailConfirmedAsync(user))
         {
             // Don't reveal that the user does not exist or is not confirmed
             redirectManager.RedirectTo("Account/ForgotPasswordConfirmation");

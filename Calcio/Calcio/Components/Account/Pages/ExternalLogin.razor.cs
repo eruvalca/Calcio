@@ -172,14 +172,9 @@ public partial class ExternalLogin(
         }
     }
 
-    private IUserEmailStore<ApplicationUser> GetEmailStore()
-    {
-        if (!userManager.SupportsUserEmail)
-        {
-            throw new NotSupportedException("The default UI requires a user store with email support.");
-        }
-        return (IUserEmailStore<ApplicationUser>)userStore;
-    }
+    private IUserEmailStore<ApplicationUser> GetEmailStore() => !userManager.SupportsUserEmail
+        ? throw new NotSupportedException("The default UI requires a user store with email support.")
+        : (IUserEmailStore<ApplicationUser>)userStore;
 
     private sealed class InputModel
     {

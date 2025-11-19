@@ -39,6 +39,7 @@ public partial class Passkeys(
             redirectManager.RedirectToInvalidUser(userManager, HttpContext);
             return;
         }
+
         currentPasskeys = await userManager.GetPasskeysAsync(user);
     }
 
