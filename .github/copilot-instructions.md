@@ -8,10 +8,12 @@
 ## C# / .NET Coding Guidelines
 
 ### Formatting & Structure
+
 - Always use braces for blocks.
 - Use file-scoped namespaces exclusively.
 
 ### Language Features & Expressions
+
 - Prefer pattern matching for type + null checks and logical simplification.
 - Use switch expressions where suitable.
 - Use null-propagation (`?.`) and coalescing (`??`) operators when appropriate.
@@ -22,23 +24,30 @@
 - Use implicit object creation (`new()`) when type apparent.
 
 ### Null / Equality / Safety
+
 - Prefer `is null` pattern over `ReferenceEquals`.
 - Avoid redundant null checks when null-propagation suffices.
 
 ### Members & Types
+
 - Prefer auto-properties over fields when suitable.
 - Mark fields `readonly` when possible.
 - Use explicit tuple & anonymous member names inference.
 
 ### Naming
+
 - Interfaces: PascalCase starting with `I`.
 - Types & non-field members: PascalCase.
 
 ### Performance & Quality
+
 - Eliminate unused parameters (warnings enabled) and unused value assignments (discard where needed).
 
 ### Using & Resource Management
+
 - Prefer simple `using` statements (no extra block) where possible.
 
 ### Blazor Components
+
 - All blazor components inherit from `CancellableComponentBase` to support cancellation tokens. This is set with `@inherits` directives in `_Imports.razor` files.
+- Most blazor components have a code-behind `.razor.cs` file for C# code. With the exception of standard blazor application files (e.g. `App.razor`, `Routes.razor`, `_Imports.razor`), all `.razor` files should have a corresponding `.razor.cs` file.

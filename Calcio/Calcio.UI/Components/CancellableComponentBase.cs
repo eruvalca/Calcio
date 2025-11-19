@@ -9,7 +9,7 @@ public abstract class CancellableComponentBase : ComponentBase, IDisposable
     protected CancellationToken CancellationToken => (_cts ??= new()).Token;
 
 #pragma warning disable CA1816 // Dispose methods should call SuppressFinalize
-    public void Dispose()
+    public virtual void Dispose()
 #pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
     {
         _cts?.Cancel();

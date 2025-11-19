@@ -3,15 +3,11 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 
-@implements IDisposable
-@inject NavigationManager NavigationManager
-@inject ThemeService ThemeService
-
 <nav class="navbar fixed-bottom navbar-expand-sm bg-body-tertiary">
     <div class="container-fluid">
         <a class="navbar-brand" href="/">Calcio</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
-                aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+            aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="mainNavbar">
@@ -34,13 +30,17 @@
             </ul>
             <div class="d-flex ms-auto align-items-center">
                 <div class="dropdown dropup me-2">
-                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle py-1 px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle py-1 px-2" type="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
                         @GetThemeLabel()
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end py-1 small">
-                        <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.Light))" type="button" @onclick="() => ChangeTheme(ThemePreference.Light)">☀️ Light</button></li>
-                        <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.Dark))" type="button" @onclick="() => ChangeTheme(ThemePreference.Dark)">🌙 Dark</button></li>
-                        <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.System))" type="button" @onclick="() => ChangeTheme(ThemePreference.System)">🌗 Auto</button></li>
+                        <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.Light))" type="button"
+                                @onclick="() => ChangeTheme(ThemePreference.Light)">☀️ Light</button></li>
+                        <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.Dark))" type="button"
+                                @onclick="() => ChangeTheme(ThemePreference.Dark)">🌙 Dark</button></li>
+                        <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.System))" type="button"
+                                @onclick="() => ChangeTheme(ThemePreference.System)">🌗 Auto</button></li>
                     </ul>
                 </div>
                 <AuthorizeView>
@@ -82,54 +82,3 @@
         </div>
     </div>
 </nav>
-
-@code
-{
-    private string? currentUrl;
-    private bool _themeSubscribed;
-
-    protected override void OnInitialized()
-    {
-        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        NavigationManager.LocationChanged += OnLocationChanged;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && RendererInfo.IsInteractive && !_themeSubscribed)
-        {
-            await ThemeService.InitializeAsync();
-            ThemeService.ThemeChanged += OnThemeChanged;
-            _themeSubscribed = true;
-            StateHasChanged();
-        }
-    }
-
-    private void OnThemeChanged(ThemePreference pref) => InvokeAsync(StateHasChanged);
-
-    private string IsActive(ThemePreference pref) => ThemeService.Current == pref ? "active" : string.Empty;
-
-    private string GetThemeLabel() => ThemeService.Current switch
-    {
-        ThemePreference.Light => "☀️",
-        ThemePreference.Dark => "🌙",
-        _ => "🌗"
-    };
-
-    private async Task ChangeTheme(ThemePreference pref) => await ThemeService.SetThemeAsync(pref);
-
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
-        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
-        StateHasChanged();
-    }
-
-    public void Dispose()
-    {
-        NavigationManager.LocationChanged -= OnLocationChanged;
-        if (_themeSubscribed)
-        {
-            ThemeService.ThemeChanged -= OnThemeChanged;
-        }
-    }
-}

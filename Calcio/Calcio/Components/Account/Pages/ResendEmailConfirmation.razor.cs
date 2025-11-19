@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Calcio.Data;
@@ -12,8 +11,7 @@ namespace Calcio.Components.Account.Pages;
 public partial class ResendEmailConfirmation(
     UserManager<ApplicationUser> userManager,
     IEmailSender<ApplicationUser> emailSender,
-    NavigationManager navigationManager,
-    IdentityRedirectManager redirectManager)
+    NavigationManager navigationManager)
 {
     private string? message;
 
