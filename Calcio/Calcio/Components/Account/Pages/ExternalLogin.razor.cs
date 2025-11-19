@@ -1,0 +1,190 @@
+using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
+using System.Text;
+using System.Text.Encodings.Web;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
+using Calcio.Data;
+
+namespace Calcio.Components.Account.Pages;
+
+public partial class ExternalLogin(
+    SignInManager<ApplicationUser> signInManager,
+    UserManager<ApplicationUser> userManager,
+    IUserStore<ApplicationUser> userStore,
+    IEmailSender<ApplicationUser> emailSender,
+    NavigationManager navigationManager,
+    IdentityRedirectManager redirectManager,
+    ILogger<ExternalLogin> logger)
+{
+    public const string LoginCallbackAction = "LoginCallback";
+
+    private string? message;
+    private ExternalLoginInfo? externalLoginInfo;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = default!;
+
+    [SupplyParameterFromQuery]
+    private string? RemoteError { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? Action { get; set; }
+
+    private string? ProviderDisplayName => externalLoginInfo?.ProviderDisplayName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Input ??= new();
+
+        if (RemoteError is not null)
+        {
+            redirectManager.RedirectToWithStatus("Account/Login", $"Error from external provider: {RemoteError}", HttpContext);
+            return;
+        }
+
+        var info = await signInManager.GetExternalLoginInfoAsync();
+        if (info is null)
+        {
+            redirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information.", HttpContext);
+            return;
+        }
+
+        externalLoginInfo = info;
+
+        if (HttpMethods.IsGet(HttpContext.Request.Method))
+        {
+            if (Action == LoginCallbackAction)
+            {
+                await OnLoginCallbackAsync();
+                return;
+            }
+
+            // We should only reach this page via the login callback, so redirect back to
+            // the login page if we get here some other way.
+            redirectManager.RedirectTo("Account/Login");
+        }
+    }
+
+    private async Task OnLoginCallbackAsync()
+    {
+        if (externalLoginInfo is null)
+        {
+            redirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information.", HttpContext);
+            return;
+        }
+
+        // Sign in the user with this external login provider if the user already has a login.
+        var result = await signInManager.ExternalLoginSignInAsync(
+            externalLoginInfo.LoginProvider,
+            externalLoginInfo.ProviderKey,
+            isPersistent: false,
+            bypassTwoFactor: true);
+
+        if (result.Succeeded)
+        {
+            logger.LogInformation(
+                "{Name} logged in with {LoginProvider} provider.",
+                externalLoginInfo.Principal.Identity?.Name,
+                externalLoginInfo.LoginProvider);
+            redirectManager.RedirectTo(ReturnUrl);
+            return;
+        }
+        else if (result.IsLockedOut)
+        {
+            redirectManager.RedirectTo("Account/Lockout");
+            return;
+        }
+
+        // If the user does not have an account, then ask the user to create an account.
+        if (externalLoginInfo.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
+        {
+            Input.Email = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email) ?? "";
+        }
+    }
+
+    private async Task OnValidSubmitAsync()
+    {
+        if (externalLoginInfo is null)
+        {
+            redirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information during confirmation.", HttpContext);
+            return;
+        }
+
+        var emailStore = GetEmailStore();
+        var user = CreateUser();
+
+        await userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+        await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+
+        var result = await userManager.CreateAsync(user);
+        if (result.Succeeded)
+        {
+            result = await userManager.AddLoginAsync(user, externalLoginInfo);
+            if (result.Succeeded)
+            {
+                logger.LogInformation("User created an account using {Name} provider.", externalLoginInfo.LoginProvider);
+
+                var userId = await userManager.GetUserIdAsync(user);
+                var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+                var callbackUrl = navigationManager.GetUriWithQueryParameters(
+                    navigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+                    new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code });
+                await emailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
+
+                // If account confirmation is required, we need to show the link if we don't have a real email sender
+                if (userManager.Options.SignIn.RequireConfirmedAccount)
+                {
+                    redirectManager.RedirectTo("Account/RegisterConfirmation", new() { ["email"] = Input.Email });
+                }
+                else
+                {
+                    await signInManager.SignInAsync(user, isPersistent: false, externalLoginInfo.LoginProvider);
+                    redirectManager.RedirectTo(ReturnUrl);
+                }
+            }
+        }
+        else
+        {
+            message = $"Error: {string.Join(",", result.Errors.Select(error => error.Description))}";
+        }
+    }
+
+    private ApplicationUser CreateUser()
+    {
+        try
+        {
+            return Activator.CreateInstance<ApplicationUser>();
+        }
+        catch
+        {
+            throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
+                $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor");
+        }
+    }
+
+    private IUserEmailStore<ApplicationUser> GetEmailStore()
+    {
+        if (!userManager.SupportsUserEmail)
+        {
+            throw new NotSupportedException("The default UI requires a user store with email support.");
+        }
+        return (IUserEmailStore<ApplicationUser>)userStore;
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
+    }
+}
