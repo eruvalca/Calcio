@@ -1,10 +1,11 @@
+using Calcio.Data;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
-using Calcio.Data;
 
 namespace Calcio.Components.Account;
 
-internal sealed class IdentityRedirectManager(NavigationManager navigationManager)
+public sealed class IdentityRedirectManager(NavigationManager navigationManager)
 {
     public const string StatusCookieName = "Identity.StatusMessage";
 

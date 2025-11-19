@@ -39,3 +39,6 @@
 
 ### Using & Resource Management
 - Prefer simple `using` statements (no extra block) where possible.
+
+### Blazor Components
+- All blazor components inherit from `CancellableComponentBase` to support cancellation tokens. This is set with `@inherits` directives in `_Imports.razor` files.
