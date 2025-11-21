@@ -22,10 +22,7 @@ public partial class init : Migration
                 NormalizedName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                 ConcurrencyStamp = table.Column<string>(type: "text", nullable: true)
             },
-            constraints: table =>
-            {
-                table.PrimaryKey("PK_AspNetRoles", x => x.Id);
-            });
+            constraints: table => table.PrimaryKey("PK_AspNetRoles", x => x.Id));
 
         migrationBuilder.CreateTable(
             name: "Clubs",
@@ -41,10 +38,7 @@ public partial class init : Migration
                 ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                 ModifiedById = table.Column<long>(type: "bigint", nullable: true)
             },
-            constraints: table =>
-            {
-                table.PrimaryKey("PK_Clubs", x => x.ClubId);
-            });
+            constraints: table => table.PrimaryKey("PK_Clubs", x => x.ClubId));
 
         migrationBuilder.CreateTable(
             name: "AspNetRoleClaims",

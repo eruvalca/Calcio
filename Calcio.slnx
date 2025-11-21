@@ -6,7 +6,11 @@
   <Project Path="Calcio.AppHost/Calcio.AppHost.csproj" />
   <Project Path="Calcio.ServiceDefaults/Calcio.ServiceDefaults.csproj" />
   <Project Path="Calcio/Calcio.Client/Calcio.Client.csproj" />
-  <Project Path="Calcio/Calcio.Shared/Calcio.Shared.csproj" Id="9d9f5937-c306-4176-8929-150fe0862806" />
+  <Project Path="Calcio/Calcio.Shared/Calcio.Shared.csproj"
+    Id="9d9f5937-c306-4176-8929-150fe0862806" />
   <Project Path="Calcio/Calcio.UI/Calcio.UI.csproj" Id="0b967939-01aa-4cf2-803e-32bd97cf527b" />
+  <Project Path="Calcio/Calcio.UnitTests/Calcio.UnitTests.csproj"
+    Id="d1172051-6e91-4003-a29a-ee894c4bbca4" />
+  <Project Path="Calcio/Calcio.IntegrationTests/Calcio.IntegrationTests.csproj" />
   <Project Path="Calcio/Calcio/Calcio.csproj" />
 </Solution>

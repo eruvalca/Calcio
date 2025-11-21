@@ -69,15 +69,11 @@ builder.Services.AddDbContextFactory<ReadWriteDbContext>((sp, options) =>
 builder.EnrichNpgsqlDbContext<ReadWriteDbContext>();
 
 // ReadOnlyApplicationDbContext registration + factory
-builder.Services.AddDbContext<ReadOnlyDbContext>((sp, options) =>
-{
-    options.UseNpgsql(connectionString);
-}, ServiceLifetime.Scoped);
+builder.Services.AddDbContext<ReadOnlyDbContext>((sp, options)
+    => options.UseNpgsql(connectionString), ServiceLifetime.Scoped);
 
-builder.Services.AddDbContextFactory<ReadOnlyDbContext>((sp, options) =>
-{
-    options.UseNpgsql(connectionString);
-}, ServiceLifetime.Scoped);
+builder.Services.AddDbContextFactory<ReadOnlyDbContext>((sp, options)
+    => options.UseNpgsql(connectionString), ServiceLifetime.Scoped);
 
 builder.EnrichNpgsqlDbContext<ReadOnlyDbContext>();
 
