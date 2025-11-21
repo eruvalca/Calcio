@@ -67,7 +67,7 @@ public partial class Login(
 
         if (result.Succeeded)
         {
-            logger.LogInformation("User logged in.");
+            LogUserLoggedIn(logger);
             redirectManager.RedirectTo(ReturnUrl);
         }
         else if (result.RequiresTwoFactor)
@@ -78,7 +78,7 @@ public partial class Login(
         }
         else if (result.IsLockedOut)
         {
-            logger.LogWarning("User account locked out.");
+            LogUserAccountLockedOut(logger);
             redirectManager.RedirectTo("Account/Lockout");
         }
         else
@@ -102,4 +102,10 @@ public partial class Login(
 
         public PasskeyInputModel? Passkey { get; set; }
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "User logged in.")]
+    private static partial void LogUserLoggedIn(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "User account locked out.")]
+    private static partial void LogUserAccountLockedOut(ILogger logger);
 }

@@ -90,10 +90,7 @@ public partial class ExternalLogin(
 
         if (result.Succeeded)
         {
-            logger.LogInformation(
-                "{Name} logged in with {LoginProvider} provider.",
-                externalLoginInfo.Principal.Identity?.Name,
-                externalLoginInfo.LoginProvider);
+            LogUserLoggedInWithProvider(logger, externalLoginInfo.Principal.Identity?.Name, externalLoginInfo.LoginProvider);
             redirectManager.RedirectTo(ReturnUrl);
             return;
         }
@@ -130,7 +127,7 @@ public partial class ExternalLogin(
             result = await userManager.AddLoginAsync(user, externalLoginInfo);
             if (result.Succeeded)
             {
-                logger.LogInformation("User created an account using {Name} provider.", externalLoginInfo.LoginProvider);
+                LogUserCreatedAccountWithProvider(logger, externalLoginInfo.LoginProvider);
 
                 var userId = await userManager.GetUserIdAsync(user);
                 var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -182,4 +179,10 @@ public partial class ExternalLogin(
         [EmailAddress]
         public string Email { get; set; } = "";
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "{Name} logged in with {LoginProvider} provider.")]
+    private static partial void LogUserLoggedInWithProvider(ILogger logger, string? name, string loginProvider);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "User created an account using {Name} provider.")]
+    private static partial void LogUserCreatedAccountWithProvider(ILogger logger, string name);
 }

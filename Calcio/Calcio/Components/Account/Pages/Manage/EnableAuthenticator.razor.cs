@@ -66,7 +66,7 @@ public partial class EnableAuthenticator(
 
         await userManager.SetTwoFactorEnabledAsync(user, true);
         var userId = await userManager.GetUserIdAsync(user);
-        logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", userId);
+        LogUserEnabled2fa(logger, userId);
 
         message = "Your authenticator app has been verified.";
 
@@ -129,4 +129,7 @@ public partial class EnableAuthenticator(
         [Display(Name = "Verification Code")]
         public string Code { get; set; } = "";
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "User with ID '{UserId}' has enabled 2FA with an authenticator app.")]
+    private static partial void LogUserEnabled2fa(ILogger logger, string userId);
 }

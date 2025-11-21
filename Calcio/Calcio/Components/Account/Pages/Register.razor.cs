@@ -48,7 +48,7 @@ public partial class Register(
             return;
         }
 
-        logger.LogInformation("User created a new account with password.");
+        LogUserCreatedAccountWithPassword(logger);
 
         var userId = await userManager.GetUserIdAsync(user);
         var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -107,4 +107,7 @@ public partial class Register(
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; } = "";
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "User created a new account with password.")]
+    private static partial void LogUserCreatedAccountWithPassword(ILogger logger);
 }

@@ -15,7 +15,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace Calcio.Components.Account;
 
-internal static class IdentityComponentsEndpointRouteBuilderExtensions
+internal static partial class IdentityComponentsEndpointRouteBuilderExtensions
 {
     // These endpoints are required by the Identity Razor components defined in the /Components/Account/Pages directory of this project.
     public static IEndpointConventionBuilder MapAdditionalIdentityEndpoints(this IEndpointRouteBuilder endpoints)
@@ -125,10 +125,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
             }
 
             var userId = await userManager.GetUserIdAsync(user);
-            if (downloadLogger.IsEnabled(LogLevel.Information))
-            {
-                downloadLogger.LogInformation("User with ID '{UserId}' asked for their personal data.", userId);
-            }
+            LogUserAskedForPersonalData(downloadLogger, userId);
 
             // Only include personal data for download
             var personalData = new Dictionary<string, string>();
@@ -154,4 +151,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
         return accountGroup;
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "User with ID '{UserId}' asked for their personal data.")]
+    private static partial void LogUserAskedForPersonalData(ILogger logger, string userId);
 }

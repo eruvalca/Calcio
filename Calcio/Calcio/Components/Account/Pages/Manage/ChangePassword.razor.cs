@@ -58,10 +58,7 @@ public partial class ChangePassword(
 
         await signInManager.RefreshSignInAsync(user);
 
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation("User changed their password successfully.");
-        }
+        LogUserChangedPassword(logger);
 
         redirectManager.RedirectToCurrentPageWithStatus("Your password has been changed", HttpContext);
     }
@@ -84,4 +81,7 @@ public partial class ChangePassword(
         [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; } = "";
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "User changed their password successfully.")]
+    private static partial void LogUserChangedPassword(ILogger logger);
 }

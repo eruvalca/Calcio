@@ -26,7 +26,7 @@ public partial class ResetAuthenticator(
         await userManager.SetTwoFactorEnabledAsync(user, false);
         await userManager.ResetAuthenticatorKeyAsync(user);
         var userId = await userManager.GetUserIdAsync(user);
-        logger.LogInformation("User with ID '{UserId}' has reset their authentication app key.", userId);
+        LogUserResetAuthenticatorKey(logger, userId);
 
         await signInManager.RefreshSignInAsync(user);
 
@@ -35,4 +35,7 @@ public partial class ResetAuthenticator(
             "Your authenticator app key has been reset, you will need to configure your authenticator app using the new key.",
             HttpContext);
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "User with ID '{UserId}' has reset their authentication app key.")]
+    private static partial void LogUserResetAuthenticatorKey(ILogger logger, string userId);
 }

@@ -60,10 +60,7 @@ public partial class DeletePersonalData(
         await signInManager.SignOutAsync();
 
         var userId = await userManager.GetUserIdAsync(user);
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);
-        }
+        LogUserDeletedThemselves(logger, userId);
 
         redirectManager.RedirectToCurrentPage();
     }
@@ -73,4 +70,7 @@ public partial class DeletePersonalData(
         [DataType(DataType.Password)]
         public string Password { get; set; } = "";
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "User with ID '{UserId}' deleted themselves.")]
+    private static partial void LogUserDeletedThemselves(ILogger logger, string userId);
 }
