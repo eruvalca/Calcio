@@ -6,7 +6,6 @@
   <Project Path="Calcio.AppHost/Calcio.AppHost.csproj" />
   <Project Path="Calcio.ServiceDefaults/Calcio.ServiceDefaults.csproj" />
   <Project Path="Calcio/Calcio.Client/Calcio.Client.csproj" />
-  <Project Path="Calcio/Calcio.Shared/Calcio.Shared.csproj" Id="47a741b6-c09c-4623-9759-34cce2839c0f" />
   <Project Path="Calcio/Calcio.UI/Calcio.UI.csproj" Id="0b967939-01aa-4cf2-803e-32bd97cf527b" />
   <Project Path="Calcio/Calcio/Calcio.csproj" />
 </Solution>
