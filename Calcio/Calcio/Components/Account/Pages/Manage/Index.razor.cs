@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-using Calcio.Data;
+using Calcio.Data.Models.Entities;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
@@ -8,11 +8,11 @@ using Microsoft.AspNetCore.Identity;
 namespace Calcio.Components.Account.Pages.Manage;
 
 public partial class Index(
-    UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager,
+    UserManager<CalcioUserEntity> userManager,
+    SignInManager<CalcioUserEntity> signInManager,
     IdentityRedirectManager redirectManager)
 {
-    private ApplicationUser? user;
+    private CalcioUserEntity? user;
     private string? username;
     private string? phoneNumber;
 

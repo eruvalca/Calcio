@@ -1,14 +1,16 @@
 using System.ComponentModel.DataAnnotations;
+
+using Calcio.Data.Models.Entities;
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
-using Calcio.Data;
 
 namespace Calcio.Components.Account.Pages;
 
 public partial class Login(
-    SignInManager<ApplicationUser> signInManager,
+    SignInManager<CalcioUserEntity> signInManager,
     ILogger<Login> logger,
     NavigationManager navigationManager,
     IdentityRedirectManager redirectManager)

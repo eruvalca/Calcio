@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.Encodings.Web;
 
-using Calcio.Data;
+using Calcio.Data.Models.Entities;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Identity;
 namespace Calcio.Components.Account.Pages.Manage;
 
 public partial class EnableAuthenticator(
-    UserManager<ApplicationUser> userManager,
+    UserManager<CalcioUserEntity> userManager,
     UrlEncoder urlEncoder,
     IdentityRedirectManager redirectManager,
     ILogger<EnableAuthenticator> logger)
@@ -19,7 +19,7 @@ public partial class EnableAuthenticator(
     private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 
     private string? message;
-    private ApplicationUser? user;
+    private CalcioUserEntity? user;
     private string? sharedKey;
     private string? authenticatorUri;
     private IEnumerable<string>? recoveryCodes;
@@ -80,7 +80,7 @@ public partial class EnableAuthenticator(
         }
     }
 
-    private async ValueTask LoadSharedKeyAndQrCodeUriAsync(ApplicationUser user)
+    private async ValueTask LoadSharedKeyAndQrCodeUriAsync(CalcioUserEntity user)
     {
         // Load the authenticator key & QR code URI to display on the form
         var unformattedKey = await userManager.GetAuthenticatorKeyAsync(user);

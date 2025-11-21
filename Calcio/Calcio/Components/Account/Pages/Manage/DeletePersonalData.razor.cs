@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-using Calcio.Data;
+using Calcio.Data.Models.Entities;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
@@ -8,13 +8,13 @@ using Microsoft.AspNetCore.Identity;
 namespace Calcio.Components.Account.Pages.Manage;
 
 public partial class DeletePersonalData(
-    UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager,
+    UserManager<CalcioUserEntity> userManager,
+    SignInManager<CalcioUserEntity> signInManager,
     IdentityRedirectManager redirectManager,
     ILogger<ChangePassword> logger)
 {
     private string? message;
-    private ApplicationUser? user;
+    private CalcioUserEntity? user;
     private bool requirePassword;
 
     [CascadingParameter]

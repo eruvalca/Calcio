@@ -1,17 +1,17 @@
+using Calcio.Data.Models.Entities;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
-
-using Calcio.Data;
 
 namespace Calcio.Components.Account.Pages.Manage;
 
 public partial class GenerateRecoveryCodes(
-    UserManager<ApplicationUser> userManager,
+    UserManager<CalcioUserEntity> userManager,
     IdentityRedirectManager redirectManager,
     ILogger<GenerateRecoveryCodes> logger)
 {
     private string? message;
-    private ApplicationUser? user;
+    private CalcioUserEntity? user;
     private IEnumerable<string>? recoveryCodes;
 
     [CascadingParameter]

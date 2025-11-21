@@ -1,18 +1,20 @@
 using System.ComponentModel.DataAnnotations;
+
+using Calcio.Data.Models.Entities;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
-using Calcio.Data;
 
 namespace Calcio.Components.Account.Pages;
 
 public partial class LoginWith2fa(
-    SignInManager<ApplicationUser> signInManager,
-    UserManager<ApplicationUser> userManager,
+    SignInManager<CalcioUserEntity> signInManager,
+    UserManager<CalcioUserEntity> userManager,
     IdentityRedirectManager redirectManager,
     ILogger<LoginWith2fa> logger)
 {
     private string? message;
-    private ApplicationUser user = default!;
+    private CalcioUserEntity user = default!;
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = default!;

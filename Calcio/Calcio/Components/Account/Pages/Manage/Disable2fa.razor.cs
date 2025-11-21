@@ -1,4 +1,4 @@
-using Calcio.Data;
+using Calcio.Data.Models.Entities;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Identity;
 namespace Calcio.Components.Account.Pages.Manage;
 
 public partial class Disable2fa(
-    UserManager<ApplicationUser> userManager,
+    UserManager<CalcioUserEntity> userManager,
     IdentityRedirectManager redirectManager,
     ILogger<Disable2fa> logger)
 {
-    private ApplicationUser? user;
+    private CalcioUserEntity? user;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;

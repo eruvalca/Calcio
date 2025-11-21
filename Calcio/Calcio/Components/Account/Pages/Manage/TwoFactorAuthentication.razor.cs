@@ -1,4 +1,4 @@
-using Calcio.Data;
+using Calcio.Data.Models.Entities;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Http.Features;
@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Identity;
 namespace Calcio.Components.Account.Pages.Manage;
 
 public partial class TwoFactorAuthentication(
-    UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager,
+    UserManager<CalcioUserEntity> userManager,
+    SignInManager<CalcioUserEntity> signInManager,
     IdentityRedirectManager redirectManager)
 {
     private bool canTrack;

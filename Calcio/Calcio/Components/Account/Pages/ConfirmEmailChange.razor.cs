@@ -1,14 +1,16 @@
 using System.Text;
+
+using Calcio.Data.Models.Entities;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using Calcio.Data;
 
 namespace Calcio.Components.Account.Pages;
 
 public partial class ConfirmEmailChange(
-    UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager,
+    UserManager<CalcioUserEntity> userManager,
+    SignInManager<CalcioUserEntity> signInManager,
     IdentityRedirectManager redirectManager)
 {
     private string? message;

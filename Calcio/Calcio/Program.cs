@@ -1,6 +1,9 @@
 using Calcio.Components;
 using Calcio.Components.Account;
-using Calcio.Data;
+using Calcio.Data.Contexts;
+using Calcio.Data.Contexts.Base;
+using Calcio.Data.Interceptors;
+using Calcio.Data.Models.Entities;
 using Calcio.ServiceDefaults;
 using Calcio.UI.Services.Theme;
 
@@ -29,21 +32,63 @@ builder.Services.AddAuthentication(options =>
     })
     .AddIdentityCookies();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddScoped<AuditSaveChangesInterceptor>();
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+// BaseDbContext registration + factory
+builder.Services.AddDbContext<BaseDbContext>((sp, options) =>
+{
+    options.UseNpgsql(connectionString);
+    options.AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>());
+}, ServiceLifetime.Scoped);
+
+builder.Services.AddDbContextFactory<BaseDbContext>((sp, options) =>
+{
+    options.UseNpgsql(connectionString);
+    options.AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>());
+}, ServiceLifetime.Scoped);
+
+// ReadWriteApplicationDbContext registration + factory
+builder.Services.AddDbContext<ReadWriteApplicationDbContext>((sp, options) =>
+{
+    options.UseNpgsql(connectionString);
+    options.AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>());
+}, ServiceLifetime.Scoped);
+
+builder.Services.AddDbContextFactory<ReadWriteApplicationDbContext>((sp, options) =>
+{
+    options.UseNpgsql(connectionString);
+    options.AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>());
+}, ServiceLifetime.Scoped);
+
+// ReadOnlyApplicationDbContext registration + factory
+builder.Services.AddDbContext<ReadOnlyApplicationDbContext>((sp, options) =>
+{
+    options.UseNpgsql(connectionString);
+}, ServiceLifetime.Scoped);
+
+builder.Services.AddDbContextFactory<ReadOnlyApplicationDbContext>((sp, options) =>
+{
+    options.UseNpgsql(connectionString);
+    options.AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>());
+}, ServiceLifetime.Scoped);
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddIdentityCore<ApplicationUser>(options =>
+builder.Services.AddIdentityCore<CalcioUserEntity>(options =>
     {
         options.SignIn.RequireConfirmedAccount = true;
         options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
     })
-    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddRoles<IdentityRole<long>>()
+    .AddEntityFrameworkStores<BaseDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddSingleton<IEmailSender<CalcioUserEntity>, IdentityNoOpEmailSender>();
 
 builder.Services.AddScoped<ThemeService>();
 
@@ -78,5 +123,32 @@ app.MapRazorComponents<App>()
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
+
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<BaseDbContext>();
+        await context.Database.MigrateAsync();
+
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole<long>>>();
+        string[] roles = ["Admin", "StandardUser"];
+
+        foreach (var role in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(role))
+            {
+                await roleManager.CreateAsync(new IdentityRole<long>(role));
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database.");
+    }
+}
 
 app.Run();

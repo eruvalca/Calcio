@@ -1,13 +1,15 @@
 using System.Text;
+
+using Calcio.Data.Models.Entities;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using Calcio.Data;
 
 namespace Calcio.Components.Account.Pages;
 
 public partial class ConfirmEmail(
-    UserManager<ApplicationUser> userManager,
+    UserManager<CalcioUserEntity> userManager,
     IdentityRedirectManager redirectManager)
 {
     private string? statusMessage;

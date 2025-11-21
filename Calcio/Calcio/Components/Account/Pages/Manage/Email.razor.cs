@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
 
-using Calcio.Data;
+using Calcio.Data.Models.Entities;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
@@ -11,13 +11,13 @@ using Microsoft.AspNetCore.WebUtilities;
 namespace Calcio.Components.Account.Pages.Manage;
 
 public partial class Email(
-    UserManager<ApplicationUser> userManager,
-    IEmailSender<ApplicationUser> emailSender,
+    UserManager<CalcioUserEntity> userManager,
+    IEmailSender<CalcioUserEntity> emailSender,
     NavigationManager navigationManager,
     IdentityRedirectManager redirectManager)
 {
     private string? message;
-    private ApplicationUser? user;
+    private CalcioUserEntity? user;
     private string? email;
     private bool isEmailConfirmed;
 

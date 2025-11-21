@@ -1,7 +1,7 @@
 using System.Buffers.Text;
 using System.ComponentModel.DataAnnotations;
 
-using Calcio.Data;
+using Calcio.Data.Models.Entities;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
@@ -9,10 +9,10 @@ using Microsoft.AspNetCore.Identity;
 namespace Calcio.Components.Account.Pages.Manage;
 
 public partial class RenamePasskey(
-    UserManager<ApplicationUser> userManager,
+    UserManager<CalcioUserEntity> userManager,
     IdentityRedirectManager redirectManager)
 {
-    private ApplicationUser? user;
+    private CalcioUserEntity? user;
     private UserPasskeyInfo? passkey;
 
     [CascadingParameter]

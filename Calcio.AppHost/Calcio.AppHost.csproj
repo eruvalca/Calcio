@@ -12,4 +12,8 @@
     <ProjectReference Include="..\Calcio\Calcio\Calcio.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.0.0" />
+  </ItemGroup>
+
 </Project>

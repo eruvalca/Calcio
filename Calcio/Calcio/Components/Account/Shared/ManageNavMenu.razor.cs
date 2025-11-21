@@ -1,9 +1,10 @@
+using Calcio.Data.Models.Entities;
+
 using Microsoft.AspNetCore.Identity;
-using Calcio.Data;
 
 namespace Calcio.Components.Account.Shared;
 
-public partial class ManageNavMenu(SignInManager<ApplicationUser> signInManager)
+public partial class ManageNavMenu(SignInManager<CalcioUserEntity> signInManager)
 {
     private bool hasExternalLogins;
 

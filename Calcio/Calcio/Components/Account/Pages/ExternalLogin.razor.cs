@@ -2,18 +2,20 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
+
+using Calcio.Data.Models.Entities;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using Calcio.Data;
 
 namespace Calcio.Components.Account.Pages;
 
 public partial class ExternalLogin(
-    SignInManager<ApplicationUser> signInManager,
-    UserManager<ApplicationUser> userManager,
-    IUserStore<ApplicationUser> userStore,
-    IEmailSender<ApplicationUser> emailSender,
+    SignInManager<CalcioUserEntity> signInManager,
+    UserManager<CalcioUserEntity> userManager,
+    IUserStore<CalcioUserEntity> userStore,
+    IEmailSender<CalcioUserEntity> emailSender,
     NavigationManager navigationManager,
     IdentityRedirectManager redirectManager,
     ILogger<ExternalLogin> logger)
@@ -156,22 +158,22 @@ public partial class ExternalLogin(
         }
     }
 
-    private ApplicationUser CreateUser()
+    private CalcioUserEntity CreateUser()
     {
         try
         {
-            return Activator.CreateInstance<ApplicationUser>();
+            return Activator.CreateInstance<CalcioUserEntity>();
         }
         catch
         {
-            throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
-                $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor");
+            throw new InvalidOperationException($"Can't create an instance of '{nameof(CalcioUserEntity)}'. " +
+                $"Ensure that '{nameof(CalcioUserEntity)}' is not an abstract class and has a parameterless constructor");
         }
     }
 
-    private IUserEmailStore<ApplicationUser> GetEmailStore() => !userManager.SupportsUserEmail
+    private IUserEmailStore<CalcioUserEntity> GetEmailStore() => !userManager.SupportsUserEmail
         ? throw new NotSupportedException("The default UI requires a user store with email support.")
-        : (IUserEmailStore<ApplicationUser>)userStore;
+        : (IUserEmailStore<CalcioUserEntity>)userStore;
 
     private sealed class InputModel
     {

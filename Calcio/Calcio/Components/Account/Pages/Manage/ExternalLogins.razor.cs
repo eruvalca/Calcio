@@ -1,20 +1,20 @@
+using Calcio.Data.Models.Entities;
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 
-using Calcio.Data;
-
 namespace Calcio.Components.Account.Pages.Manage;
 
 public partial class ExternalLogins(
-    UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager,
-    IUserStore<ApplicationUser> userStore,
+    UserManager<CalcioUserEntity> userManager,
+    SignInManager<CalcioUserEntity> signInManager,
+    IUserStore<CalcioUserEntity> userStore,
     IdentityRedirectManager redirectManager)
 {
     public const string LinkLoginCallbackAction = "LinkLoginCallback";
 
-    private ApplicationUser? user;
+    private CalcioUserEntity? user;
     private IList<UserLoginInfo>? currentLogins;
     private IList<AuthenticationScheme>? otherLogins;
     private bool showRemoveButton;
@@ -44,7 +44,7 @@ public partial class ExternalLogins(
         otherLogins = [.. (await signInManager.GetExternalAuthenticationSchemesAsync()).Where(auth => currentLogins.All(ul => auth.Name != ul.LoginProvider))];
 
         string? passwordHash = null;
-        if (userStore is IUserPasswordStore<ApplicationUser> userPasswordStore)
+        if (userStore is IUserPasswordStore<CalcioUserEntity> userPasswordStore)
         {
             passwordHash = await userPasswordStore.GetPasswordHashAsync(user, HttpContext.RequestAborted);
         }

@@ -1,16 +1,18 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
+
+using Calcio.Data.Models.Entities;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using Calcio.Data;
 
 namespace Calcio.Components.Account.Pages;
 
 public partial class ForgotPassword(
-    UserManager<ApplicationUser> userManager,
-    IEmailSender<ApplicationUser> emailSender,
+    UserManager<CalcioUserEntity> userManager,
+    IEmailSender<CalcioUserEntity> emailSender,
     NavigationManager navigationManager,
     IdentityRedirectManager redirectManager)
 {
