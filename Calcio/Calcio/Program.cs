@@ -51,30 +51,35 @@ builder.Services.AddDbContextFactory<BaseDbContext>((sp, options) =>
     options.AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>());
 }, ServiceLifetime.Scoped);
 
+builder.EnrichNpgsqlDbContext<BaseDbContext>();
+
 // ReadWriteApplicationDbContext registration + factory
-builder.Services.AddDbContext<ReadWriteApplicationDbContext>((sp, options) =>
+builder.Services.AddDbContext<ReadWriteDbContext>((sp, options) =>
 {
     options.UseNpgsql(connectionString);
     options.AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>());
 }, ServiceLifetime.Scoped);
 
-builder.Services.AddDbContextFactory<ReadWriteApplicationDbContext>((sp, options) =>
+builder.Services.AddDbContextFactory<ReadWriteDbContext>((sp, options) =>
 {
     options.UseNpgsql(connectionString);
     options.AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>());
 }, ServiceLifetime.Scoped);
+
+builder.EnrichNpgsqlDbContext<ReadWriteDbContext>();
 
 // ReadOnlyApplicationDbContext registration + factory
-builder.Services.AddDbContext<ReadOnlyApplicationDbContext>((sp, options) =>
+builder.Services.AddDbContext<ReadOnlyDbContext>((sp, options) =>
 {
     options.UseNpgsql(connectionString);
 }, ServiceLifetime.Scoped);
 
-builder.Services.AddDbContextFactory<ReadOnlyApplicationDbContext>((sp, options) =>
+builder.Services.AddDbContextFactory<ReadOnlyDbContext>((sp, options) =>
 {
     options.UseNpgsql(connectionString);
-    options.AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>());
 }, ServiceLifetime.Scoped);
+
+builder.EnrichNpgsqlDbContext<ReadOnlyDbContext>();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -87,6 +92,8 @@ builder.Services.AddIdentityCore<CalcioUserEntity>(options =>
     .AddEntityFrameworkStores<BaseDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
+
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddSingleton<IEmailSender<CalcioUserEntity>, IdentityNoOpEmailSender>();
 

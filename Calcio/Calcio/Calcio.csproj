@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.5.2" />
     <ProjectReference Include="..\..\Calcio.ServiceDefaults\Calcio.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Calcio.Client\Calcio.Client.csproj" />
     <ProjectReference Include="..\Calcio.Shared\Calcio.Shared.csproj" />
