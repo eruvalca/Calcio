@@ -387,7 +387,7 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
     }
 
     [Fact]
-    public async Task DeleteTeam_ShouldClientCascadeAssignments()
+    public async Task DeleteTeam_ShouldCascadeAssignments()
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
