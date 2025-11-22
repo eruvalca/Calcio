@@ -50,7 +50,7 @@ public class BaseDbContext : IdentityDbContext<CalcioUserEntity, IdentityRole<lo
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(BaseDbContext).Assembly);
     }
 
-    protected Expression<Func<TEntity, bool>> IsOwnedByCurrentUser<TEntity>(string clubIdPropertyName)
+    protected Expression<Func<TEntity, bool>> IsOwnedByAccessibleClub<TEntity>(string clubIdPropertyName)
         where TEntity : class
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(clubIdPropertyName);
