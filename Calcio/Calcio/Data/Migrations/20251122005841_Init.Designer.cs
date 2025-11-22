@@ -15,8 +15,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Calcio.Data.Migrations;
 
 [DbContext(typeof(BaseDbContext))]
-[Migration("20251121050459_init")]
-partial class init
+[Migration("20251122005841_Init")]
+partial class Init
 {
     /// <inheritdoc />
     protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Calcio.Data.Migrations;
 
 /// <inheritdoc />
-public partial class init : Migration
+public partial class Init : Migration
 {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
@@ -22,7 +22,10 @@ public partial class init : Migration
                 NormalizedName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                 ConcurrencyStamp = table.Column<string>(type: "text", nullable: true)
             },
-            constraints: table => table.PrimaryKey("PK_AspNetRoles", x => x.Id));
+            constraints: table =>
+            {
+                table.PrimaryKey("PK_AspNetRoles", x => x.Id);
+            });
 
         migrationBuilder.CreateTable(
             name: "Clubs",
@@ -38,7 +41,10 @@ public partial class init : Migration
                 ModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                 ModifiedById = table.Column<long>(type: "bigint", nullable: true)
             },
-            constraints: table => table.PrimaryKey("PK_Clubs", x => x.ClubId));
+            constraints: table =>
+            {
+                table.PrimaryKey("PK_Clubs", x => x.ClubId);
+            });
 
         migrationBuilder.CreateTable(
             name: "AspNetRoleClaims",
@@ -628,7 +634,7 @@ public partial class init : Migration
         migrationBuilder.CreateIndex(
             name: "IX_Seasons_ClubId_Name",
             table: "Seasons",
-            columns: new[] { "ClubId", "Name" },
+            columns: ["ClubId", "Name"],
             unique: true);
 
         migrationBuilder.CreateIndex(

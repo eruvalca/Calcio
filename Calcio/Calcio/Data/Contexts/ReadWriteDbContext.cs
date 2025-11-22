@@ -13,7 +13,7 @@ public class ReadWriteDbContext(DbContextOptions<ReadWriteDbContext> options,
         base.OnModelCreating(builder);
 
         builder.Entity<ClubEntity>()
-            .HasQueryFilter(IsOwnedByCurrentUser<ClubEntity>(nameof(ClubEntity.ClubId)));
+            .HasQueryFilter(club => club.CalcioUsers.Any(u => u.Id == CurrentUserIdForFilters));
 
         builder.Entity<CampaignEntity>()
             .HasQueryFilter(IsOwnedByCurrentUser<CampaignEntity>(nameof(CampaignEntity.ClubId)));

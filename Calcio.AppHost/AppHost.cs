@@ -10,7 +10,7 @@ var postgres = builder.AddPostgres("postgres", pgUser, pgPassword)
     .WithLifetime(ContainerLifetime.Persistent)
     .WithEndpoint("tcp", endpoint => endpoint.Port = 15432);
 
-var postgresDb = postgres.AddDatabase("defaultdb");
+var postgresDb = postgres.AddDatabase("calcioDb");
 
 builder.AddProject<Projects.Calcio>("calcio")
     .WithReference(postgresDb, connectionName: "DefaultConnection")
