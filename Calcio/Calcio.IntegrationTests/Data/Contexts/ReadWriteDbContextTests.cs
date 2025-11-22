@@ -201,4 +201,242 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         // Assert
         clubs.ShouldBeEmpty();
     }
+
+    [Fact]
+    public async Task DeleteClub_WithCampaigns_ShouldThrowDbUpdateException()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+        var context = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
+        var token = TestContext.Current.CancellationToken;
+
+        ClubGraphIds? graph = null;
+        try
+        {
+            graph = await CreateClubGraphAsync(context, includeNote: false, includePhoto: false, includeAssignment: false, token);
+
+            var campaignCount = await context.Campaigns
+                .IgnoreQueryFilters()
+                .CountAsync(c => c.ClubId == graph.ClubId, token);
+            campaignCount.ShouldBeGreaterThan(0);
+
+            var club = await context.Clubs
+                .IgnoreQueryFilters()
+                .FirstAsync(c => c.ClubId == graph.ClubId, token);
+
+            context.Clubs.Remove(club);
+
+            await Should.ThrowAsync<DbUpdateException>(() => context.SaveChangesAsync(token));
+        }
+        finally
+        {
+            if (graph is ClubGraphIds createdGraph)
+            {
+                await CleanupClubGraphAsync(context, createdGraph, token);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task DeleteClub_WithNotes_ShouldThrowDbUpdateException()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+        var context = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
+        var token = TestContext.Current.CancellationToken;
+
+        ClubGraphIds? graph = null;
+        try
+        {
+            graph = await CreateClubGraphAsync(context, includeNote: true, includePhoto: false, includeAssignment: false, token);
+
+            var club = await context.Clubs
+                .IgnoreQueryFilters()
+                .Include(c => c.Campaigns)
+                .FirstAsync(c => c.ClubId == graph.ClubId, token);
+
+            context.Campaigns.RemoveRange(club.Campaigns);
+            await context.SaveChangesAsync(token);
+            context.ChangeTracker.Clear();
+
+            club = await context.Clubs
+                .IgnoreQueryFilters()
+                .FirstAsync(c => c.ClubId == graph.ClubId, token);
+
+            (await context.Notes.IgnoreQueryFilters().AnyAsync(n => n.ClubId == graph.ClubId, token)).ShouldBeTrue();
+
+            context.Clubs.Remove(club);
+
+            await Should.ThrowAsync<DbUpdateException>(() => context.SaveChangesAsync(token));
+        }
+        finally
+        {
+            if (graph is ClubGraphIds createdGraph)
+            {
+                await CleanupClubGraphAsync(context, createdGraph, token);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task DeleteClub_AfterClearingRestrictedDependents_ShouldCascadeOtherEntities()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+        var context = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
+        var token = TestContext.Current.CancellationToken;
+
+        ClubGraphIds? graph = null;
+        try
+        {
+            graph = await CreateClubGraphAsync(context, includeNote: true, includePhoto: false, includeAssignment: false, token);
+
+            var club = await context.Clubs
+                .IgnoreQueryFilters()
+                .Include(c => c.Campaigns)
+                .FirstAsync(c => c.ClubId == graph.ClubId, token);
+
+            context.Campaigns.RemoveRange(club.Campaigns);
+            var notes = await context.Notes
+                .IgnoreQueryFilters()
+                .Where(n => n.ClubId == graph.ClubId)
+                .ToListAsync(token);
+            context.Notes.RemoveRange(notes);
+            await context.SaveChangesAsync(token);
+            context.ChangeTracker.Clear();
+
+            club = await context.Clubs
+                .IgnoreQueryFilters()
+                .FirstAsync(c => c.ClubId == graph.ClubId, token);
+
+            context.Clubs.Remove(club);
+            await context.SaveChangesAsync(token);
+
+            (await context.Players.IgnoreQueryFilters().AnyAsync(p => p.ClubId == graph.ClubId, token)).ShouldBeFalse();
+            (await context.Teams.IgnoreQueryFilters().AnyAsync(t => t.ClubId == graph.ClubId, token)).ShouldBeFalse();
+            (await context.Seasons.IgnoreQueryFilters().AnyAsync(s => s.ClubId == graph.ClubId, token)).ShouldBeFalse();
+            (await context.PlayerTags.IgnoreQueryFilters().AnyAsync(pt => pt.ClubId == graph.ClubId, token)).ShouldBeFalse();
+        }
+        finally
+        {
+            if (graph is ClubGraphIds createdGraph)
+            {
+                await CleanupClubGraphAsync(context, createdGraph, token);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task DeletePlayer_ShouldCascadeDependentEntities()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+        var context = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
+        var token = TestContext.Current.CancellationToken;
+
+        ClubGraphIds? graph = null;
+        try
+        {
+            graph = await CreateClubGraphAsync(context, includeNote: true, includePhoto: true, includeAssignment: true, token);
+
+            var player = await context.Players
+                .IgnoreQueryFilters()
+                .Include(p => p.Notes)
+                .Include(p => p.Photos)
+                .Include(p => p.CampaignAssignments)
+                .FirstAsync(p => p.PlayerId == graph.PlayerId, token);
+
+            graph.AssignmentId.ShouldNotBeNull();
+            graph.NoteId.ShouldNotBeNull();
+            graph.PhotoId.ShouldNotBeNull();
+
+            context.Players.Remove(player);
+            await context.SaveChangesAsync(token);
+
+            (await context.Notes.IgnoreQueryFilters().AnyAsync(n => n.PlayerId == graph.PlayerId, token)).ShouldBeFalse();
+            (await context.PlayerPhotos.IgnoreQueryFilters().AnyAsync(p => p.PlayerId == graph.PlayerId, token)).ShouldBeFalse();
+            (await context.PlayerCampaignAssignments.IgnoreQueryFilters().AnyAsync(a => a.PlayerId == graph.PlayerId, token)).ShouldBeFalse();
+        }
+        finally
+        {
+            if (graph is ClubGraphIds createdGraph)
+            {
+                await CleanupClubGraphAsync(context, createdGraph, token);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task DeleteCampaign_ShouldCascadeAssignments()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+        var context = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
+        var token = TestContext.Current.CancellationToken;
+
+        ClubGraphIds? graph = null;
+        try
+        {
+            graph = await CreateClubGraphAsync(context, includeAssignment: true, cancellationToken: token);
+            graph.AssignmentId.ShouldNotBeNull();
+
+            var campaign = await context.Campaigns
+                .IgnoreQueryFilters()
+                .FirstAsync(c => c.CampaignId == graph.CampaignId, token);
+
+            context.Campaigns.Remove(campaign);
+            await context.SaveChangesAsync(token);
+
+            (await context.PlayerCampaignAssignments.IgnoreQueryFilters().AnyAsync(a => a.CampaignId == graph.CampaignId, token)).ShouldBeFalse();
+            (await context.Players.IgnoreQueryFilters().AnyAsync(p => p.PlayerId == graph.PlayerId, token)).ShouldBeTrue();
+        }
+        finally
+        {
+            if (graph is ClubGraphIds createdGraph)
+            {
+                await CleanupClubGraphAsync(context, createdGraph, token);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task DeleteTeam_ShouldClientCascadeAssignments()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+        var context = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
+        var token = TestContext.Current.CancellationToken;
+
+        ClubGraphIds? graph = null;
+        try
+        {
+            graph = await CreateClubGraphAsync(context, includeAssignment: true, cancellationToken: token);
+            graph.AssignmentId.ShouldNotBeNull();
+
+            var team = await context.Teams
+                .IgnoreQueryFilters()
+                .Include(t => t.PlayerAssignments)
+                .FirstAsync(t => t.TeamId == graph.TeamId, token);
+
+            team.PlayerAssignments.ShouldNotBeEmpty();
+
+            context.Teams.Remove(team);
+            await context.SaveChangesAsync(token);
+
+            (await context.PlayerCampaignAssignments.IgnoreQueryFilters().AnyAsync(a => a.TeamId == graph.TeamId, token)).ShouldBeFalse();
+        }
+        finally
+        {
+            if (graph is ClubGraphIds createdGraph)
+            {
+                await CleanupClubGraphAsync(context, createdGraph, token);
+            }
+        }
+    }
 }

@@ -262,4 +262,218 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
             .Include(t => t.Club)
             .ThenInclude(c => c.CalcioUsers)
             .FirstAsync(t => t.Club.CalcioUsers.Any(u => u.Id == userId), cancellationToken);
+
+    protected sealed record ClubGraphIds(
+        long ClubId,
+        long PlayerId,
+        long CampaignId,
+        long TeamId,
+        long SeasonId,
+        long PlayerTagId,
+        long? NoteId,
+        long? PhotoId,
+        long? AssignmentId);
+
+    protected static async Task<ClubGraphIds> CreateClubGraphAsync(
+        ReadWriteDbContext context,
+        bool includeNote = true,
+        bool includePhoto = true,
+        bool includeAssignment = true,
+        CancellationToken cancellationToken = default)
+    {
+        var uniqueSuffix = Guid.NewGuid().ToString("N");
+
+        var club = new ClubEntity
+        {
+            Name = $"Cascade Club {uniqueSuffix}",
+            City = "Cascade City",
+            State = "CC",
+            CreatedById = UserAId
+        };
+
+        var season = new SeasonEntity
+        {
+            Name = $"Season {uniqueSuffix}",
+            StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
+            Club = club,
+            ClubId = club.ClubId,
+            CreatedById = UserAId
+        };
+
+        var campaign = new CampaignEntity
+        {
+            Name = $"Campaign {uniqueSuffix}",
+            Club = club,
+            Season = season,
+            ClubId = club.ClubId,
+            SeasonId = season.SeasonId,
+            CreatedById = UserAId
+        };
+
+        var team = new TeamEntity
+        {
+            Name = $"Team {uniqueSuffix}",
+            Club = club,
+            ClubId = club.ClubId,
+            CreatedById = UserAId
+        };
+
+        var player = new PlayerEntity
+        {
+            FirstName = "Cascade",
+            LastName = uniqueSuffix,
+            DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-12)),
+            Club = club,
+            ClubId = club.ClubId,
+            CreatedById = UserAId
+        };
+
+        var tag = new PlayerTagEntity
+        {
+            Name = $"Tag {uniqueSuffix}",
+            Color = "#123456",
+            Club = club,
+            ClubId = club.ClubId,
+            CreatedById = UserAId
+        };
+
+        NoteEntity? note = null;
+        if (includeNote)
+        {
+            note = new NoteEntity
+            {
+                Player = player,
+                Club = club,
+                Content = "Restricted club note",
+                PlayerId = player.PlayerId,
+                ClubId = club.ClubId,
+                CreatedById = UserAId
+            };
+        }
+
+        PlayerPhotoEntity? photo = null;
+        if (includePhoto)
+        {
+            photo = new PlayerPhotoEntity
+            {
+                Player = player,
+                Club = club,
+                OriginalBlobName = $"photo-{uniqueSuffix}.jpg",
+                PlayerId = player.PlayerId,
+                ClubId = club.ClubId,
+                CreatedById = UserAId
+            };
+        }
+
+        PlayerCampaignAssignmentEntity? assignment = null;
+        if (includeAssignment)
+        {
+            assignment = new PlayerCampaignAssignmentEntity
+            {
+                Player = player,
+                Campaign = campaign,
+                Team = team,
+                Club = club,
+                PlayerId = player.PlayerId,
+                CampaignId = campaign.CampaignId,
+                TeamId = team.TeamId,
+                ClubId = club.ClubId,
+                CreatedById = UserAId
+            };
+        }
+
+        context.Add(club);
+        context.Add(season);
+        context.Add(campaign);
+        context.Add(team);
+        context.Add(player);
+        context.Add(tag);
+
+        if (note is not null)
+        {
+            context.Add(note);
+        }
+
+        if (photo is not null)
+        {
+            context.Add(photo);
+        }
+
+        if (assignment is not null)
+        {
+            context.Add(assignment);
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+        context.ChangeTracker.Clear();
+
+        return new ClubGraphIds(
+            club.ClubId,
+            player.PlayerId,
+            campaign.CampaignId,
+            team.TeamId,
+            season.SeasonId,
+            tag.PlayerTagId,
+            note?.NoteId,
+            photo?.PlayerPhotoId,
+            assignment?.PlayerCampaignAssignmentId);
+    }
+
+    protected static async Task CleanupClubGraphAsync(ReadWriteDbContext context, ClubGraphIds graph, CancellationToken cancellationToken)
+    {
+        context.ChangeTracker.Clear();
+
+        var assignments = await context.PlayerCampaignAssignments
+            .IgnoreQueryFilters()
+            .Where(a => a.ClubId == graph.ClubId)
+            .ToListAsync(cancellationToken);
+        if (assignments.Count > 0)
+        {
+            context.PlayerCampaignAssignments.RemoveRange(assignments);
+        }
+
+        var photos = await context.PlayerPhotos
+            .IgnoreQueryFilters()
+            .Where(p => p.ClubId == graph.ClubId)
+            .ToListAsync(cancellationToken);
+        if (photos.Count > 0)
+        {
+            context.PlayerPhotos.RemoveRange(photos);
+        }
+
+        var notes = await context.Notes
+            .IgnoreQueryFilters()
+            .Where(n => n.ClubId == graph.ClubId)
+            .ToListAsync(cancellationToken);
+        if (notes.Count > 0)
+        {
+            context.Notes.RemoveRange(notes);
+        }
+
+        var campaigns = await context.Campaigns
+            .IgnoreQueryFilters()
+            .Where(c => c.ClubId == graph.ClubId)
+            .ToListAsync(cancellationToken);
+        if (campaigns.Count > 0)
+        {
+            context.Campaigns.RemoveRange(campaigns);
+        }
+
+        if (assignments.Count > 0 || photos.Count > 0 || notes.Count > 0 || campaigns.Count > 0)
+        {
+            await context.SaveChangesAsync(cancellationToken);
+            context.ChangeTracker.Clear();
+        }
+
+        var club = await context.Clubs
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(c => c.ClubId == graph.ClubId, cancellationToken);
+        if (club is null)
+        {
+            return;
+        }
+
+        context.Clubs.Remove(club);
+        await context.SaveChangesAsync(cancellationToken);
+    }
 }

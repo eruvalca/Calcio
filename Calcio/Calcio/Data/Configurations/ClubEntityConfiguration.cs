@@ -20,16 +20,16 @@ public class ClubEntityConfiguration : IEntityTypeConfiguration<ClubEntity>
             .OnDelete(DeleteBehavior.SetNull);
 
         builder
-            .HasMany(c => c.Campaigns)
-            .WithOne(ca => ca.Club)
-            .HasForeignKey(ca => ca.ClubId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder
             .HasMany(c => c.Seasons)
             .WithOne(s => s.Club)
             .HasForeignKey(s => s.ClubId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .HasMany(c => c.Campaigns)
+            .WithOne(ca => ca.Club)
+            .HasForeignKey(ca => ca.ClubId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .HasMany(c => c.Teams)
