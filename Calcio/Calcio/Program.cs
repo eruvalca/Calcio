@@ -134,7 +134,9 @@ if (app.Environment.IsDevelopment())
     try
     {
         var context = services.GetRequiredService<BaseDbContext>();
-        await context.Database.MigrateAsync();
+
+        var strategy = context.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () => await context.Database.MigrateAsync());
 
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole<long>>>();
         string[] roles = ["Admin", "StandardUser"];
