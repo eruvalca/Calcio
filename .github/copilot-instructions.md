@@ -65,6 +65,7 @@
 ### Global query filters & tenancy
 
 - All club-scoped entities (`ClubEntity`, `CampaignEntity`, `SeasonEntity`, `TeamEntity`, `PlayerEntity`, `NoteEntity`, `PlayerTagEntity`, `PlayerCampaignAssignmentEntity`, `PlayerPhotoEntity`) apply `IsOwnedByCurrentUser` filters so queries automatically restrict to `AccessibleClubIds`.
+- `ClubJoinRequestEntity` uses a custom filter: the requesting user always sees their own requests, and club members see requests targeting their clubs via `AccessibleClubIds`. Build/testing code must resolve scopes with the desired user _before_ resolving `ReadWriteDbContext`, otherwise the filter captures the wrong user id for the context lifetime.
 - `ClubEntity` itself filters on the membership join (`Club.CalcioUsers`). Expect queries to automatically hide clubs unless the current user belongs to them.
 - Avoid bypassing filters (e.g., `IgnoreQueryFilters`) unless you are in infrastructure code validating tenancy constraints; any bypass must include manual club checks.
 
@@ -72,3 +73,4 @@
 
 - `ClubEntity` (`ClubId` key) acts as the tenant root; every user, campaign, season, team, player, note, tag, join request, assignment, and photo hangs off a club id. Treat `ClubId` as the partition key for caching and data sharding decisions.
 - Removing a club cascades into seasons, campaigns, teams, players, notes, tags, join requests, and related assignments/photos per entity configuration.
+- `ClubJoinRequestEntity` enforces a unique constraint on `RequestingUserId` (one open request per user) and cascades deletes from both the club and requesting user relationships.

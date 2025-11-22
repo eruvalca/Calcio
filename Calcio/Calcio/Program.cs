@@ -139,7 +139,7 @@ if (app.Environment.IsDevelopment())
         await strategy.ExecuteAsync(async () => await context.Database.MigrateAsync());
 
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole<long>>>();
-        string[] roles = ["Admin", "StandardUser"];
+        string[] roles = ["Admin", "ClubAdmin", "StandardUser"];
 
         foreach (var role in roles)
         {

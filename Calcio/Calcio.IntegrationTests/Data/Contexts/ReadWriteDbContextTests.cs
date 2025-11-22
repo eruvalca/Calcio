@@ -1,4 +1,5 @@
 using Calcio.Data.Contexts;
+using Calcio.Data.Models.Entities;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -420,5 +421,134 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
                 await CleanupClubGraphAsync(context, createdGraph, token);
             }
         }
+    }
+
+    [Fact]
+    public async Task GetClubJoinRequests_AsClubMember_ShouldReturnRequestsForClub()
+    {
+        var token = TestContext.Current.CancellationToken;
+
+        using var seedScope = CreateContextScope(UserBId, out var seedContext);
+        var userAClub = await GetClubForUserAsync(seedContext, UserAId, token);
+        var joinRequestId = await CreateJoinRequestAsync(seedContext, userAClub.ClubId, UserBId, token);
+
+        try
+        {
+            using var queryScope = CreateContextScope(UserAId, out var queryContext);
+
+            var requests = await queryContext.ClubJoinRequests
+                .Include(r => r.Club)
+                .ThenInclude(c => c.CalcioUsers)
+                .ToListAsync(token);
+
+            var request = requests.ShouldHaveSingleItem();
+            request.ClubJoinRequestId.ShouldBe(joinRequestId);
+            request.Club.CalcioUsers.ShouldContain(u => u.Id == UserAId);
+        }
+        finally
+        {
+            using var cleanupScope = CreateContextScope(UserAId, out var cleanupContext);
+            await RemoveJoinRequestAsync(cleanupContext, joinRequestId, token);
+        }
+    }
+
+    [Fact]
+    public async Task GetClubJoinRequests_AsRequestingUser_ShouldReturnOwnRequests()
+    {
+        var token = TestContext.Current.CancellationToken;
+
+        using var seedScope = CreateContextScope(UserBId, out var seedContext);
+        var userAClub = await GetClubForUserAsync(seedContext, UserAId, token);
+        var joinRequestId = await CreateJoinRequestAsync(seedContext, userAClub.ClubId, UserBId, token);
+
+        try
+        {
+            using var queryScope = CreateContextScope(UserBId, out var queryContext);
+
+            var requests = await queryContext.ClubJoinRequests
+                .AsNoTracking()
+                .ToListAsync(token);
+
+            var request = requests.ShouldHaveSingleItem();
+            request.RequestingUserId.ShouldBe(UserBId);
+            request.ClubId.ShouldBe(userAClub.ClubId);
+        }
+        finally
+        {
+            using var cleanupScope = CreateContextScope(UserAId, out var cleanupContext);
+            await RemoveJoinRequestAsync(cleanupContext, joinRequestId, token);
+        }
+    }
+
+    [Fact]
+    public async Task GetClubJoinRequests_AsUnrelatedUser_ShouldNotReturnRequests()
+    {
+        var token = TestContext.Current.CancellationToken;
+
+        using var seedScope = CreateContextScope(UserBId, out var seedContext);
+        var userBClub = await GetClubForUserAsync(seedContext, UserBId, token);
+        var joinRequestId = await CreateJoinRequestAsync(seedContext, userBClub.ClubId, UserBId, token);
+
+        try
+        {
+            using var queryScope = CreateContextScope(UserAId, out var queryContext);
+
+            var requests = await queryContext.ClubJoinRequests
+                .AsNoTracking()
+                .ToListAsync(token);
+
+            requests.ShouldBeEmpty();
+        }
+        finally
+        {
+            using var cleanupScope = CreateContextScope(UserAId, out var cleanupContext);
+            await RemoveJoinRequestAsync(cleanupContext, joinRequestId, token);
+        }
+    }
+
+    private static Task<ClubEntity> GetClubForUserAsync(ReadWriteDbContext context, long userId, CancellationToken token)
+        => context.Clubs
+            .IgnoreQueryFilters()
+            .Include(c => c.CalcioUsers)
+            .FirstAsync(c => c.CalcioUsers.Any(u => u.Id == userId), token);
+
+    private static async Task<long> CreateJoinRequestAsync(ReadWriteDbContext context, long clubId, long requestingUserId, CancellationToken token)
+    {
+        var joinRequest = new ClubJoinRequestEntity
+        {
+            ClubId = clubId,
+            RequestingUserId = requestingUserId,
+            CreatedById = requestingUserId
+        };
+
+        context.ClubJoinRequests.Add(joinRequest);
+        await context.SaveChangesAsync(token);
+        var requestId = joinRequest.ClubJoinRequestId;
+        context.ChangeTracker.Clear();
+        return requestId;
+    }
+
+    private static async Task RemoveJoinRequestAsync(ReadWriteDbContext context, long joinRequestId, CancellationToken token)
+    {
+        var existing = await context.ClubJoinRequests
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(r => r.ClubJoinRequestId == joinRequestId, token);
+
+        if (existing is null)
+        {
+            return;
+        }
+
+        context.ClubJoinRequests.Remove(existing);
+        await context.SaveChangesAsync(token);
+        context.ChangeTracker.Clear();
+    }
+
+    private IServiceScope CreateContextScope(long userId, out ReadWriteDbContext context)
+    {
+        var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, userId);
+        context = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
+        return scope;
     }
 }

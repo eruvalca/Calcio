@@ -38,5 +38,10 @@ public class ReadWriteDbContext(DbContextOptions<ReadWriteDbContext> options,
 
         builder.Entity<PlayerPhotoEntity>()
             .HasQueryFilter(IsOwnedByCurrentUser<PlayerPhotoEntity>(nameof(PlayerPhotoEntity.ClubId)));
+
+        builder.Entity<ClubJoinRequestEntity>()
+            .HasQueryFilter(request
+                => request.RequestingUserId == CurrentUserIdForFilters
+                    || AccessibleClubIds.Contains(request.ClubId));
     }
 }
