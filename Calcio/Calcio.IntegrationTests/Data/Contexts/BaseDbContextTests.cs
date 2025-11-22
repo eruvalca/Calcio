@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Threading;
 
 using Bogus;
 
@@ -134,4 +135,131 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
         var principal = new ClaimsPrincipal(identity);
         httpContextAccessor.HttpContext = new DefaultHttpContext { User = principal };
     }
+
+    protected static async Task SeedNotesForBothClubsAsync(ReadWriteDbContext context, CancellationToken cancellationToken)
+    {
+        var userPlayer = await GetPlayerForUserAsync(context, UserAId, cancellationToken);
+        var otherPlayer = await GetPlayerForUserAsync(context, UserBId, cancellationToken);
+
+        context.Notes.AddRange(
+            new NoteEntity
+            {
+                PlayerId = userPlayer.PlayerId,
+                ClubId = userPlayer.ClubId,
+                Content = "User note",
+                CreatedById = UserAId
+            },
+            new NoteEntity
+            {
+                PlayerId = otherPlayer.PlayerId,
+                ClubId = otherPlayer.ClubId,
+                Content = "Other user note",
+                CreatedById = UserBId
+            });
+
+        await context.SaveChangesAsync(cancellationToken);
+        context.ChangeTracker.Clear();
+    }
+
+    protected static async Task SeedPlayerTagsForBothClubsAsync(ReadWriteDbContext context, CancellationToken cancellationToken)
+    {
+        var userPlayer = await GetPlayerForUserAsync(context, UserAId, cancellationToken);
+        var otherPlayer = await GetPlayerForUserAsync(context, UserBId, cancellationToken);
+
+        context.PlayerTags.AddRange(
+            new PlayerTagEntity
+            {
+                Name = "Speed",
+                Color = "#FF0000",
+                ClubId = userPlayer.ClubId,
+                CreatedById = UserAId
+            },
+            new PlayerTagEntity
+            {
+                Name = "Strength",
+                Color = "#00FF00",
+                ClubId = otherPlayer.ClubId,
+                CreatedById = UserBId
+            });
+
+        await context.SaveChangesAsync(cancellationToken);
+        context.ChangeTracker.Clear();
+    }
+
+    protected static async Task SeedCampaignAssignmentsForBothClubsAsync(ReadWriteDbContext context, CancellationToken cancellationToken)
+    {
+        var userPlayer = await GetPlayerForUserAsync(context, UserAId, cancellationToken);
+        var otherPlayer = await GetPlayerForUserAsync(context, UserBId, cancellationToken);
+        var userCampaign = await GetCampaignForUserAsync(context, UserAId, cancellationToken);
+        var otherCampaign = await GetCampaignForUserAsync(context, UserBId, cancellationToken);
+        var userTeam = await GetTeamForUserAsync(context, UserAId, cancellationToken);
+        var otherTeam = await GetTeamForUserAsync(context, UserBId, cancellationToken);
+
+        context.PlayerCampaignAssignments.AddRange(
+            new PlayerCampaignAssignmentEntity
+            {
+                PlayerId = userPlayer.PlayerId,
+                CampaignId = userCampaign.CampaignId,
+                TeamId = userTeam.TeamId,
+                ClubId = userPlayer.ClubId,
+                CreatedById = UserAId
+            },
+            new PlayerCampaignAssignmentEntity
+            {
+                PlayerId = otherPlayer.PlayerId,
+                CampaignId = otherCampaign.CampaignId,
+                TeamId = otherTeam.TeamId,
+                ClubId = otherPlayer.ClubId,
+                CreatedById = UserBId
+            });
+
+        await context.SaveChangesAsync(cancellationToken);
+        context.ChangeTracker.Clear();
+    }
+
+    protected static async Task SeedPlayerPhotosForBothClubsAsync(ReadWriteDbContext context, CancellationToken cancellationToken)
+    {
+        var userPlayer = await GetPlayerForUserAsync(context, UserAId, cancellationToken);
+        var otherPlayer = await GetPlayerForUserAsync(context, UserBId, cancellationToken);
+
+        context.PlayerPhotos.AddRange(
+            new PlayerPhotoEntity
+            {
+                PlayerId = userPlayer.PlayerId,
+                ClubId = userPlayer.ClubId,
+                OriginalBlobName = "user-original.jpg",
+                CreatedById = UserAId
+            },
+            new PlayerPhotoEntity
+            {
+                PlayerId = otherPlayer.PlayerId,
+                ClubId = otherPlayer.ClubId,
+                OriginalBlobName = "other-original.jpg",
+                CreatedById = UserBId
+            });
+
+        await context.SaveChangesAsync(cancellationToken);
+        context.ChangeTracker.Clear();
+    }
+
+    protected static Task<PlayerEntity> GetPlayerForUserAsync(ReadWriteDbContext context, long userId, CancellationToken cancellationToken)
+        => context.Players
+            .IgnoreQueryFilters()
+            .Include(p => p.Club)
+            .ThenInclude(c => c.CalcioUsers)
+            .FirstAsync(p => p.Club.CalcioUsers.Any(u => u.Id == userId), cancellationToken);
+
+    protected static Task<CampaignEntity> GetCampaignForUserAsync(ReadWriteDbContext context, long userId, CancellationToken cancellationToken)
+        => context.Campaigns
+            .IgnoreQueryFilters()
+            .Include(c => c.Club)
+            .ThenInclude(club => club.CalcioUsers)
+            .FirstAsync(c => c.Club.CalcioUsers.Any(u => u.Id == userId), cancellationToken);
+
+    protected static Task<TeamEntity> GetTeamForUserAsync(ReadWriteDbContext context, long userId, CancellationToken cancellationToken)
+        => context.Teams
+            .IgnoreQueryFilters()
+            .Include(t => t.Club)
+            .ThenInclude(c => c.CalcioUsers)
+            .FirstAsync(t => t.Club.CalcioUsers.Any(u => u.Id == userId), cancellationToken);
 }
