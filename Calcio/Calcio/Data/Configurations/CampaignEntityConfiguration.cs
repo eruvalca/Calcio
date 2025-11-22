@@ -17,7 +17,7 @@ public class CampaignEntityConfiguration : IEntityTypeConfiguration<CampaignEnti
             .HasOne(e => e.Club)
             .WithMany(c => c.Campaigns)
             .HasForeignKey(e => e.ClubId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .HasOne(e => e.Season)

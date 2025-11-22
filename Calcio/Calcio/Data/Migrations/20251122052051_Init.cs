@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+
+using Microsoft.EntityFrameworkCore.Migrations;
 
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -366,7 +368,7 @@ public partial class Init : Migration
                     column: x => x.ClubId,
                     principalTable: "Clubs",
                     principalColumn: "ClubId",
-                    onDelete: ReferentialAction.Restrict);
+                    onDelete: ReferentialAction.Cascade);
                 table.ForeignKey(
                     name: "FK_Notes_Players_PlayerId",
                     column: x => x.PlayerId,
@@ -401,7 +403,7 @@ public partial class Init : Migration
                     column: x => x.ClubId,
                     principalTable: "Clubs",
                     principalColumn: "ClubId",
-                    onDelete: ReferentialAction.Restrict);
+                    onDelete: ReferentialAction.Cascade);
                 table.ForeignKey(
                     name: "FK_PlayerPhotos_Players_PlayerId",
                     column: x => x.PlayerId,
@@ -457,7 +459,7 @@ public partial class Init : Migration
                     column: x => x.ClubId,
                     principalTable: "Clubs",
                     principalColumn: "ClubId",
-                    onDelete: ReferentialAction.Restrict);
+                    onDelete: ReferentialAction.Cascade);
                 table.ForeignKey(
                     name: "FK_Campaigns_Seasons_SeasonId",
                     column: x => x.SeasonId,
@@ -495,17 +497,19 @@ public partial class Init : Migration
                     column: x => x.ClubId,
                     principalTable: "Clubs",
                     principalColumn: "ClubId",
-                    onDelete: ReferentialAction.Restrict);
+                    onDelete: ReferentialAction.Cascade);
                 table.ForeignKey(
                     name: "FK_PlayerCampaignAssignments_Players_PlayerId",
                     column: x => x.PlayerId,
                     principalTable: "Players",
-                    principalColumn: "PlayerId");
+                    principalColumn: "PlayerId",
+                    onDelete: ReferentialAction.Cascade);
                 table.ForeignKey(
                     name: "FK_PlayerCampaignAssignments_Teams_TeamId",
                     column: x => x.TeamId,
                     principalTable: "Teams",
-                    principalColumn: "TeamId");
+                    principalColumn: "TeamId",
+                    onDelete: ReferentialAction.Cascade);
             });
 
         migrationBuilder.CreateIndex(
@@ -634,7 +638,7 @@ public partial class Init : Migration
         migrationBuilder.CreateIndex(
             name: "IX_Seasons_ClubId_Name",
             table: "Seasons",
-            columns: ["ClubId", "Name"],
+            columns: new[] { "ClubId", "Name" },
             unique: true);
 
         migrationBuilder.CreateIndex(

@@ -717,7 +717,7 @@ partial class BaseDbContextModelSnapshot : ModelSnapshot
                 b.HasOne("Calcio.Data.Models.Entities.ClubEntity", "Club")
                     .WithMany("Campaigns")
                     .HasForeignKey("ClubId")
-                    .OnDelete(DeleteBehavior.Restrict)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
 
                 b.HasOne("Calcio.Data.Models.Entities.SeasonEntity", "Season")
@@ -755,7 +755,7 @@ partial class BaseDbContextModelSnapshot : ModelSnapshot
                 b.HasOne("Calcio.Data.Models.Entities.ClubEntity", "Club")
                     .WithMany()
                     .HasForeignKey("ClubId")
-                    .OnDelete(DeleteBehavior.Restrict)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
 
                 b.HasOne("Calcio.Data.Models.Entities.PlayerEntity", "Player")
@@ -780,19 +780,19 @@ partial class BaseDbContextModelSnapshot : ModelSnapshot
                 b.HasOne("Calcio.Data.Models.Entities.ClubEntity", "Club")
                     .WithMany()
                     .HasForeignKey("ClubId")
-                    .OnDelete(DeleteBehavior.Restrict)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
 
                 b.HasOne("Calcio.Data.Models.Entities.PlayerEntity", "Player")
                     .WithMany("CampaignAssignments")
                     .HasForeignKey("PlayerId")
-                    .OnDelete(DeleteBehavior.ClientCascade)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
 
                 b.HasOne("Calcio.Data.Models.Entities.TeamEntity", "Team")
                     .WithMany("PlayerAssignments")
                     .HasForeignKey("TeamId")
-                    .OnDelete(DeleteBehavior.ClientCascade);
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 b.Navigation("Campaign");
 
@@ -819,7 +819,7 @@ partial class BaseDbContextModelSnapshot : ModelSnapshot
                 b.HasOne("Calcio.Data.Models.Entities.ClubEntity", "Club")
                     .WithMany()
                     .HasForeignKey("ClubId")
-                    .OnDelete(DeleteBehavior.Restrict)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
 
                 b.HasOne("Calcio.Data.Models.Entities.PlayerEntity", "Player")

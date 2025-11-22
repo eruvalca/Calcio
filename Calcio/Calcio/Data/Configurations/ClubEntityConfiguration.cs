@@ -29,7 +29,7 @@ public class ClubEntityConfiguration : IEntityTypeConfiguration<ClubEntity>
             .HasMany(c => c.Campaigns)
             .WithOne(ca => ca.Club)
             .HasForeignKey(ca => ca.ClubId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .HasMany(c => c.Teams)
@@ -53,7 +53,7 @@ public class ClubEntityConfiguration : IEntityTypeConfiguration<ClubEntity>
             .HasMany<NoteEntity>()
             .WithOne(n => n.Club)
             .HasForeignKey(n => n.ClubId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .HasMany(c => c.JoinRequests)

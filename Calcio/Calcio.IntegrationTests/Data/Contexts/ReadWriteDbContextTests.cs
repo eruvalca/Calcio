@@ -203,7 +203,7 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
     }
 
     [Fact]
-    public async Task DeleteClub_WithCampaigns_ShouldThrowDbUpdateException()
+    public async Task DeleteClub_WithCampaigns_ShouldCascadeDependents()
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
@@ -227,7 +227,9 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
 
             context.Clubs.Remove(club);
 
-            await Should.ThrowAsync<DbUpdateException>(() => context.SaveChangesAsync(token));
+            await context.SaveChangesAsync(token);
+
+            (await context.Campaigns.IgnoreQueryFilters().AnyAsync(c => c.ClubId == graph.ClubId, token)).ShouldBeFalse();
         }
         finally
         {
@@ -239,7 +241,7 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
     }
 
     [Fact]
-    public async Task DeleteClub_WithNotes_ShouldThrowDbUpdateException()
+    public async Task DeleteClub_WithNotes_ShouldCascadeDependents()
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
@@ -254,22 +256,12 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
 
             var club = await context.Clubs
                 .IgnoreQueryFilters()
-                .Include(c => c.Campaigns)
                 .FirstAsync(c => c.ClubId == graph.ClubId, token);
-
-            context.Campaigns.RemoveRange(club.Campaigns);
-            await context.SaveChangesAsync(token);
-            context.ChangeTracker.Clear();
-
-            club = await context.Clubs
-                .IgnoreQueryFilters()
-                .FirstAsync(c => c.ClubId == graph.ClubId, token);
-
-            (await context.Notes.IgnoreQueryFilters().AnyAsync(n => n.ClubId == graph.ClubId, token)).ShouldBeTrue();
 
             context.Clubs.Remove(club);
+            await context.SaveChangesAsync(token);
 
-            await Should.ThrowAsync<DbUpdateException>(() => context.SaveChangesAsync(token));
+            (await context.Notes.IgnoreQueryFilters().AnyAsync(n => n.ClubId == graph.ClubId, token)).ShouldBeFalse();
         }
         finally
         {
@@ -281,7 +273,7 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
     }
 
     [Fact]
-    public async Task DeleteClub_AfterClearingRestrictedDependents_ShouldCascadeOtherEntities()
+    public async Task DeleteClub_ShouldCascadeEntireGraph()
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
@@ -292,33 +284,23 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         ClubGraphIds? graph = null;
         try
         {
-            graph = await CreateClubGraphAsync(context, includeNote: true, includePhoto: false, includeAssignment: false, token);
+            graph = await CreateClubGraphAsync(context, includeNote: true, includePhoto: true, includeAssignment: true, token);
 
             var club = await context.Clubs
-                .IgnoreQueryFilters()
-                .Include(c => c.Campaigns)
-                .FirstAsync(c => c.ClubId == graph.ClubId, token);
-
-            context.Campaigns.RemoveRange(club.Campaigns);
-            var notes = await context.Notes
-                .IgnoreQueryFilters()
-                .Where(n => n.ClubId == graph.ClubId)
-                .ToListAsync(token);
-            context.Notes.RemoveRange(notes);
-            await context.SaveChangesAsync(token);
-            context.ChangeTracker.Clear();
-
-            club = await context.Clubs
                 .IgnoreQueryFilters()
                 .FirstAsync(c => c.ClubId == graph.ClubId, token);
 
             context.Clubs.Remove(club);
             await context.SaveChangesAsync(token);
 
+            (await context.Campaigns.IgnoreQueryFilters().AnyAsync(c => c.ClubId == graph.ClubId, token)).ShouldBeFalse();
             (await context.Players.IgnoreQueryFilters().AnyAsync(p => p.ClubId == graph.ClubId, token)).ShouldBeFalse();
             (await context.Teams.IgnoreQueryFilters().AnyAsync(t => t.ClubId == graph.ClubId, token)).ShouldBeFalse();
             (await context.Seasons.IgnoreQueryFilters().AnyAsync(s => s.ClubId == graph.ClubId, token)).ShouldBeFalse();
             (await context.PlayerTags.IgnoreQueryFilters().AnyAsync(pt => pt.ClubId == graph.ClubId, token)).ShouldBeFalse();
+            (await context.Notes.IgnoreQueryFilters().AnyAsync(n => n.ClubId == graph.ClubId, token)).ShouldBeFalse();
+            (await context.PlayerPhotos.IgnoreQueryFilters().AnyAsync(p => p.ClubId == graph.ClubId, token)).ShouldBeFalse();
+            (await context.PlayerCampaignAssignments.IgnoreQueryFilters().AnyAsync(a => a.ClubId == graph.ClubId, token)).ShouldBeFalse();
         }
         finally
         {

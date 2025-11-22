@@ -15,7 +15,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Calcio.Data.Migrations;
 
 [DbContext(typeof(BaseDbContext))]
-[Migration("20251122005841_Init")]
+[Migration("20251122052051_Init")]
 partial class Init
 {
     /// <inheritdoc />
@@ -720,7 +720,7 @@ partial class Init
                 b.HasOne("Calcio.Data.Models.Entities.ClubEntity", "Club")
                     .WithMany("Campaigns")
                     .HasForeignKey("ClubId")
-                    .OnDelete(DeleteBehavior.Restrict)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
 
                 b.HasOne("Calcio.Data.Models.Entities.SeasonEntity", "Season")
@@ -758,7 +758,7 @@ partial class Init
                 b.HasOne("Calcio.Data.Models.Entities.ClubEntity", "Club")
                     .WithMany()
                     .HasForeignKey("ClubId")
-                    .OnDelete(DeleteBehavior.Restrict)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
 
                 b.HasOne("Calcio.Data.Models.Entities.PlayerEntity", "Player")
@@ -783,19 +783,19 @@ partial class Init
                 b.HasOne("Calcio.Data.Models.Entities.ClubEntity", "Club")
                     .WithMany()
                     .HasForeignKey("ClubId")
-                    .OnDelete(DeleteBehavior.Restrict)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
 
                 b.HasOne("Calcio.Data.Models.Entities.PlayerEntity", "Player")
                     .WithMany("CampaignAssignments")
                     .HasForeignKey("PlayerId")
-                    .OnDelete(DeleteBehavior.ClientCascade)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
 
                 b.HasOne("Calcio.Data.Models.Entities.TeamEntity", "Team")
                     .WithMany("PlayerAssignments")
                     .HasForeignKey("TeamId")
-                    .OnDelete(DeleteBehavior.ClientCascade);
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 b.Navigation("Campaign");
 
@@ -822,7 +822,7 @@ partial class Init
                 b.HasOne("Calcio.Data.Models.Entities.ClubEntity", "Club")
                     .WithMany()
                     .HasForeignKey("ClubId")
-                    .OnDelete(DeleteBehavior.Restrict)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
 
                 b.HasOne("Calcio.Data.Models.Entities.PlayerEntity", "Player")

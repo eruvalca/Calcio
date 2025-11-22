@@ -23,6 +23,6 @@ public class NoteEntityConfiguration : IEntityTypeConfiguration<NoteEntity>
             .HasOne(e => e.Club)
             .WithMany()
             .HasForeignKey(e => e.ClubId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
