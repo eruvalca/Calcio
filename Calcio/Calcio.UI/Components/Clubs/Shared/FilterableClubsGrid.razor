@@ -1,14 +1,16 @@
 ﻿@using Calcio.Shared.DTOs.Clubs
 @using Microsoft.AspNetCore.Components.QuickGrid
 
-<form @onsubmit:preventDefault>
-    <div class="input-group mb-3" role="search">
-        <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="ClubSearch" name="ClubSearch"
-            class="form-control" placeholder="Search by name, city, or state" autocomplete="off" />
-    </div>
-</form>
-
 <div class="card shadow mb-4">
+    <div class="card-header">
+        <form @onsubmit:preventDefault>
+            <div class="input-group" role="search">
+                <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="ClubSearch"
+                    name="ClubSearch" class="form-control" placeholder="Search by name, city, or state"
+                    autocomplete="off" />
+            </div>
+        </form>
+    </div>
     <div class="card-body">
         <QuickGrid TGridItem="BaseClubDto" Items="FilteredClubs.AsQueryable()"
             class="table table-responsive table-borderless table-hover">
