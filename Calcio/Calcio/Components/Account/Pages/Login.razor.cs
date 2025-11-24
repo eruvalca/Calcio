@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-using Calcio.Data.Models.Entities;
+using Calcio.Shared.Models.Entities;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;

@@ -1,4 +1,4 @@
-using Calcio.Data.Models.Entities;
+using Calcio.Shared.Models.Entities;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Http.Features;

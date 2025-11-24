@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using System.Security.Claims;
 
-using Calcio.Data.Models.Entities;
+using Calcio.Shared.Models.Entities;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;

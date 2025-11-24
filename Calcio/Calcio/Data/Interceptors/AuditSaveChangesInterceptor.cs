@@ -1,4 +1,4 @@
-using Calcio.Data.Models.Entities.Base;
+using Calcio.Shared.Models.Entities.Base;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;

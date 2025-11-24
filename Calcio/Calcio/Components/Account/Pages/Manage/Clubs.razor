@@ -2,7 +2,7 @@
 @using Calcio.Shared.DTOs.Clubs
 @using Calcio.UI.Components.Clubs.Shared
 @using Microsoft.AspNetCore.Components.QuickGrid
-@using Calcio.Data.Models.Entities
+@using Calcio.Shared.Extensions.Clubs
 
 <PageTitle>Clubs</PageTitle>
 
@@ -27,7 +27,7 @@ else
     {
         <h5>Find an existing club</h5>
 
-        <FilterableClubsGrid Clubs="AllClubs.Select(c => new BaseClubDto(c.ClubId, c.Name, c.City, c.State)).ToList()"
+        <FilterableClubsGrid Clubs="AllClubs"
             @rendermode="InteractiveAuto" />
     }
 

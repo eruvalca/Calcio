@@ -1,5 +1,3 @@
-using System;
-
 using Calcio.Shared.DTOs.Clubs;
 
 using Microsoft.AspNetCore.Authorization;

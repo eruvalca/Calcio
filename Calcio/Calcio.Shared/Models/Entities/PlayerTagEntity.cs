@@ -1,6 +1,6 @@
-﻿using Calcio.Data.Models.Entities.Base;
+﻿using Calcio.Shared.Models.Entities.Base;
 
-namespace Calcio.Data.Models.Entities;
+namespace Calcio.Shared.Models.Entities;
 
 public class PlayerTagEntity : BaseEntity
 {

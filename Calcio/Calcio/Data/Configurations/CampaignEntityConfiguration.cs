@@ -1,4 +1,4 @@
-using Calcio.Data.Models.Entities;
+using Calcio.Shared.Models.Entities;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

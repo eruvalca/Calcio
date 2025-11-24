@@ -3,8 +3,8 @@ using Calcio.Components.Account;
 using Calcio.Data.Contexts;
 using Calcio.Data.Contexts.Base;
 using Calcio.Data.Interceptors;
-using Calcio.Data.Models.Entities;
 using Calcio.ServiceDefaults;
+using Calcio.Shared.Models.Entities;
 using Calcio.UI.Services.Theme;
 
 using Microsoft.AspNetCore.Components.Authorization;

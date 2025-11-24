@@ -1,5 +1,5 @@
 using Calcio.Data.Contexts.Base;
-using Calcio.Data.Models.Entities;
+using Calcio.Shared.Models.Entities;
 
 using Microsoft.EntityFrameworkCore;
 

@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 using Calcio.Data.Contexts;
-using Calcio.Data.Models.Entities;
+using Calcio.Shared.DTOs.Clubs;
+using Calcio.Shared.Extensions.Clubs;
+using Calcio.Shared.Models.Entities;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -29,7 +31,7 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
 
     private long UserId { get; set; } = default!;
     private List<ClubEntity> UserClubs { get; set; } = [];
-    private List<ClubEntity> AllClubs { get; set; } = [];
+    private List<BaseClubDto> AllClubs { get; set; } = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -47,10 +49,10 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
         {
             AllClubs = await readOnlyDbContext.Clubs
                 .IgnoreQueryFilters()
-                .Where(club => club.CalcioUsers.All(user => user.Id != UserId))
                 .OrderBy(c => c.State)
                 .ThenBy(c => c.City)
                 .ThenBy(c => c.Name)
+                .SelectClubDtos() // Server-side projection via expression.
                 .ToListAsync(CancellationToken);
         }
     }
