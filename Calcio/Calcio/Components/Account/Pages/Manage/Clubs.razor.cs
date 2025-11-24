@@ -52,7 +52,7 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
                 .OrderBy(c => c.State)
                 .ThenBy(c => c.City)
                 .ThenBy(c => c.Name)
-                .SelectClubDtos() // Server-side projection via expression.
+                .Select(c => c.ToClubDto())
                 .ToListAsync(CancellationToken);
         }
     }
