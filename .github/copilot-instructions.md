@@ -2,7 +2,7 @@
 
 - This solution is a .NET 10 Blazor web app.
 - The server/host project for the application is `D:\repos\Calcio\Calcio\Calcio\Calcio.csproj`.
-- The Blazor WebAssembly project for interactive components is `D:\repos\Calcio\Calcio.Client\Calcio.Client.csproj`.
+- The Blazor WebAssembly project for interactive components is `D:\repos\Calcio\Calcio\Calcio.Client\Calcio.Client.csproj`.
 - The shared UI library containing reusable components and layouts is `D:\repos\Calcio\Calcio\Calcio.UI\Calcio.UI.csproj`.
 - The `D:\repos\Calcio\Calcio\Calcio.Shared\Calcio.Shared.csproj` project contains shared models, interfaces, utilities, etc. used by both server and client projects.
 - Aspire instrumentation is configured in `D:\repos\Calcio\Calcio.AppHost\Calcio.AppHost.csproj` and `D:\repos\Calcio\Calcio.ServiceDefaults\Calcio.ServiceDefaults.csproj`.
@@ -35,6 +35,7 @@
 - Prefer auto-properties over fields when suitable.
 - Mark fields `readonly` when possible.
 - Use explicit tuple & anonymous member names inference.
+- Always use `string.Empty` instead of `""`.
 
 ### Naming
 
@@ -53,6 +54,15 @@
 
 - All blazor components inherit from `CancellableComponentBase` to support cancellation tokens. This is set with `@inherits` directives in `_Imports.razor` files.
 - Most blazor components should have a code-behind `.razor.cs` file for C# code. With the exception of standard blazor application files (e.g. `App.razor`, `Routes.razor`, `_Imports.razor`), all `.razor` files should have a corresponding `.razor.cs` file.
+
+### Logging
+
+- Always use source-generated logging via `partial` methods annotated with `LoggerMessage` (see `Login.razor.cs` for example). Do not use ad-hoc `logger.LogInformation("...")` with string interpolation.
+- Define one method per distinct log message; keep messages short, stable, and template-based for structured sinks.
+- Avoid runtime string building (interpolation, concatenation) before logging; pass state via method parameters.
+- Prefer strongly-typed logging methods inside loops and hot code paths for minimal allocations.
+- Do not log PII or secrets. Include only identifiers necessary for diagnosis.
+- Use appropriate log level (Trace/Debug/Information/Warning/Error/Critical) and avoid elevating routine events.
 
 ## Data Access Layer Guidance
 

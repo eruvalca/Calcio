@@ -37,7 +37,11 @@ public partial class Register(
 
     public async Task RegisterUser(EditContext editContext)
     {
-        var user = CreateUser();
+        var user = new CalcioUserEntity()
+        {
+            FirstName = Input.FirstName,
+            LastName = Input.LastName
+        };
 
         await userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
         var emailStore = GetEmailStore();
@@ -74,25 +78,20 @@ public partial class Register(
         }
     }
 
-    private CalcioUserEntity CreateUser()
-    {
-        try
-        {
-            return Activator.CreateInstance<CalcioUserEntity>();
-        }
-        catch
-        {
-            throw new InvalidOperationException($"Can't create an instance of '{nameof(CalcioUserEntity)}'. " +
-                $"Ensure that '{nameof(CalcioUserEntity)}' is not an abstract class and has a parameterless constructor.");
-        }
-    }
-
     private IUserEmailStore<CalcioUserEntity> GetEmailStore() => !userManager.SupportsUserEmail
         ? throw new NotSupportedException("The default UI requires a user store with email support.")
         : (IUserEmailStore<CalcioUserEntity>)userStore;
 
     private sealed class InputModel
     {
+        [Required]
+        [Display(Name = "First Name")]
+        public string FirstName { get; set; } = "";
+
+        [Required]
+        [Display(Name = "Last Name")]
+        public string LastName { get; set; } = "";
+
         [Required]
         [EmailAddress]
         [Display(Name = "Email")]

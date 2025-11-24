@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.5.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="10.0.0" />
     <ProjectReference Include="..\..\Calcio.ServiceDefaults\Calcio.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Calcio.Client\Calcio.Client.csproj" />
     <ProjectReference Include="..\Calcio.Shared\Calcio.Shared.csproj" />

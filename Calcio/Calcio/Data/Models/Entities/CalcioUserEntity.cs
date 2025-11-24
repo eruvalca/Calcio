@@ -7,7 +7,6 @@ public class CalcioUserEntity : IdentityUser<long>
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
     public string FullName => $"{FirstName} {LastName}";
-    public required string EmailAddress { get; set; }
 
     public long? ClubId { get; set; }
     public ClubEntity? Club { get; set; }

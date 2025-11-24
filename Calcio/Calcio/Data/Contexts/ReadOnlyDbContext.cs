@@ -1,10 +1,8 @@
-﻿using Calcio.Data.Contexts.Base;
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Calcio.Data.Contexts;
 
-public class ReadOnlyDbContext : BaseDbContext
+public class ReadOnlyDbContext : ReadWriteDbContext
 {
     public ReadOnlyDbContext(DbContextOptions<ReadOnlyDbContext> options,
         IHttpContextAccessor httpContextAccessor)

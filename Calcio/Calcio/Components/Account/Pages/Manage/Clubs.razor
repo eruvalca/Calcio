@@ -1,0 +1,68 @@
+﻿@page "/Account/Manage/Clubs"
+@using Calcio.Shared.DTOs.Clubs
+@using Calcio.UI.Components.Clubs.Shared
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Calcio.Data.Models.Entities
+
+<PageTitle>Clubs</PageTitle>
+
+<h3>Clubs</h3>
+<StatusMessage />
+
+@if (UserClubs.Count > 0)
+{
+    <h5>Your Clubs</h5>
+    <ul class="list-group mb-4">
+        @foreach (var club in UserClubs)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span><strong>@club.Name</strong> &mdash; @club.City, @club.State</span>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    @if (AllClubs.Count > 0)
+    {
+        <h5>Find an existing club</h5>
+
+        <FilterableClubsGrid Clubs="AllClubs.Select(c => new BaseClubDto(c.ClubId, c.Name, c.City, c.State)).ToList()"
+            @rendermode="InteractiveAuto" />
+    }
+
+    <details>
+        <summary class="mb-4">
+            <span class="h5">Create a club</span>
+        </summary>
+
+        <EditForm Model="Input" method="post" OnValidSubmit="CreateClub" FormName="createClub" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert" />
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Name" id="Input.Name" class="form-control" aria-required="true"
+                    placeholder="Club Name" />
+                <label for="Input.Name">Club Name</label>
+                <ValidationMessage For="() => Input.Name" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.City" id="Input.City" class="form-control" aria-required="true"
+                    placeholder="City" />
+                <label for="Input.City">City</label>
+                <ValidationMessage For="() => Input.City" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="Input.State" class="form-label">State</label>
+                <InputSelect @bind-Value="Input.State" id="Input.State" class="form-select" aria-required="true">
+                    <option value="">-- Select State --</option>
+                    @foreach (var s in UsStateAbbreviations)
+                    {
+                        <option value="@s">@s</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Input.State" class="text-danger" />
+            </div>
+            <button type="submit" class="btn btn-primary">Create Club</button>
+        </EditForm>
+    </details>
+}

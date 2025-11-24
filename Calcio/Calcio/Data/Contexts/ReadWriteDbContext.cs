@@ -5,9 +5,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Calcio.Data.Contexts;
 
-public class ReadWriteDbContext(DbContextOptions<ReadWriteDbContext> options,
-        IHttpContextAccessor httpContextAccessor) : BaseDbContext(options, httpContextAccessor)
+public class ReadWriteDbContext : BaseDbContext
 {
+    protected ReadWriteDbContext(DbContextOptions options, IHttpContextAccessor httpContextAccessor)
+        : base(options, httpContextAccessor) => ArgumentNullException.ThrowIfNull(httpContextAccessor);
+
+    public ReadWriteDbContext(DbContextOptions<ReadWriteDbContext> options, IHttpContextAccessor httpContextAccessor)
+        : this((DbContextOptions)options, httpContextAccessor)
+    {
+    }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

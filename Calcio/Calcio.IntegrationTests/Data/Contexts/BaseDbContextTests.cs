@@ -42,8 +42,7 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
         var userFaker = new Faker<CalcioUserEntity>()
             .RuleFor(u => u.FirstName, f => f.Name.FirstName())
             .RuleFor(u => u.LastName, f => f.Name.LastName())
-            .RuleFor(u => u.EmailAddress, f => f.Internet.Email())
-            .RuleFor(u => u.UserName, (f, u) => u.EmailAddress);
+            .RuleFor(u => u.UserName, f => f.Internet.Email());
 
         var userA = userFaker.Generate();
         userA.Id = UserAId;
