@@ -3,13 +3,21 @@ using Calcio.Components.Account;
 using Calcio.Data.Contexts;
 using Calcio.Data.Contexts.Base;
 using Calcio.Data.Interceptors;
+using Calcio.Endpoints.ClubJoinRequests;
 using Calcio.ServiceDefaults;
+using Calcio.Services.ClubJoinRequests;
 using Calcio.Shared.Models.Entities;
+using Calcio.Shared.Services.ClubJoinRequests;
 using Calcio.UI.Services.Theme;
 
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
+
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -95,6 +103,13 @@ builder.Services.AddSingleton<IEmailSender<CalcioUserEntity>, IdentityNoOpEmailS
 
 builder.Services.AddScoped<ThemeService>();
 
+builder.Services.AddScoped<IClubJoinRequestService, ClubJoinRequestService>();
+
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<CookieSecuritySchemeTransformer>();
+});
+
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
@@ -104,6 +119,8 @@ if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
     app.UseMigrationsEndPoint();
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 else
 {
@@ -126,6 +143,8 @@ app.MapRazorComponents<App>()
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
+
+app.MapClubJoinRequestEndpoints();
 
 if (app.Environment.IsDevelopment())
 {
@@ -157,3 +176,46 @@ if (app.Environment.IsDevelopment())
 }
 
 await app.RunAsync();
+
+internal sealed class CookieSecuritySchemeTransformer(IAuthenticationSchemeProvider authenticationSchemeProvider) : IOpenApiDocumentTransformer
+{
+    public async Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
+    {
+        var authenticationSchemes = await authenticationSchemeProvider.GetAllSchemesAsync();
+
+        if (authenticationSchemes.Any(scheme => scheme.Name == IdentityConstants.ApplicationScheme))
+        {
+            document.Components ??= new OpenApiComponents();
+            document.Components.SecuritySchemes = new Dictionary<string, IOpenApiSecurityScheme>
+            {
+                [IdentityConstants.ApplicationScheme] = new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.ApiKey,
+                    In = ParameterLocation.Cookie,
+                    Name = ".AspNetCore.Identity.Application",
+                    Description = "ASP.NET Core Identity cookie authentication. Login via /Account/Login to obtain the cookie."
+                }
+            };
+
+            if (document.Paths is not null)
+            {
+                foreach (var pathItem in document.Paths.Values)
+                {
+                    if (pathItem.Operations is null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var operation in pathItem.Operations)
+                    {
+                        operation.Value.Security ??= [];
+                        operation.Value.Security.Add(new OpenApiSecurityRequirement
+                        {
+                            [new OpenApiSecuritySchemeReference(IdentityConstants.ApplicationScheme, document)] = []
+                        });
+                    }
+                }
+            }
+        }
+    }
+}

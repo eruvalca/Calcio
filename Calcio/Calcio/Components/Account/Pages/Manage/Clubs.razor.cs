@@ -1,7 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 using Calcio.Data.Contexts;
+using Calcio.Shared.DTOs.ClubJoinRequests;
 using Calcio.Shared.DTOs.Clubs;
+using Calcio.Shared.Enums;
+using Calcio.Shared.Extensions.ClubJoinRequests;
 using Calcio.Shared.Extensions.Clubs;
 using Calcio.Shared.Models.Entities;
 
@@ -32,6 +35,7 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
     private long UserId { get; set; } = default!;
     private List<ClubEntity> UserClubs { get; set; } = [];
     private List<BaseClubDto> AllClubs { get; set; } = [];
+    private ClubJoinRequestDto? PendingJoinRequest { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -47,6 +51,11 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
 
         if (UserClubs.Count == 0)
         {
+            PendingJoinRequest = await readOnlyDbContext.ClubJoinRequests
+                .Where(r => r.RequestingUserId == UserId && r.Status == RequestStatus.Pending)
+                .Select(r => r.ToClubJoinRequestDto())
+                .FirstOrDefaultAsync(CancellationToken);
+
             AllClubs = await readOnlyDbContext.Clubs
                 .IgnoreQueryFilters()
                 .OrderBy(c => c.State)
@@ -59,7 +68,7 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
 
     public async Task CreateClub(EditContext editContext)
     {
-        if (UserClubs.Count != 0)
+        if (UserClubs.Count != 0 || PendingJoinRequest is not null)
         {
             return;
         }

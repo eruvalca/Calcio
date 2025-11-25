@@ -54,6 +54,7 @@
 
 - All blazor components inherit from `CancellableComponentBase` to support cancellation tokens. This is set with `@inherits` directives in `_Imports.razor` files.
 - Most blazor components should have a code-behind `.razor.cs` file for C# code. With the exception of standard blazor application files (e.g. `App.razor`, `Routes.razor`, `_Imports.razor`), all `.razor` files should have a corresponding `.razor.cs` file.
+- Always use primary constructors in code-behind files to inject dependencies.
 
 ### Logging
 
@@ -84,3 +85,24 @@
 - `ClubEntity` (`ClubId` key) acts as the tenant root; every user, campaign, season, team, player, note, tag, join request, assignment, and photo hangs off a club id. Treat `ClubId` as the partition key for caching and data sharding decisions.
 - Removing a club cascades into seasons, campaigns, teams, players, notes, tags, join requests, and related assignments/photos per entity configuration.
 - `ClubJoinRequestEntity` enforces a unique constraint on `RequestingUserId` (one open request per user) and cascades deletes from both the club and requesting user relationships.
+
+### Bootstrap
+
+- The front-end for this application uses Bootstrap 5.3.
+- Ensure that any new UI components or pages adhere to Bootstrap's grid system and component styles for consistency.
+- Ensure responsiveness across different device sizes.
+- Stock bootstrap components and styles should be used wherever possible to maintain a consistent look and feel and custom implementations or styling should be avoided unless absolutely necessary.
+
+## Minimal API Endpoints
+
+- Place endpoints in `Endpoints/` folder, organized by feature.
+- Use `MapGroup()` with `.RequireAuthorization()` and `.AddEndpointFilter<UnhandledExceptionFilter>()`.
+- Always use `TypedResults` (not `Results`) and declare explicit `Results<T1, T2, ...>` return types.
+- Always include `ProblemHttpResult` in return types to account for unhandled exceptions.
+- When `Conflict` is ambiguous, use alias: `using ConflictResult = Microsoft.AspNetCore.Http.HttpResults.Conflict;`.
+
+## OneOf Library Usage
+
+- Use `OneOf<T1, T2, ...>` for service method return types representing multiple outcomes.
+- Prefer built-in types from `OneOf.Types` (`Success`, `NotFound`, etc.); define custom types in `Calcio.Shared/Results/` only when needed.
+- Use `.Match<TResult>()` in endpoints to convert to HTTP results; use `.Switch()` in components for side effects.

@@ -17,6 +17,92 @@
             <PropertyColumn Title="Name" Property="c => c.Name" />
             <PropertyColumn Title="City" Property="c => c.City" />
             <PropertyColumn Title="State" Property="c => c.State" />
+            <TemplateColumn Title="Actions">
+                @if (IsPendingClub(context.Id))
+                {
+                    <span class="badge bg-warning text-dark me-2">Pending</span>
+                    <button type="button" class="btn btn-sm btn-outline-danger"
+                            @onclick="ShowCancelConfirmation">
+                        Cancel Request
+                    </button>
+                }
+                else if (!HasPendingRequest)
+                {
+                    <button type="button" class="btn btn-sm btn-outline-primary"
+                            @onclick="() => ShowJoinConfirmation(context.Id)">
+                        Request to Join
+                    </button>
+                }
+            </TemplateColumn>
         </QuickGrid>
     </div>
 </div>
+
+@* Confirmation dialog for joining a club *@
+@if (ConfirmingJoinClubId.HasValue)
+{
+    var club = Clubs.FirstOrDefault(c => c.Id == ConfirmingJoinClubId.Value);
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Join Request</h5>
+                    <button type="button" class="btn-close" @onclick="CancelJoinConfirmation"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(ErrorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">@ErrorMessage</div>
+                    }
+                    <p>Are you sure you want to request to join <strong>@club?.Name</strong>?</p>
+                    <p class="text-muted small">A club administrator will need to approve your request before you can access the club.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CancelJoinConfirmation" disabled="@IsProcessing">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="ConfirmJoinClub" disabled="@IsProcessing">
+                        @if (IsProcessing)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        }
+                        Submit Request
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@* Confirmation dialog for canceling a request *@
+@if (ConfirmingCancelRequest)
+{
+    var club = PendingJoinRequestClubId.HasValue
+        ? Clubs.FirstOrDefault(c => c.Id == PendingJoinRequestClubId.Value)
+        : null;
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cancel Join Request</h5>
+                    <button type="button" class="btn-close" @onclick="DismissCancelConfirmation"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(ErrorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">@ErrorMessage</div>
+                    }
+                    <p>Are you sure you want to cancel your request to join <strong>@club?.Name</strong>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="DismissCancelConfirmation" disabled="@IsProcessing">Keep Request</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmCancelRequest" disabled="@IsProcessing">
+                        @if (IsProcessing)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        }
+                        Cancel Request
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
