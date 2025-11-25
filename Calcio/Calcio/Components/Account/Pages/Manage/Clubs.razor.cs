@@ -18,6 +18,7 @@ namespace Calcio.Components.Account.Pages.Manage;
 public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContextFactory,
     IDbContextFactory<ReadWriteDbContext> readWriteDbContextFactory,
     UserManager<CalcioUserEntity> userManager,
+    SignInManager<CalcioUserEntity> signInManager,
     IdentityRedirectManager redirectManager,
     ILogger<Clubs> logger)
 {
@@ -36,6 +37,8 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
     private List<ClubEntity> UserClubs { get; set; } = [];
     private List<BaseClubDto> AllClubs { get; set; } = [];
     private ClubJoinRequestDto? PendingJoinRequest { get; set; }
+    private List<ClubJoinRequestWithUserDto> ClubJoinRequests { get; set; } = [];
+    private bool IsClubAdmin { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -44,6 +47,8 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
             : throw new InvalidOperationException("Current user cannot be null.");
 
         Input ??= new();
+
+        IsClubAdmin = HttpContext.User.IsInRole("ClubAdmin");
 
         await using var readOnlyDbContext = await readOnlyDbContextFactory.CreateDbContextAsync();
         UserClubs = await readOnlyDbContext.Clubs
@@ -62,6 +67,15 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
                 .ThenBy(c => c.City)
                 .ThenBy(c => c.Name)
                 .Select(c => c.ToClubDto())
+                .ToListAsync(CancellationToken);
+        }
+        else if (IsClubAdmin)
+        {
+            ClubJoinRequests = await readOnlyDbContext.ClubJoinRequests
+                .Include(r => r.RequestingUser)
+                .Where(r => r.ClubId == UserClubs[0].ClubId && r.Status == RequestStatus.Pending)
+                .OrderBy(r => r.CreatedAt)
+                .Select(r => r.ToClubJoinRequestWithUserDto())
                 .ToListAsync(CancellationToken);
         }
     }
@@ -90,13 +104,21 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
         readWriteDbContext.Add(club);
         await readWriteDbContext.SaveChangesAsync(CancellationToken);
 
+        var roleResult = await userManager.AddToRoleAsync(currentUser, "ClubAdmin");
+        if (!roleResult.Succeeded)
+        {
+            var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+            LogClubAdminRoleFailed(logger, currentUser.Id, errors);
+        }
+        else
+        {
+            await signInManager.RefreshSignInAsync(currentUser);
+        }
+
         LogClubCreated(logger, club.Name);
 
         redirectManager.RedirectToWithStatus("Account/Manage/Clubs", $"Club '{club.Name}' created.", HttpContext);
     }
-
-    [LoggerMessage(Level = LogLevel.Information, Message = "Club created: {ClubName}")]
-    private static partial void LogClubCreated(ILogger logger, string ClubName);
 
     private sealed class InputModel
     {
@@ -118,4 +140,10 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
     {
         public string ClubSearch { get; set; } = string.Empty;
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Club created: {ClubName}")]
+    private static partial void LogClubCreated(ILogger logger, string ClubName);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to add ClubAdmin role to user {UserId}: {Errors}")]
+    private static partial void LogClubAdminRoleFailed(ILogger logger, long UserId, string Errors);
 }

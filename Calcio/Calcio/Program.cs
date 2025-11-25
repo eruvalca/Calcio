@@ -89,13 +89,14 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<CalcioUserEntity>(options =>
     {
-        options.SignIn.RequireConfirmedAccount = true;
+        options.SignIn.RequireConfirmedAccount = false;
         options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
     })
     .AddRoles<IdentityRole<long>>()
     .AddEntityFrameworkStores<BaseDbContext>()
     .AddSignInManager()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddClaimsPrincipalFactory<UserClaimsPrincipalFactory<CalcioUserEntity, IdentityRole<long>>>();
 
 builder.Services.AddHttpContextAccessor();
 
@@ -105,10 +106,7 @@ builder.Services.AddScoped<ThemeService>();
 
 builder.Services.AddScoped<IClubJoinRequestService, ClubJoinRequestService>();
 
-builder.Services.AddOpenApi(options =>
-{
-    options.AddDocumentTransformer<CookieSecuritySchemeTransformer>();
-});
+builder.Services.AddOpenApi(options => options.AddDocumentTransformer<CookieSecuritySchemeTransformer>());
 
 var app = builder.Build();
 

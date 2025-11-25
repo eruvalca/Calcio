@@ -88,9 +88,96 @@ public partial class ClubJoinRequestService(
         return new Success();
     }
 
+    public async Task<OneOf<List<ClubJoinRequestWithUserDto>, Unauthorized, Error>> GetPendingRequestsForClubAsync(long clubId, CancellationToken cancellationToken)
+    {
+        await using var dbContext = await readOnlyDbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        var isClubMember = await dbContext.Clubs
+            .AnyAsync(c => c.ClubId == clubId, cancellationToken);
+
+        if (!isClubMember)
+        {
+            return new Unauthorized();
+        }
+
+        var requests = await dbContext.ClubJoinRequests
+            .Include(r => r.RequestingUser)
+            .Where(r => r.ClubId == clubId && r.Status == RequestStatus.Pending)
+            .OrderBy(r => r.CreatedAt)
+            .Select(r => r.ToClubJoinRequestWithUserDto())
+            .ToListAsync(cancellationToken);
+
+        return requests;
+    }
+
+    public async Task<OneOf<Success, NotFound, Unauthorized, Error>> ApproveJoinRequestAsync(long clubId, long requestId, CancellationToken cancellationToken)
+    {
+        await using var dbContext = await readWriteDbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        var joinRequest = await dbContext.ClubJoinRequests
+            .Include(r => r.RequestingUser)
+            .Include(r => r.Club)
+            .FirstOrDefaultAsync(r => r.ClubJoinRequestId == requestId && r.ClubId == clubId && r.Status == RequestStatus.Pending, cancellationToken);
+
+        if (joinRequest is null)
+        {
+            return new NotFound();
+        }
+
+        var isClubMember = await dbContext.Clubs
+            .AnyAsync(c => c.ClubId == joinRequest.ClubId, cancellationToken);
+
+        if (!isClubMember)
+        {
+            return new Unauthorized();
+        }
+
+        joinRequest.Status = RequestStatus.Approved;
+        joinRequest.RequestingUser.ClubId = joinRequest.ClubId;
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        LogJoinRequestApproved(logger, joinRequest.ClubId, joinRequest.RequestingUserId, CurrentUserId);
+        return new Success();
+    }
+
+    public async Task<OneOf<Success, NotFound, Unauthorized, Error>> RejectJoinRequestAsync(long clubId, long requestId, CancellationToken cancellationToken)
+    {
+        await using var dbContext = await readWriteDbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        var joinRequest = await dbContext.ClubJoinRequests
+            .FirstOrDefaultAsync(r => r.ClubJoinRequestId == requestId && r.ClubId == clubId && r.Status == RequestStatus.Pending, cancellationToken);
+
+        if (joinRequest is null)
+        {
+            return new NotFound();
+        }
+
+        var isClubMember = await dbContext.Clubs
+            .AnyAsync(c => c.ClubId == joinRequest.ClubId, cancellationToken);
+
+        if (!isClubMember)
+        {
+            return new Unauthorized();
+        }
+
+        joinRequest.Status = RequestStatus.Rejected;
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        LogJoinRequestRejected(logger, joinRequest.ClubId, joinRequest.RequestingUserId, CurrentUserId);
+        return new Success();
+    }
+
     [LoggerMessage(Level = LogLevel.Information, Message = "Join request created for club {ClubId} by user {UserId}")]
     private static partial void LogJoinRequestCreated(ILogger logger, long clubId, long userId);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Join request canceled for club {ClubId} by user {UserId}")]
     private static partial void LogJoinRequestCanceled(ILogger logger, long clubId, long userId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Join request for club {ClubId} from user {RequestingUserId} approved by user {ApprovingUserId}")]
+    private static partial void LogJoinRequestApproved(ILogger logger, long clubId, long requestingUserId, long approvingUserId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Join request for club {ClubId} from user {RequestingUserId} rejected by user {RejectingUserId}")]
+    private static partial void LogJoinRequestRejected(ILogger logger, long clubId, long requestingUserId, long rejectingUserId);
 }

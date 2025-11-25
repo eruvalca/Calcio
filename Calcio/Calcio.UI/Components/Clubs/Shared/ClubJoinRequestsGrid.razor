@@ -1,0 +1,107 @@
+@using Calcio.Shared.DTOs.ClubJoinRequests
+@using Microsoft.AspNetCore.Components.QuickGrid
+
+<div class="card shadow mb-4">
+    <div class="card-header">
+        <h6 class="mb-0">Pending Join Requests</h6>
+    </div>
+    <div class="card-body">
+        @if (JoinRequests.Count == 0)
+        {
+            <p class="text-muted mb-0">No pending join requests.</p>
+        }
+        else
+        {
+            <QuickGrid TGridItem="ClubJoinRequestWithUserDto" Items="JoinRequests.AsQueryable()"
+                class="table table-responsive table-borderless table-hover">
+                <PropertyColumn Title="Name" Property="r => r.RequestingUserFullName" />
+                <PropertyColumn Title="Email" Property="r => r.RequestingUserEmail" />
+                <TemplateColumn Title="Requested">
+                    @context.RequestedAt.LocalDateTime.ToShortDateString()
+                </TemplateColumn>
+                <TemplateColumn Title="Actions">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-success"
+                            @onclick="() => ShowApproveConfirmation(context)" disabled="@IsProcessing">
+                            Approve
+                        </button>
+                        <button type="button" class="btn btn-outline-danger"
+                            @onclick="() => ShowRejectConfirmation(context)" disabled="@IsProcessing">
+                            Reject
+                        </button>
+                    </div>
+                </TemplateColumn>
+            </QuickGrid>
+        }
+    </div>
+</div>
+
+@* Confirmation dialog for approving a request *@
+@if (ConfirmingApproveRequest is not null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Approve Join Request</h5>
+                    <button type="button" class="btn-close" @onclick="CancelApproveConfirmation"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(ErrorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">@ErrorMessage</div>
+                    }
+                    <p>Are you sure you want to approve the join request from
+                        <strong>@ConfirmingApproveRequest.RequestingUserFullName</strong>?</p>
+                    <p class="text-muted small">They will become a member of your club and have access to club resources.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CancelApproveConfirmation"
+                        disabled="@IsProcessing">Cancel</button>
+                    <button type="button" class="btn btn-success" @onclick="ConfirmApprove" disabled="@IsProcessing">
+                        @if (IsProcessing)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        }
+                        Approve
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@* Confirmation dialog for rejecting a request *@
+@if (ConfirmingRejectRequest is not null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reject Join Request</h5>
+                    <button type="button" class="btn-close" @onclick="CancelRejectConfirmation"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(ErrorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">@ErrorMessage</div>
+                    }
+                    <p>Are you sure you want to reject the join request from
+                        <strong>@ConfirmingRejectRequest.RequestingUserFullName</strong>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CancelRejectConfirmation"
+                        disabled="@IsProcessing">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmReject" disabled="@IsProcessing">
+                        @if (IsProcessing)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        }
+                        Reject
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
