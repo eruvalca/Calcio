@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 using Calcio.Endpoints.Filters;
 using Calcio.Shared.DTOs.ClubJoinRequests;
 using Calcio.Shared.Services.ClubJoinRequests;
@@ -45,6 +47,8 @@ public static class ClubJoinRequestEndpoints
     }
 
     private static async Task<Results<Created, NotFound, ConflictResult, UnauthorizedHttpResult, ProblemHttpResult>> CreateJoinRequest(
+        [Required]
+        [Range(1, long.MaxValue)]
         long clubId,
         IClubJoinRequestService service,
         CancellationToken cancellationToken)
@@ -73,6 +77,8 @@ public static class ClubJoinRequestEndpoints
     }
 
     private static async Task<Results<Ok<List<ClubJoinRequestWithUserDto>>, UnauthorizedHttpResult, ProblemHttpResult>> GetPendingRequestsForClub(
+        [Required]
+        [Range(1, long.MaxValue)]
         long clubId,
         IClubJoinRequestService service,
         CancellationToken cancellationToken)
@@ -86,7 +92,11 @@ public static class ClubJoinRequestEndpoints
     }
 
     private static async Task<Results<NoContent, NotFound, UnauthorizedHttpResult, ProblemHttpResult>> ApproveJoinRequest(
+        [Required]
+        [Range(1, long.MaxValue)]
         long clubId,
+        [Required]
+        [Range(1, long.MaxValue)]
         long requestId,
         IClubJoinRequestService service,
         CancellationToken cancellationToken)
@@ -101,7 +111,11 @@ public static class ClubJoinRequestEndpoints
     }
 
     private static async Task<Results<NoContent, NotFound, UnauthorizedHttpResult, ProblemHttpResult>> RejectJoinRequest(
+        [Required]
+        [Range(1, long.MaxValue)]
         long clubId,
+        [Required]
+        [Range(1, long.MaxValue)]
         long requestId,
         IClubJoinRequestService service,
         CancellationToken cancellationToken)

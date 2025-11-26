@@ -114,6 +114,15 @@ public partial class ClubJoinRequestService(
     {
         await using var dbContext = await readWriteDbContextFactory.CreateDbContextAsync(cancellationToken);
 
+        // Check club membership first (authorization before data access)
+        var isClubMember = await dbContext.Clubs
+            .AnyAsync(c => c.ClubId == clubId, cancellationToken);
+
+        if (!isClubMember)
+        {
+            return new Unauthorized();
+        }
+
         var joinRequest = await dbContext.ClubJoinRequests
             .Include(r => r.RequestingUser)
             .Include(r => r.Club)
@@ -122,14 +131,6 @@ public partial class ClubJoinRequestService(
         if (joinRequest is null)
         {
             return new NotFound();
-        }
-
-        var isClubMember = await dbContext.Clubs
-            .AnyAsync(c => c.ClubId == joinRequest.ClubId, cancellationToken);
-
-        if (!isClubMember)
-        {
-            return new Unauthorized();
         }
 
         joinRequest.Status = RequestStatus.Approved;
@@ -145,20 +146,21 @@ public partial class ClubJoinRequestService(
     {
         await using var dbContext = await readWriteDbContextFactory.CreateDbContextAsync(cancellationToken);
 
+        // Check club membership first (authorization before data access)
+        var isClubMember = await dbContext.Clubs
+            .AnyAsync(c => c.ClubId == clubId, cancellationToken);
+
+        if (!isClubMember)
+        {
+            return new Unauthorized();
+        }
+
         var joinRequest = await dbContext.ClubJoinRequests
             .FirstOrDefaultAsync(r => r.ClubJoinRequestId == requestId && r.ClubId == clubId && r.Status == RequestStatus.Pending, cancellationToken);
 
         if (joinRequest is null)
         {
             return new NotFound();
-        }
-
-        var isClubMember = await dbContext.Clubs
-            .AnyAsync(c => c.ClubId == joinRequest.ClubId, cancellationToken);
-
-        if (!isClubMember)
-        {
-            return new Unauthorized();
         }
 
         joinRequest.Status = RequestStatus.Rejected;

@@ -108,6 +108,8 @@ builder.Services.AddScoped<IClubJoinRequestService, ClubJoinRequestService>();
 
 builder.Services.AddOpenApi(options => options.AddDocumentTransformer<CookieSecuritySchemeTransformer>());
 
+builder.Services.AddValidation();
+
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
