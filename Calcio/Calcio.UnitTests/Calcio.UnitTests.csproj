@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="bunit" Version="2.1.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageReference Include="NSubstitute" Version="5.3.0" />
     <PackageReference Include="RichardSzalay.MockHttp" Version="7.0.0" />
@@ -33,6 +34,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Calcio.Client\Calcio.Client.csproj" />
+    <ProjectReference Include="..\Calcio.UI\Calcio.UI.csproj" />
   </ItemGroup>
 
 </Project>
