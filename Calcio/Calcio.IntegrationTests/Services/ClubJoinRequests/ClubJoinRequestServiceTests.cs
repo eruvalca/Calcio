@@ -9,6 +9,7 @@ using Calcio.Shared.Enums;
 using Calcio.Shared.Models.Entities;
 
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -31,8 +32,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
         SetCurrentUser(scope.ServiceProvider, UserAId);
 
         var dbContext = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<CalcioUserEntity>>();
 
-        // Create an unaffiliated user (no club) for join request testing
+        // Create an unaffiliated user (no club) for join request testing using UserManager
+        // This ensures the user has proper security stamp for role assignments
         if (!await dbContext.Users.IgnoreQueryFilters().AnyAsync(u => u.Id == UnaffiliatedUserId))
         {
             var userFaker = new Faker<CalcioUserEntity>()
@@ -45,8 +48,11 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
             unaffiliatedUser.Id = UnaffiliatedUserId;
             unaffiliatedUser.ClubId = null;
 
-            dbContext.Users.Add(unaffiliatedUser);
-            await dbContext.SaveChangesAsync();
+            var result = await userManager.CreateAsync(unaffiliatedUser, "TestPassword123!");
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException($"Failed to create unaffiliated user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
         }
 
         // Clean up any existing join requests from previous test runs
@@ -368,7 +374,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     #region ApproveJoinRequestAsync Tests
 
     [Fact]
-    public async Task ApproveJoinRequestAsync_WhenValidRequest_ReturnsSuccessAndUpdatesUserClub()
+    public async Task ApproveJoinRequestAsync_WhenValidRequest_ReturnsSuccessAndUpdatesUserClubAndAddsRole()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -376,6 +382,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
         SetCurrentUser(scope.ServiceProvider, UserAId);
 
         var dbContext = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<CalcioUserEntity>>();
         var service = CreateService(scope.ServiceProvider);
 
         var club = await dbContext.Clubs.FirstAsync(cancellationToken);
@@ -407,6 +414,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
         // Verify user was added to club
         var updatedUser = await dbContext.Users.IgnoreQueryFilters().FirstAsync(u => u.Id == UnaffiliatedUserId, cancellationToken);
         updatedUser.ClubId.ShouldBe(club.ClubId);
+
+        // Verify user was assigned the StandardUser role
+        var isInRole = await userManager.IsInRoleAsync(updatedUser, "StandardUser");
+        isInRole.ShouldBeTrue();
     }
 
     [Fact]
@@ -625,10 +636,11 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     {
         var readOnlyFactory = services.GetRequiredService<IDbContextFactory<ReadOnlyDbContext>>();
         var readWriteFactory = services.GetRequiredService<IDbContextFactory<ReadWriteDbContext>>();
+        var userManager = services.GetRequiredService<UserManager<CalcioUserEntity>>();
         var httpContextAccessor = services.GetRequiredService<IHttpContextAccessor>();
         var logger = services.GetRequiredService<ILogger<ClubJoinRequestService>>();
 
-        return new ClubJoinRequestService(readOnlyFactory, readWriteFactory, httpContextAccessor, logger);
+        return new ClubJoinRequestService(readOnlyFactory, readWriteFactory, userManager, httpContextAccessor, logger);
     }
 
     #endregion

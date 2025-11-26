@@ -6,6 +6,7 @@ using Calcio.Shared.Models.Entities;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.ClubJoinRequests;
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 using OneOf;
@@ -16,6 +17,7 @@ namespace Calcio.Services.ClubJoinRequests;
 public partial class ClubJoinRequestService(
     IDbContextFactory<ReadOnlyDbContext> readOnlyDbContextFactory,
     IDbContextFactory<ReadWriteDbContext> readWriteDbContextFactory,
+    UserManager<CalcioUserEntity> userManager,
     IHttpContextAccessor httpContextAccessor,
     ILogger<ClubJoinRequestService> logger) : AuthenticatedServiceBase(httpContextAccessor), IClubJoinRequestService
 {
@@ -133,12 +135,27 @@ public partial class ClubJoinRequestService(
             return new NotFound();
         }
 
+        var requestingUserId = joinRequest.RequestingUserId;
+
         joinRequest.Status = RequestStatus.Approved;
         joinRequest.RequestingUser.ClubId = joinRequest.ClubId;
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        LogJoinRequestApproved(logger, joinRequest.ClubId, joinRequest.RequestingUserId, CurrentUserId);
+        // Add StandardUser role to the newly approved user
+        // Fetch fresh user via UserManager to avoid entity tracking conflicts
+        var userForRoleAssignment = await userManager.FindByIdAsync(requestingUserId.ToString());
+        if (userForRoleAssignment is not null)
+        {
+            var roleResult = await userManager.AddToRoleAsync(userForRoleAssignment, "StandardUser");
+            if (!roleResult.Succeeded)
+            {
+                var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                LogStandardUserRoleFailed(logger, requestingUserId, errors);
+            }
+        }
+
+        LogJoinRequestApproved(logger, joinRequest.ClubId, requestingUserId, CurrentUserId);
         return new Success();
     }
 
@@ -182,4 +199,7 @@ public partial class ClubJoinRequestService(
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Join request for club {ClubId} from user {RequestingUserId} rejected by user {RejectingUserId}")]
     private static partial void LogJoinRequestRejected(ILogger logger, long clubId, long requestingUserId, long rejectingUserId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to add StandardUser role to user {UserId}: {Errors}")]
+    private static partial void LogStandardUserRoleFailed(ILogger logger, long userId, string errors);
 }
