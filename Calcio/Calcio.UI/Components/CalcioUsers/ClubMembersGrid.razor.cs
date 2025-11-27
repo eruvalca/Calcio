@@ -32,7 +32,8 @@ public partial class ClubMembersGrid(ICalcioUsersService calcioUsersService)
             : Members.Where(member => member.FullName.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)
                 || member.Email.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
 
-    protected override async Task OnInitializedAsync() => await LoadMembersAsync();
+    protected override async Task OnInitializedAsync()
+        => await LoadMembersAsync();
 
     private async Task LoadMembersAsync()
     {
