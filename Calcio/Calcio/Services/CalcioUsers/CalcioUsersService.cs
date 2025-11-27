@@ -33,7 +33,7 @@ public partial class CalcioUsersService(
         }
 
         var users = await dbContext.Users
-            .Where(u => u.ClubId == clubId)
+            .Where(u => u.ClubId == clubId && u.Id != CurrentUserId)
             .ToListAsync(cancellationToken);
 
         var members = new List<ClubMemberDto>();

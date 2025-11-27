@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Components;
 namespace Calcio.UI.Components.CalcioUsers;
 
 [Authorize(Roles = "ClubAdmin")]
-public partial class ClubMembersGrid(ICalcioUsersService calcioUsersService) : AuthenticatedComponentBase
+public partial class ClubMembersGrid(ICalcioUsersService calcioUsersService)
 {
     [Parameter]
     public required long ClubId { get; set; }
@@ -28,10 +28,9 @@ public partial class ClubMembersGrid(ICalcioUsersService calcioUsersService) : A
 
     private IEnumerable<ClubMemberDto> FilteredMembers
         => string.IsNullOrWhiteSpace(SearchTerm)
-            ? Members.Where(member => member.UserId != CurrentUserId)
-            : Members.Where(member => member.UserId != CurrentUserId
-                && (member.FullName.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)
-                || member.Email.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)));
+            ? Members
+            : Members.Where(member => member.FullName.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)
+                || member.Email.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
 
     protected override async Task OnInitializedAsync() => await LoadMembersAsync();
 

@@ -34,11 +34,12 @@ public class CalcioUsersServiceTests(CustomApplicationFactory factory) : BaseDbC
         var dbContext = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<CalcioUserEntity>>();
 
-        // Create a standard member user in UserA's club for testing
-        if (!await dbContext.Users.IgnoreQueryFilters().AnyAsync(u => u.Id == StandardMemberUserId))
-        {
-            var club = await dbContext.Clubs.FirstAsync();
+        var club = await dbContext.Clubs.FirstAsync();
 
+        // Create or reset the standard member user in UserA's club for testing
+        var existingUser = await dbContext.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Id == StandardMemberUserId);
+        if (existingUser is null)
+        {
             var userFaker = new Faker<CalcioUserEntity>()
                 .RuleFor(u => u.FirstName, f => f.Name.FirstName())
                 .RuleFor(u => u.LastName, f => f.Name.LastName())
@@ -57,6 +58,19 @@ public class CalcioUsersServiceTests(CustomApplicationFactory factory) : BaseDbC
 
             // Add StandardUser role
             await userManager.AddToRoleAsync(standardMember, "StandardUser");
+        }
+        else if (existingUser.ClubId != club.ClubId)
+        {
+            // Reset the user's club membership if they were removed by another test
+            existingUser.ClubId = club.ClubId;
+            await dbContext.SaveChangesAsync();
+
+            // Also re-add the StandardUser role if needed
+            var freshUser = await userManager.FindByIdAsync(StandardMemberUserId.ToString());
+            if (freshUser is not null && !await userManager.IsInRoleAsync(freshUser, "StandardUser"))
+            {
+                await userManager.AddToRoleAsync(freshUser, "StandardUser");
+            }
         }
     }
 
@@ -82,7 +96,7 @@ public class CalcioUsersServiceTests(CustomApplicationFactory factory) : BaseDbC
         result.IsT0.ShouldBeTrue();
         var members = result.AsT0;
         members.ShouldNotBeEmpty();
-        members.ShouldContain(m => m.UserId == UserAId);
+        members.ShouldNotContain(m => m.UserId == UserAId); // Current user should be excluded
         members.ShouldContain(m => m.UserId == StandardMemberUserId);
     }
 
