@@ -1,6 +1,7 @@
 ﻿@page "/Account/Manage/Clubs"
 @using Calcio.Shared.DTOs.ClubJoinRequests
 @using Calcio.Shared.DTOs.Clubs
+@using Calcio.UI.Components.CalcioUsers
 @using Calcio.UI.Components.Clubs.Shared
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using Calcio.Shared.Extensions.Clubs
@@ -26,6 +27,12 @@
     {
         <h5>Manage Join Requests</h5>
         <ClubJoinRequestsGrid ClubId="UserClubs[0].ClubId" JoinRequests="ClubJoinRequests" @rendermode="InteractiveAuto" />
+    }
+
+    @if (IsClubAdmin)
+    {
+        <h5>Manage Club Members</h5>
+        <ClubMembersGrid ClubId="UserClubs[0].ClubId" @rendermode="InteractiveAuto" />
     }
 }
 else

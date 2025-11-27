@@ -1,0 +1,93 @@
+@using Calcio.Shared.DTOs.CalcioUsers
+@using Microsoft.AspNetCore.Components.QuickGrid
+
+<div class="card shadow mb-4">
+    <div class="card-header">
+        <form @onsubmit:preventDefault>
+            <div class="input-group" role="search">
+                <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="MemberSearch"
+                    name="MemberSearch" class="form-control" placeholder="Search by name or email" autocomplete="off" />
+            </div>
+        </form>
+    </div>
+    <div class="card-body">
+        @if (IsLoading)
+        {
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(LoadErrorMessage))
+        {
+            <div class="alert alert-danger" role="alert">@LoadErrorMessage</div>
+        }
+        else if (Members.Count == 0)
+        {
+            <p class="text-muted mb-0">No members in this club.</p>
+        }
+        else
+        {
+            <QuickGrid TGridItem="ClubMemberDto" Items="FilteredMembers.AsQueryable()"
+                class="table table-responsive table-borderless table-hover">
+                <PropertyColumn Title="Name" Property="m => m.FullName" />
+                <PropertyColumn Title="Email" Property="m => m.Email" />
+                <TemplateColumn Title="Role">
+                    @if (context.IsClubAdmin)
+                    {
+                        <span class="badge bg-primary">Club Admin</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Member</span>
+                    }
+                </TemplateColumn>
+                <TemplateColumn Title="Actions">
+                    @if (!context.IsClubAdmin)
+                    {
+                        <button type="button" class="btn btn-outline-danger btn-sm"
+                            @onclick="() => ShowRemoveConfirmation(context)" disabled="@IsProcessing">
+                            Remove
+                        </button>
+                    }
+                </TemplateColumn>
+            </QuickGrid>
+        }
+    </div>
+</div>
+
+@* Confirmation dialog for removing a member *@
+@if (ConfirmingRemoveMember is not null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Remove Club Member</h5>
+                    <button type="button" class="btn-close" @onclick="CancelRemoveConfirmation"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(ErrorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">@ErrorMessage</div>
+                    }
+                    <p>Are you sure you want to remove <strong>@ConfirmingRemoveMember.FullName</strong> from the club?</p>
+                    <p class="text-muted small">They will lose access to all club resources and will need to request to
+                        rejoin.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CancelRemoveConfirmation"
+                        disabled="@IsProcessing">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmRemove" disabled="@IsProcessing">
+                        @if (IsProcessing)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        }
+                        Remove
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

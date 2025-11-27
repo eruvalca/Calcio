@@ -3,10 +3,13 @@ using Calcio.Components.Account;
 using Calcio.Data.Contexts;
 using Calcio.Data.Contexts.Base;
 using Calcio.Data.Interceptors;
+using Calcio.Endpoints.CalcioUsers;
 using Calcio.Endpoints.ClubJoinRequests;
 using Calcio.ServiceDefaults;
+using Calcio.Services.CalcioUsers;
 using Calcio.Services.ClubJoinRequests;
 using Calcio.Shared.Models.Entities;
+using Calcio.Shared.Services.CalcioUsers;
 using Calcio.Shared.Services.ClubJoinRequests;
 using Calcio.UI.Services.Theme;
 
@@ -105,6 +108,7 @@ builder.Services.AddSingleton<IEmailSender<CalcioUserEntity>, IdentityNoOpEmailS
 builder.Services.AddScoped<ThemeService>();
 
 builder.Services.AddScoped<IClubJoinRequestService, ClubJoinRequestService>();
+builder.Services.AddScoped<ICalcioUsersService, CalcioUsersService>();
 
 builder.Services.AddOpenApi(options => options.AddDocumentTransformer<CookieSecuritySchemeTransformer>());
 
@@ -145,6 +149,7 @@ app.MapRazorComponents<App>()
 app.MapAdditionalIdentityEndpoints();
 
 app.MapClubJoinRequestEndpoints();
+app.MapCalcioUsersEndpoints();
 
 if (app.Environment.IsDevelopment())
 {

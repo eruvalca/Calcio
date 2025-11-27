@@ -1,4 +1,6 @@
+using Calcio.Client.Services.CalcioUsers;
 using Calcio.Client.Services.ClubJoinRequests;
+using Calcio.Shared.Services.CalcioUsers;
 using Calcio.Shared.Services.ClubJoinRequests;
 using Calcio.UI.Services.Theme;
 
@@ -11,6 +13,9 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthenticationStateDeserialization();
 
 builder.Services.AddHttpClient<IClubJoinRequestService, ClubJoinRequestService>(client =>
+    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+
+builder.Services.AddHttpClient<ICalcioUsersService, CalcioUsersService>(client =>
     client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
 builder.Services.AddScoped<ThemeService>();
