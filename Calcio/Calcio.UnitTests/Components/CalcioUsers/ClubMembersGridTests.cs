@@ -1,4 +1,7 @@
+using System.Security.Claims;
+
 using Bunit;
+using Bunit.TestDoubles;
 
 using Calcio.Shared.DTOs.CalcioUsers;
 using Calcio.Shared.Results;
@@ -20,6 +23,7 @@ namespace Calcio.UnitTests.Components.CalcioUsers;
 /// </summary>
 public sealed class ClubMembersGridTests : BunitContext
 {
+    private const long CurrentUserId = 1;
     private readonly ICalcioUsersService _mockCalcioUsersService;
 
     public ClubMembersGridTests()
@@ -29,18 +33,34 @@ public sealed class ClubMembersGridTests : BunitContext
 
         // QuickGrid uses JS interop for virtualization
         JSInterop.Mode = JSRuntimeMode.Loose;
+
+        // Set up authenticated user for AuthenticatedComponentBase
+        // Use AddAuthorization() to add auth services and CascadingAuthenticationState
+        var authContext = AddAuthorization();
+        authContext.SetAuthorized("TestUser");
+        authContext.SetClaims(new Claim(ClaimTypes.NameIdentifier, CurrentUserId.ToString()));
     }
 
     #region Helper Methods
 
-    private static List<ClubMemberDto> CreateTestMembers(int count = 2, bool includeAdmin = true)
+    private static List<ClubMemberDto> CreateTestMembers(int count = 2, bool includeAdmin = true, bool includeCurrentUser = false)
     {
         var members = new List<ClubMemberDto>();
+
+        // Optionally include the current user (ID=1) - will be filtered out by component
+        if (includeCurrentUser)
+        {
+            members.Add(new ClubMemberDto(
+                UserId: CurrentUserId,
+                FullName: "Current User",
+                Email: "currentuser@test.com",
+                IsClubAdmin: true));
+        }
 
         if (includeAdmin)
         {
             members.Add(new ClubMemberDto(
-                UserId: 1,
+                UserId: 2,
                 FullName: "Admin User",
                 Email: "admin@test.com",
                 IsClubAdmin: true));
