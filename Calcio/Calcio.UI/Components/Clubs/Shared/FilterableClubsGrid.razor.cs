@@ -1,4 +1,6 @@
+using Calcio.Shared.DTOs.ClubJoinRequests;
 using Calcio.Shared.DTOs.Clubs;
+using Calcio.Shared.Enums;
 using Calcio.Shared.Services.ClubJoinRequests;
 
 using Microsoft.AspNetCore.Authorization;
@@ -15,7 +17,7 @@ public partial class FilterableClubsGrid(
     public List<BaseClubDto> Clubs { get; set; } = [];
 
     [Parameter]
-    public long? PendingJoinRequestClubId { get; set; }
+    public ClubJoinRequestDto? CurrentJoinRequest { get; set; }
 
     private string SearchTerm { get; set; } = string.Empty;
 
@@ -34,9 +36,13 @@ public partial class FilterableClubsGrid(
                 || club.City.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)
                 || club.State.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
 
-    private bool HasPendingRequest => PendingJoinRequestClubId.HasValue;
+    private bool HasPendingRequest => CurrentJoinRequest?.Status == RequestStatus.Pending;
 
-    private bool IsPendingClub(long clubId) => PendingJoinRequestClubId == clubId;
+    private bool IsRejectedRequest => CurrentJoinRequest?.Status == RequestStatus.Rejected;
+
+    private bool IsPendingClub(long clubId) => CurrentJoinRequest?.ClubId == clubId && CurrentJoinRequest?.Status == RequestStatus.Pending;
+
+    private bool IsRejectedClub(long clubId) => CurrentJoinRequest?.ClubId == clubId && CurrentJoinRequest?.Status == RequestStatus.Rejected;
 
     private void ShowJoinConfirmation(long clubId)
     {
@@ -64,7 +70,7 @@ public partial class FilterableClubsGrid(
                 {
                     ConfirmingJoinClubId = null;
                     IsProcessing = false;
-                    navigationManager.Refresh(forceReload: true);
+                    navigationManager.Refresh();
                 },
                 notFound =>
                 {
@@ -115,7 +121,7 @@ public partial class FilterableClubsGrid(
                 {
                     ConfirmingCancelRequest = false;
                     IsProcessing = false;
-                    navigationManager.Refresh(forceReload: true);
+                    navigationManager.Refresh();
                 },
                 notFound =>
                 {

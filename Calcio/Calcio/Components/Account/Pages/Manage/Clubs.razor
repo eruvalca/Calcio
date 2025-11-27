@@ -1,6 +1,7 @@
 ﻿@page "/Account/Manage/Clubs"
 @using Calcio.Shared.DTOs.ClubJoinRequests
 @using Calcio.Shared.DTOs.Clubs
+@using Calcio.Shared.Enums
 @using Calcio.UI.Components.CalcioUsers
 @using Calcio.UI.Components.Clubs.Shared
 @using Microsoft.AspNetCore.Components.QuickGrid
@@ -26,13 +27,14 @@
     @if (IsClubAdmin && ClubJoinRequests.Count > 0)
     {
         <h5>Manage Join Requests</h5>
-        <ClubJoinRequestsGrid ClubId="UserClubs[0].ClubId" JoinRequests="ClubJoinRequests" @rendermode="InteractiveAuto" />
+        <ClubJoinRequestsGrid ClubId="UserClubs[0].ClubId" JoinRequests="ClubJoinRequests"
+            @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
     }
 
     @if (IsClubAdmin)
     {
         <h5>Manage Club Members</h5>
-        <ClubMembersGrid ClubId="UserClubs[0].ClubId" @rendermode="InteractiveAuto" />
+        <ClubMembersGrid ClubId="UserClubs[0].ClubId" @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
     }
 }
 else
@@ -41,11 +43,11 @@ else
     {
         <h5>Find and join an existing club</h5>
 
-        <FilterableClubsGrid Clubs="AllClubs" PendingJoinRequestClubId="PendingJoinRequest?.ClubId"
-            @rendermode="InteractiveAuto" />
+        <FilterableClubsGrid Clubs="AllClubs" CurrentJoinRequest="CurrentJoinRequest"
+            @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
     }
 
-    @if (PendingJoinRequest is null)
+    @if (CurrentJoinRequest?.Status != RequestStatus.Pending)
     {
         <h5>Create a club</h5>
 

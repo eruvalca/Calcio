@@ -21,12 +21,14 @@ public partial class ClubJoinRequestService(
     IHttpContextAccessor httpContextAccessor,
     ILogger<ClubJoinRequestService> logger) : AuthenticatedServiceBase(httpContextAccessor), IClubJoinRequestService
 {
-    public async Task<OneOf<ClubJoinRequestDto, NotFound, Unauthorized, Error>> GetPendingRequestForCurrentUserAsync(CancellationToken cancellationToken)
+    public async Task<OneOf<ClubJoinRequestDto, NotFound, Unauthorized, Error>> GetRequestForCurrentUserAsync(CancellationToken cancellationToken)
     {
         await using var dbContext = await readOnlyDbContextFactory.CreateDbContextAsync(cancellationToken);
 
+        // Return both pending and rejected requests so UI can show rejection status
         var request = await dbContext.ClubJoinRequests
-            .Where(request => request.RequestingUserId == CurrentUserId && request.Status == RequestStatus.Pending)
+            .Where(request => request.RequestingUserId == CurrentUserId &&
+                (request.Status == RequestStatus.Pending || request.Status == RequestStatus.Rejected))
             .Select(request => request.ToClubJoinRequestDto())
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -40,11 +42,17 @@ public partial class ClubJoinRequestService(
         await using var dbContext = await readWriteDbContextFactory.CreateDbContextAsync(cancellationToken);
 
         var existingRequest = await dbContext.ClubJoinRequests
-            .AnyAsync(r => r.RequestingUserId == CurrentUserId && r.Status == RequestStatus.Pending, cancellationToken);
+            .FirstOrDefaultAsync(r => r.RequestingUserId == CurrentUserId, cancellationToken);
 
-        if (existingRequest)
+        if (existingRequest is not null)
         {
-            return new Conflict();
+            if (existingRequest.Status == RequestStatus.Pending)
+            {
+                return new Conflict();
+            }
+
+            // Delete rejected request to allow new request
+            dbContext.Remove(existingRequest);
         }
 
         var clubExists = await dbContext.Clubs
@@ -136,9 +144,12 @@ public partial class ClubJoinRequestService(
         }
 
         var requestingUserId = joinRequest.RequestingUserId;
+        var requestingUser = joinRequest.RequestingUser;
 
-        joinRequest.Status = RequestStatus.Approved;
-        joinRequest.RequestingUser.ClubId = joinRequest.ClubId;
+        // Assign user to club and remove the join request record
+        // (allows user to submit new requests in future if removed from club)
+        requestingUser.ClubId = joinRequest.ClubId;
+        dbContext.Remove(joinRequest);
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
@@ -180,11 +191,12 @@ public partial class ClubJoinRequestService(
             return new NotFound();
         }
 
+        // Mark as rejected - record will be deleted when user requests to join another club or creates their own
         joinRequest.Status = RequestStatus.Rejected;
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        LogJoinRequestRejected(logger, joinRequest.ClubId, joinRequest.RequestingUserId, CurrentUserId);
+        LogJoinRequestRejected(logger, clubId, joinRequest.RequestingUserId, CurrentUserId);
         return new Success();
     }
 

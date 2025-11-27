@@ -36,7 +36,7 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
     private long UserId { get; set; } = default!;
     private List<ClubEntity> UserClubs { get; set; } = [];
     private List<BaseClubDto> AllClubs { get; set; } = [];
-    private ClubJoinRequestDto? PendingJoinRequest { get; set; }
+    private ClubJoinRequestDto? CurrentJoinRequest { get; set; }
     private List<ClubJoinRequestWithUserDto> ClubJoinRequests { get; set; } = [];
     private bool IsClubAdmin { get; set; }
 
@@ -56,8 +56,9 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
 
         if (UserClubs.Count == 0)
         {
-            PendingJoinRequest = await readOnlyDbContext.ClubJoinRequests
-                .Where(r => r.RequestingUserId == UserId && r.Status == RequestStatus.Pending)
+            CurrentJoinRequest = await readOnlyDbContext.ClubJoinRequests
+                .Where(r => r.RequestingUserId == UserId &&
+                    (r.Status == RequestStatus.Pending || r.Status == RequestStatus.Rejected))
                 .Select(r => r.ToClubJoinRequestDto())
                 .FirstOrDefaultAsync(CancellationToken);
 
@@ -82,7 +83,7 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
 
     public async Task CreateClub(EditContext editContext)
     {
-        if (UserClubs.Count != 0 || PendingJoinRequest is not null)
+        if (UserClubs.Count != 0 || CurrentJoinRequest?.Status == RequestStatus.Pending)
         {
             return;
         }
@@ -91,6 +92,15 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
 
         var currentUser = await readWriteDbContext.Users.FirstOrDefaultAsync(user => user.Id == UserId, CancellationToken)
             ?? throw new InvalidOperationException("Current user cannot be null.");
+
+        // Delete any existing join request (rejected) when creating own club
+        var existingRequest = await readWriteDbContext.ClubJoinRequests
+            .FirstOrDefaultAsync(r => r.RequestingUserId == UserId, CancellationToken);
+
+        if (existingRequest is not null)
+        {
+            readWriteDbContext.Remove(existingRequest);
+        }
 
         var club = new ClubEntity
         {

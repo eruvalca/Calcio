@@ -12,9 +12,9 @@ namespace Calcio.Client.Services.ClubJoinRequests;
 
 public class ClubJoinRequestService(HttpClient httpClient) : IClubJoinRequestService
 {
-    public async Task<OneOf<ClubJoinRequestDto, NotFound, Unauthorized, Error>> GetPendingRequestForCurrentUserAsync(CancellationToken cancellationToken)
+    public async Task<OneOf<ClubJoinRequestDto, NotFound, Unauthorized, Error>> GetRequestForCurrentUserAsync(CancellationToken cancellationToken)
     {
-        var response = await httpClient.GetAsync("api/club-join-requests/pending", cancellationToken);
+        var response = await httpClient.GetAsync("api/club-join-requests/current", cancellationToken);
 
         return response.StatusCode switch
         {
@@ -41,7 +41,7 @@ public class ClubJoinRequestService(HttpClient httpClient) : IClubJoinRequestSer
 
     public async Task<OneOf<Success, NotFound, Unauthorized, Error>> CancelJoinRequestAsync(CancellationToken cancellationToken)
     {
-        var response = await httpClient.DeleteAsync("api/club-join-requests/pending", cancellationToken);
+        var response = await httpClient.DeleteAsync("api/club-join-requests/current", cancellationToken);
 
         return response.StatusCode switch
         {

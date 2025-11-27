@@ -18,16 +18,16 @@ public class ClubJoinRequestServiceTests
 {
     private const string BaseUrl = "http://localhost";
 
-    #region GetPendingRequestForCurrentUserAsync Tests
+    #region GetRequestForCurrentUserAsync Tests
 
     [Fact]
-    public async Task GetPendingRequestForCurrentUserAsync_WhenOk_ReturnsDto()
+    public async Task GetRequestForCurrentUserAsync_WhenOk_ReturnsDto()
     {
         // Arrange
         var expectedDto = new ClubJoinRequestDto(1, 10, 100, RequestStatus.Pending);
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/club-join-requests/pending")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/club-join-requests/current")
             .Respond(HttpStatusCode.OK, JsonContent.Create(expectedDto));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -36,7 +36,7 @@ public class ClubJoinRequestServiceTests
         var service = new ClubJoinRequestService(httpClient);
 
         // Act
-        var result = await service.GetPendingRequestForCurrentUserAsync(CancellationToken.None);
+        var result = await service.GetRequestForCurrentUserAsync(CancellationToken.None);
 
         // Assert
         result.IsT0.ShouldBeTrue();
@@ -48,11 +48,11 @@ public class ClubJoinRequestServiceTests
     }
 
     [Fact]
-    public async Task GetPendingRequestForCurrentUserAsync_WhenNotFound_ReturnsNotFound()
+    public async Task GetRequestForCurrentUserAsync_WhenNotFound_ReturnsNotFound()
     {
         // Arrange
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/club-join-requests/pending")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/club-join-requests/current")
             .Respond(HttpStatusCode.NotFound);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -61,7 +61,7 @@ public class ClubJoinRequestServiceTests
         var service = new ClubJoinRequestService(httpClient);
 
         // Act
-        var result = await service.GetPendingRequestForCurrentUserAsync(CancellationToken.None);
+        var result = await service.GetRequestForCurrentUserAsync(CancellationToken.None);
 
         // Assert
         result.IsT1.ShouldBeTrue();
@@ -69,11 +69,11 @@ public class ClubJoinRequestServiceTests
     }
 
     [Fact]
-    public async Task GetPendingRequestForCurrentUserAsync_WhenUnauthorized_ReturnsUnauthorized()
+    public async Task GetRequestForCurrentUserAsync_WhenUnauthorized_ReturnsUnauthorized()
     {
         // Arrange
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/club-join-requests/pending")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/club-join-requests/current")
             .Respond(HttpStatusCode.Unauthorized);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -82,7 +82,7 @@ public class ClubJoinRequestServiceTests
         var service = new ClubJoinRequestService(httpClient);
 
         // Act
-        var result = await service.GetPendingRequestForCurrentUserAsync(CancellationToken.None);
+        var result = await service.GetRequestForCurrentUserAsync(CancellationToken.None);
 
         // Assert
         result.IsT2.ShouldBeTrue();
@@ -90,11 +90,11 @@ public class ClubJoinRequestServiceTests
     }
 
     [Fact]
-    public async Task GetPendingRequestForCurrentUserAsync_WhenServerError_ReturnsError()
+    public async Task GetRequestForCurrentUserAsync_WhenServerError_ReturnsError()
     {
         // Arrange
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/club-join-requests/pending")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/club-join-requests/current")
             .Respond(HttpStatusCode.InternalServerError);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -103,7 +103,7 @@ public class ClubJoinRequestServiceTests
         var service = new ClubJoinRequestService(httpClient);
 
         // Act
-        var result = await service.GetPendingRequestForCurrentUserAsync(CancellationToken.None);
+        var result = await service.GetRequestForCurrentUserAsync(CancellationToken.None);
 
         // Assert
         result.IsT3.ShouldBeTrue();
@@ -215,7 +215,7 @@ public class ClubJoinRequestServiceTests
     {
         // Arrange
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/api/club-join-requests/pending")
+        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/api/club-join-requests/current")
             .Respond(HttpStatusCode.NoContent);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -236,7 +236,7 @@ public class ClubJoinRequestServiceTests
     {
         // Arrange
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/api/club-join-requests/pending")
+        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/api/club-join-requests/current")
             .Respond(HttpStatusCode.NotFound);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -257,7 +257,7 @@ public class ClubJoinRequestServiceTests
     {
         // Arrange
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/api/club-join-requests/pending")
+        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/api/club-join-requests/current")
             .Respond(HttpStatusCode.Unauthorized);
 
         var httpClient = mockHttp.ToHttpClient();

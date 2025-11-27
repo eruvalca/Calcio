@@ -54,7 +54,7 @@ public partial class ClubJoinRequestsGrid(
                 {
                     ConfirmingApproveRequest = null;
                     IsProcessing = false;
-                    navigationManager.Refresh(forceReload: true);
+                    navigationManager.Refresh();
                 },
                 notFound =>
                 {
@@ -103,7 +103,7 @@ public partial class ClubJoinRequestsGrid(
                 {
                     ConfirmingRejectRequest = null;
                     IsProcessing = false;
-                    navigationManager.Refresh(forceReload: true);
+                    navigationManager.Refresh();
                 },
                 notFound =>
                 {

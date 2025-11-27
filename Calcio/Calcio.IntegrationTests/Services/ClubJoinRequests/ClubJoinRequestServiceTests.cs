@@ -67,10 +67,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
         }
     }
 
-    #region GetPendingRequestForCurrentUserAsync Tests
+    #region GetRequestForCurrentUserAsync Tests
 
     [Fact]
-    public async Task GetPendingRequestForCurrentUserAsync_WhenPendingRequestExists_ReturnsRequest()
+    public async Task GetRequestForCurrentUserAsync_WhenPendingRequestExists_ReturnsRequest()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -92,7 +92,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Act
-        var result = await service.GetPendingRequestForCurrentUserAsync(cancellationToken);
+        var result = await service.GetRequestForCurrentUserAsync(cancellationToken);
 
         // Assert
         result.IsT0.ShouldBeTrue();
@@ -103,25 +103,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     }
 
     [Fact]
-    public async Task GetPendingRequestForCurrentUserAsync_WhenNoPendingRequest_ReturnsNotFound()
-    {
-        // Arrange
-        var cancellationToken = TestContext.Current.CancellationToken;
-        using var scope = Factory.Services.CreateScope();
-        SetCurrentUser(scope.ServiceProvider, UnaffiliatedUserId);
-
-        var service = CreateService(scope.ServiceProvider);
-
-        // Act
-        var result = await service.GetPendingRequestForCurrentUserAsync(cancellationToken);
-
-        // Assert
-        result.IsT1.ShouldBeTrue();
-        result.AsT1.ShouldBeOfType<NotFound>();
-    }
-
-    [Fact]
-    public async Task GetPendingRequestForCurrentUserAsync_WhenOnlyApprovedRequestExists_ReturnsNotFound()
+    public async Task GetRequestForCurrentUserAsync_WhenRejectedRequestExists_ReturnsRequest()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -136,17 +118,38 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
         {
             ClubId = club.ClubId,
             RequestingUserId = UnaffiliatedUserId,
-            Status = RequestStatus.Approved,
+            Status = RequestStatus.Rejected,
             CreatedById = UnaffiliatedUserId
         };
         dbContext.ClubJoinRequests.Add(joinRequest);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Act
-        var result = await service.GetPendingRequestForCurrentUserAsync(cancellationToken);
+        var result = await service.GetRequestForCurrentUserAsync(cancellationToken);
+
+        // Assert
+        result.IsT0.ShouldBeTrue();
+        var dto = result.AsT0;
+        dto.ClubId.ShouldBe(club.ClubId);
+        dto.Status.ShouldBe(RequestStatus.Rejected);
+    }
+
+    [Fact]
+    public async Task GetRequestForCurrentUserAsync_WhenNoRequest_ReturnsNotFound()
+    {
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UnaffiliatedUserId);
+
+        var service = CreateService(scope.ServiceProvider);
+
+        // Act
+        var result = await service.GetRequestForCurrentUserAsync(cancellationToken);
 
         // Assert
         result.IsT1.ShouldBeTrue();
+        result.AsT1.ShouldBeOfType<NotFound>();
     }
 
     #endregion
@@ -227,6 +230,54 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
 
         // Assert
         result.IsT1.ShouldBeTrue(); // NotFound
+    }
+
+    [Fact]
+    public async Task CreateJoinRequestAsync_WhenRejectedRequestExists_DeletesOldAndCreatesNew()
+    {
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UnaffiliatedUserId);
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
+        var service = CreateService(scope.ServiceProvider);
+
+        var clubs = await dbContext.Clubs.IgnoreQueryFilters().Take(2).ToListAsync(cancellationToken);
+        var firstClub = clubs[0];
+        var secondClub = clubs[1];
+
+        // Create existing rejected request for first club
+        var existingRequest = new ClubJoinRequestEntity
+        {
+            ClubId = firstClub.ClubId,
+            RequestingUserId = UnaffiliatedUserId,
+            Status = RequestStatus.Rejected,
+            CreatedById = UnaffiliatedUserId
+        };
+        dbContext.ClubJoinRequests.Add(existingRequest);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        var oldRequestId = existingRequest.ClubJoinRequestId;
+
+        // Act - request to join second club
+        var result = await service.CreateJoinRequestAsync(secondClub.ClubId, cancellationToken);
+
+        // Assert
+        result.IsT0.ShouldBeTrue();
+
+        // Verify old rejected request was deleted
+        dbContext.ChangeTracker.Clear();
+        var deletedRequest = await dbContext.ClubJoinRequests
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(r => r.ClubJoinRequestId == oldRequestId, cancellationToken);
+        deletedRequest.ShouldBeNull();
+
+        // Verify new request was created
+        var newRequest = await dbContext.ClubJoinRequests
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(r => r.RequestingUserId == UnaffiliatedUserId && r.ClubId == secondClub.ClubId, cancellationToken);
+        newRequest.ShouldNotBeNull();
+        newRequest.Status.ShouldBe(RequestStatus.Pending);
     }
 
     #endregion
@@ -403,13 +454,13 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
         // Assert
         result.IsT0.ShouldBeTrue();
 
-        // Verify request status was updated
+        // Verify request was deleted (not just status changed)
         dbContext.ChangeTracker.Clear();
-        var updatedRequest = await dbContext.ClubJoinRequests
+        var deletedRequest = await dbContext.ClubJoinRequests
             .IgnoreQueryFilters()
-            .FirstAsync(r => r.ClubJoinRequestId == requestId, cancellationToken);
+            .FirstOrDefaultAsync(r => r.ClubJoinRequestId == requestId, cancellationToken);
 
-        updatedRequest.Status.ShouldBe(RequestStatus.Approved);
+        deletedRequest.ShouldBeNull();
 
         // Verify user was added to club
         var updatedUser = await dbContext.Users.IgnoreQueryFilters().FirstAsync(u => u.Id == UnaffiliatedUserId, cancellationToken);
@@ -474,35 +525,6 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
         result.IsT2.ShouldBeTrue(); // Unauthorized
     }
 
-    [Fact]
-    public async Task ApproveJoinRequestAsync_WhenRequestAlreadyApproved_ReturnsNotFound()
-    {
-        // Arrange
-        var cancellationToken = TestContext.Current.CancellationToken;
-        using var scope = Factory.Services.CreateScope();
-        SetCurrentUser(scope.ServiceProvider, UserAId);
-
-        var dbContext = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
-        var service = CreateService(scope.ServiceProvider);
-
-        var club = await dbContext.Clubs.FirstAsync(cancellationToken);
-        var joinRequest = new ClubJoinRequestEntity
-        {
-            ClubId = club.ClubId,
-            RequestingUserId = UnaffiliatedUserId,
-            Status = RequestStatus.Approved,
-            CreatedById = UnaffiliatedUserId
-        };
-        dbContext.ClubJoinRequests.Add(joinRequest);
-        await dbContext.SaveChangesAsync(cancellationToken);
-
-        // Act
-        var result = await service.ApproveJoinRequestAsync(club.ClubId, joinRequest.ClubJoinRequestId, cancellationToken);
-
-        // Assert
-        result.IsT1.ShouldBeTrue(); // NotFound (because it looks for Pending status)
-    }
-
     #endregion
 
     #region RejectJoinRequestAsync Tests
@@ -536,12 +558,13 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
         // Assert
         result.IsT0.ShouldBeTrue();
 
-        // Verify request status was updated
+        // Verify request status was updated to Rejected (not deleted)
         dbContext.ChangeTracker.Clear();
         var updatedRequest = await dbContext.ClubJoinRequests
             .IgnoreQueryFilters()
-            .FirstAsync(r => r.ClubJoinRequestId == requestId, cancellationToken);
+            .FirstOrDefaultAsync(r => r.ClubJoinRequestId == requestId, cancellationToken);
 
+        updatedRequest.ShouldNotBeNull();
         updatedRequest.Status.ShouldBe(RequestStatus.Rejected);
     }
 
@@ -597,35 +620,6 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
 
         // Assert
         result.IsT2.ShouldBeTrue(); // Unauthorized
-    }
-
-    [Fact]
-    public async Task RejectJoinRequestAsync_WhenRequestAlreadyRejected_ReturnsNotFound()
-    {
-        // Arrange
-        var cancellationToken = TestContext.Current.CancellationToken;
-        using var scope = Factory.Services.CreateScope();
-        SetCurrentUser(scope.ServiceProvider, UserAId);
-
-        var dbContext = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
-        var service = CreateService(scope.ServiceProvider);
-
-        var club = await dbContext.Clubs.FirstAsync(cancellationToken);
-        var joinRequest = new ClubJoinRequestEntity
-        {
-            ClubId = club.ClubId,
-            RequestingUserId = UnaffiliatedUserId,
-            Status = RequestStatus.Rejected,
-            CreatedById = UnaffiliatedUserId
-        };
-        dbContext.ClubJoinRequests.Add(joinRequest);
-        await dbContext.SaveChangesAsync(cancellationToken);
-
-        // Act
-        var result = await service.RejectJoinRequestAsync(club.ClubId, joinRequest.ClubJoinRequestId, cancellationToken);
-
-        // Assert
-        result.IsT1.ShouldBeTrue(); // NotFound (because it looks for Pending status)
     }
 
     #endregion

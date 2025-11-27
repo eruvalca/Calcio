@@ -18,9 +18,9 @@ public static class ClubJoinRequestEndpoints
             .RequireAuthorization()
             .AddEndpointFilter<UnhandledExceptionFilter>();
 
-        group.MapGet("pending", GetPendingRequest);
+        group.MapGet("current", GetCurrentRequest);
         group.MapPost("{clubId:long}", CreateJoinRequest);
-        group.MapDelete("pending", CancelJoinRequest);
+        group.MapDelete("current", CancelJoinRequest);
 
         var clubAdminGroup = endpoints.MapGroup("api/clubs/{clubId:long}/join-requests")
             .RequireAuthorization(policy => policy.RequireRole("ClubAdmin"))
@@ -33,11 +33,11 @@ public static class ClubJoinRequestEndpoints
         return endpoints;
     }
 
-    private static async Task<Results<Ok<ClubJoinRequestDto>, NotFound, UnauthorizedHttpResult, ProblemHttpResult>> GetPendingRequest(
+    private static async Task<Results<Ok<ClubJoinRequestDto>, NotFound, UnauthorizedHttpResult, ProblemHttpResult>> GetCurrentRequest(
         IClubJoinRequestService service,
         CancellationToken cancellationToken)
     {
-        var request = await service.GetPendingRequestForCurrentUserAsync(cancellationToken);
+        var request = await service.GetRequestForCurrentUserAsync(cancellationToken);
 
         return request.Match<Results<Ok<ClubJoinRequestDto>, NotFound, UnauthorizedHttpResult, ProblemHttpResult>>(
             dto => TypedResults.Ok(dto),

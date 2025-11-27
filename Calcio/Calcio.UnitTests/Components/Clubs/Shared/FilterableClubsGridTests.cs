@@ -1,6 +1,8 @@
 using Bunit;
 
+using Calcio.Shared.DTOs.ClubJoinRequests;
 using Calcio.Shared.DTOs.Clubs;
+using Calcio.Shared.Enums;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.ClubJoinRequests;
 using Calcio.UI.Components.Clubs.Shared;
@@ -57,10 +59,10 @@ public sealed class FilterableClubsGridTests : BunitContext
 
     private IRenderedComponent<FilterableClubsGrid> RenderGrid(
         List<BaseClubDto>? clubs = null,
-        long? pendingJoinRequestClubId = null)
+        ClubJoinRequestDto? currentJoinRequest = null)
             => Render<FilterableClubsGrid>(parameters => parameters
                 .Add(p => p.Clubs, clubs ?? [])
-                .Add(p => p.PendingJoinRequestClubId, pendingJoinRequestClubId));
+                .Add(p => p.CurrentJoinRequest, currentJoinRequest));
 
     #endregion
 
@@ -102,7 +104,7 @@ public sealed class FilterableClubsGridTests : BunitContext
         var clubs = CreateTestClubs(2);
 
         // Act
-        var cut = RenderGrid(clubs: clubs, pendingJoinRequestClubId: null);
+        var cut = RenderGrid(clubs: clubs, currentJoinRequest: null);
 
         // Assert
         var joinButtons = cut.FindAll("button.btn-outline-primary");
@@ -121,10 +123,10 @@ public sealed class FilterableClubsGridTests : BunitContext
     {
         // Arrange
         var clubs = CreateTestClubs(3);
-        var pendingClubId = 2L;
+        var pendingRequest = new ClubJoinRequestDto(1, 2, 100, RequestStatus.Pending);
 
         // Act
-        var cut = RenderGrid(clubs: clubs, pendingJoinRequestClubId: pendingClubId);
+        var cut = RenderGrid(clubs: clubs, currentJoinRequest: pendingRequest);
 
         // Assert
         // The pending club should have a badge and cancel button
@@ -442,7 +444,8 @@ public sealed class FilterableClubsGridTests : BunitContext
     {
         // Arrange
         var clubs = CreateTestClubs(1);
-        var cut = RenderGrid(clubs: clubs, pendingJoinRequestClubId: 1);
+        var pendingRequest = new ClubJoinRequestDto(1, 1, 100, RequestStatus.Pending);
+        var cut = RenderGrid(clubs: clubs, currentJoinRequest: pendingRequest);
 
         // Act
         cut.Find("button.btn-outline-danger").Click();
@@ -459,7 +462,8 @@ public sealed class FilterableClubsGridTests : BunitContext
     {
         // Arrange
         var clubs = CreateTestClubs(1);
-        var cut = RenderGrid(clubs: clubs, pendingJoinRequestClubId: 1);
+        var pendingRequest = new ClubJoinRequestDto(1, 1, 100, RequestStatus.Pending);
+        var cut = RenderGrid(clubs: clubs, currentJoinRequest: pendingRequest);
         cut.Find("button.btn-outline-danger").Click();
 
         // Act - Click "Keep Request" button
@@ -474,7 +478,8 @@ public sealed class FilterableClubsGridTests : BunitContext
     {
         // Arrange
         var clubs = CreateTestClubs(1);
-        var cut = RenderGrid(clubs: clubs, pendingJoinRequestClubId: 1);
+        var pendingRequest = new ClubJoinRequestDto(1, 1, 100, RequestStatus.Pending);
+        var cut = RenderGrid(clubs: clubs, currentJoinRequest: pendingRequest);
 
         _mockClubJoinRequestService
             .CancelJoinRequestAsync(Arg.Any<CancellationToken>())
@@ -495,7 +500,8 @@ public sealed class FilterableClubsGridTests : BunitContext
     {
         // Arrange
         var clubs = CreateTestClubs(1);
-        var cut = RenderGrid(clubs: clubs, pendingJoinRequestClubId: 1);
+        var pendingRequest = new ClubJoinRequestDto(1, 1, 100, RequestStatus.Pending);
+        var cut = RenderGrid(clubs: clubs, currentJoinRequest: pendingRequest);
 
         _mockClubJoinRequestService
             .CancelJoinRequestAsync(Arg.Any<CancellationToken>())
@@ -519,7 +525,8 @@ public sealed class FilterableClubsGridTests : BunitContext
     {
         // Arrange
         var clubs = CreateTestClubs(1);
-        var cut = RenderGrid(clubs: clubs, pendingJoinRequestClubId: 1);
+        var pendingRequest = new ClubJoinRequestDto(1, 1, 100, RequestStatus.Pending);
+        var cut = RenderGrid(clubs: clubs, currentJoinRequest: pendingRequest);
 
         _mockClubJoinRequestService
             .CancelJoinRequestAsync(Arg.Any<CancellationToken>())
@@ -543,7 +550,8 @@ public sealed class FilterableClubsGridTests : BunitContext
     {
         // Arrange
         var clubs = CreateTestClubs(1);
-        var cut = RenderGrid(clubs: clubs, pendingJoinRequestClubId: 1);
+        var pendingRequest = new ClubJoinRequestDto(1, 1, 100, RequestStatus.Pending);
+        var cut = RenderGrid(clubs: clubs, currentJoinRequest: pendingRequest);
 
         _mockClubJoinRequestService
             .CancelJoinRequestAsync(Arg.Any<CancellationToken>())
@@ -605,7 +613,8 @@ public sealed class FilterableClubsGridTests : BunitContext
     {
         // Arrange
         var clubs = CreateTestClubs(1);
-        var cut = RenderGrid(clubs: clubs, pendingJoinRequestClubId: 1);
+        var pendingRequest = new ClubJoinRequestDto(1, 1, 100, RequestStatus.Pending);
+        var cut = RenderGrid(clubs: clubs, currentJoinRequest: pendingRequest);
 
         var tcs = new TaskCompletionSource<OneOf.OneOf<Success, NotFound, Unauthorized, Error>>();
         _mockClubJoinRequestService
