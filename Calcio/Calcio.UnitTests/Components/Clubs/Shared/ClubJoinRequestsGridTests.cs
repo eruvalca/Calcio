@@ -81,12 +81,12 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
     /// </summary>
     private IRenderedComponent<ClubJoinRequestsGrid> RenderGrid(
         long clubId = 100,
-        List<ClubJoinRequestWithUserDto>? joinRequests = null) =>
-        // BUNIT FEATURE: Parameters can be passed as a lambda
-        // This is type-safe and catches errors at compile time
-        Render<ClubJoinRequestsGrid>(parameters => parameters
-            .Add(p => p.ClubId, clubId)
-            .Add(p => p.JoinRequests, joinRequests ?? []));
+        List<ClubJoinRequestWithUserDto>? joinRequests = null)
+            // BUNIT FEATURE: Parameters can be passed as a lambda
+            // This is type-safe and catches errors at compile time
+            => Render<ClubJoinRequestsGrid>(parameters => parameters
+                .Add(p => p.ClubId, clubId)
+                .Add(p => p.JoinRequests, joinRequests ?? []));
 
     #endregion
 
