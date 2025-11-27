@@ -1,32 +1,32 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using Calcio.Data
 
-<ul class="nav nav-pills flex-column">
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage" Match="NavLinkMatch.All">Profile</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/Email">Email</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/ChangePassword">Password</NavLink>
-    </li>
+<nav class="nav nav-underline flex-row flex-wrap gap-2 gap-md-3 border-bottom pb-2">
+    <NavLink class="nav-link px-2 px-md-3" href="Account/Manage" Match="NavLinkMatch.All">
+        <i class="bi bi-person me-1 d-none d-sm-inline"></i>Profile
+    </NavLink>
+    <NavLink class="nav-link px-2 px-md-3" href="Account/Manage/Email">
+        <i class="bi bi-envelope me-1 d-none d-sm-inline"></i>Email
+    </NavLink>
+    <NavLink class="nav-link px-2 px-md-3" href="Account/Manage/ChangePassword">
+        <i class="bi bi-key me-1 d-none d-sm-inline"></i>Password
+    </NavLink>
     @if (hasExternalLogins)
     {
-        <li class="nav-item">
-            <NavLink class="nav-link" href="Account/Manage/ExternalLogins">External logins</NavLink>
-        </li>
+        <NavLink class="nav-link px-2 px-md-3" href="Account/Manage/ExternalLogins">
+            <i class="bi bi-link-45deg me-1 d-none d-sm-inline"></i>External logins
+        </NavLink>
     }
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/TwoFactorAuthentication">Two-factor authentication</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/Passkeys">Passkeys</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/PersonalData">Personal data</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/Clubs">Clubs</NavLink>
-    </li>
-</ul>
+    <NavLink class="nav-link px-2 px-md-3" href="Account/Manage/TwoFactorAuthentication">
+        <i class="bi bi-shield-lock me-1 d-none d-sm-inline"></i><span class="d-none d-md-inline">Two-factor auth</span><span class="d-md-none">2FA</span>
+    </NavLink>
+    <NavLink class="nav-link px-2 px-md-3" href="Account/Manage/Passkeys">
+        <i class="bi bi-fingerprint me-1 d-none d-sm-inline"></i>Passkeys
+    </NavLink>
+    <NavLink class="nav-link px-2 px-md-3" href="Account/Manage/PersonalData">
+        <i class="bi bi-database me-1 d-none d-sm-inline"></i><span class="d-none d-sm-inline">Personal data</span><span class="d-sm-none">Data</span>
+    </NavLink>
+    <NavLink class="nav-link px-2 px-md-3" href="Account/Manage/Clubs">
+        <i class="bi bi-building me-1 d-none d-sm-inline"></i>Clubs
+    </NavLink>
+</nav>

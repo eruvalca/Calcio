@@ -1,17 +1,15 @@
 ﻿@inherits LayoutComponentBase
 @layout Calcio.Components.Layout.MainLayout
 
-<h1>Manage your account</h1>
+<div class="container-fluid py-3 py-md-4">
+    <div class="mb-4">
+        <h1 class="h3 mb-1">Account Settings</h1>
+        <p class="text-body-secondary mb-0">Manage your account preferences and security</p>
+    </div>
 
-<div>
-    <h2>Change your account settings</h2>
-    <hr />
-    <div class="row">
-        <div class="col-lg-3">
-            <ManageNavMenu />
-        </div>
-        <div class="col-lg-9">
-            @Body
-        </div>
+    <ManageNavMenu />
+
+    <div class="mt-4">
+        @Body
     </div>
 </div>
