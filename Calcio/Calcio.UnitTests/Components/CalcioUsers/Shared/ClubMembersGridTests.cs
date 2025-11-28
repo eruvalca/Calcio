@@ -1,5 +1,4 @@
 using Bunit;
-using Bunit.TestDoubles;
 
 using Calcio.Shared.DTOs.CalcioUsers;
 using Calcio.Shared.Results;
@@ -14,7 +13,7 @@ using OneOf.Types;
 
 using Shouldly;
 
-namespace Calcio.UnitTests.Components.CalcioUsers;
+namespace Calcio.UnitTests.Components.CalcioUsers.Shared;
 
 /// <summary>
 /// Unit tests for the ClubMembersGrid Blazor component using bUnit.
