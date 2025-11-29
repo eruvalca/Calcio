@@ -6,7 +6,7 @@ using OneOf.Types;
 
 namespace Calcio.Shared.Services.Seasons;
 
-public interface ISeasonService
+public interface ISeasonsService
 {
     Task<OneOf<List<SeasonDto>, Unauthorized, Error>> GetSeasonsAsync(long clubId, CancellationToken cancellationToken);
 }

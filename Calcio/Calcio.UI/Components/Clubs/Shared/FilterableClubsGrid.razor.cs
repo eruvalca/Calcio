@@ -10,7 +10,7 @@ namespace Calcio.UI.Components.Clubs.Shared;
 
 [Authorize]
 public partial class FilterableClubsGrid(
-    IClubJoinRequestService clubJoinRequestService,
+    IClubJoinRequestsService clubJoinRequestService,
     NavigationManager navigationManager)
 {
     [Parameter]

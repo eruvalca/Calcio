@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Calcio.Endpoints.Teams;
 
-public static class TeamEndpoints
+public static class TeamsEndpoints
 {
-    public static IEndpointRouteBuilder MapTeamEndpoints(this IEndpointRouteBuilder endpoints)
+    public static IEndpointRouteBuilder MapTeamsEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("api/clubs/{clubId:long}/teams")
             .RequireAuthorization()
@@ -25,7 +25,7 @@ public static class TeamEndpoints
         [Required]
         [Range(1, long.MaxValue)]
         long clubId,
-        ITeamService service,
+        ITeamsService service,
         CancellationToken cancellationToken)
     {
         var result = await service.GetTeamsAsync(clubId, cancellationToken);

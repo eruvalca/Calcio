@@ -10,7 +10,7 @@ using OneOf.Types;
 
 namespace Calcio.Client.Services.ClubJoinRequests;
 
-public class ClubJoinRequestService(HttpClient httpClient) : IClubJoinRequestService
+public class ClubJoinRequestsService(HttpClient httpClient) : IClubJoinRequestsService
 {
     public async Task<OneOf<ClubJoinRequestDto, NotFound, Unauthorized, Error>> GetRequestForCurrentUserAsync(CancellationToken cancellationToken)
     {

@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Calcio.Endpoints.Seasons;
 
-public static class SeasonEndpoints
+public static class SeasonsEndpoints
 {
-    public static IEndpointRouteBuilder MapSeasonEndpoints(this IEndpointRouteBuilder endpoints)
+    public static IEndpointRouteBuilder MapSeasonsEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("api/clubs/{clubId:long}/seasons")
             .RequireAuthorization()
@@ -25,7 +25,7 @@ public static class SeasonEndpoints
         [Required]
         [Range(1, long.MaxValue)]
         long clubId,
-        ISeasonService service,
+        ISeasonsService service,
         CancellationToken cancellationToken)
     {
         var result = await service.GetSeasonsAsync(clubId, cancellationToken);

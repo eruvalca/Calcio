@@ -8,7 +8,7 @@ namespace Calcio.UI.Components.Clubs.Shared;
 
 [Authorize(Roles = "ClubAdmin")]
 public partial class ClubJoinRequestsGrid(
-    IClubJoinRequestService clubJoinRequestService,
+    IClubJoinRequestsService clubJoinRequestService,
     NavigationManager navigationManager)
 {
     [Parameter]

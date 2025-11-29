@@ -11,10 +11,10 @@ using OneOf.Types;
 
 namespace Calcio.Services.Teams;
 
-public partial class TeamService(
+public partial class TeamsService(
     IDbContextFactory<ReadOnlyDbContext> readOnlyDbContextFactory,
     IHttpContextAccessor httpContextAccessor,
-    ILogger<TeamService> logger) : AuthenticatedServiceBase(httpContextAccessor), ITeamService
+    ILogger<TeamsService> logger) : AuthenticatedServiceBase(httpContextAccessor), ITeamsService
 {
     public async Task<OneOf<List<TeamDto>, Unauthorized, Error>> GetTeamsAsync(long clubId, CancellationToken cancellationToken)
     {

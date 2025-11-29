@@ -37,7 +37,7 @@ public class SeasonServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new SeasonService(httpClient);
+        var service = new SeasonsService(httpClient);
 
         // Act
         var result = await service.GetSeasonsAsync(clubId, CancellationToken.None);
@@ -65,7 +65,7 @@ public class SeasonServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new SeasonService(httpClient);
+        var service = new SeasonsService(httpClient);
 
         // Act
         var result = await service.GetSeasonsAsync(clubId, CancellationToken.None);
@@ -88,7 +88,7 @@ public class SeasonServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new SeasonService(httpClient);
+        var service = new SeasonsService(httpClient);
 
         // Act
         var result = await service.GetSeasonsAsync(clubId, CancellationToken.None);
@@ -111,7 +111,7 @@ public class SeasonServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new SeasonService(httpClient);
+        var service = new SeasonsService(httpClient);
 
         // Act
         var result = await service.GetSeasonsAsync(clubId, CancellationToken.None);
@@ -134,7 +134,7 @@ public class SeasonServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new SeasonService(httpClient);
+        var service = new SeasonsService(httpClient);
 
         // Act
         var result = await service.GetSeasonsAsync(clubId, CancellationToken.None);
@@ -160,7 +160,7 @@ public class SeasonServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new SeasonService(httpClient);
+        var service = new SeasonsService(httpClient);
 
         // Act
         var result = await service.GetSeasonsAsync(clubId, CancellationToken.None);

@@ -116,11 +116,11 @@ builder.Services.AddSingleton<IEmailSender<CalcioUserEntity>, IdentityNoOpEmailS
 
 builder.Services.AddScoped<ThemeService>();
 
-builder.Services.AddScoped<IClubJoinRequestService, ClubJoinRequestService>();
+builder.Services.AddScoped<IClubJoinRequestsService, ClubJoinRequestsService>();
 builder.Services.AddScoped<ICalcioUsersService, CalcioUsersService>();
 builder.Services.AddScoped<IPlayersService, PlayersService>();
-builder.Services.AddScoped<ISeasonService, SeasonService>();
-builder.Services.AddScoped<ITeamService, TeamService>();
+builder.Services.AddScoped<ISeasonsService, SeasonsService>();
+builder.Services.AddScoped<ITeamsService, TeamsService>();
 
 builder.Services.AddOpenApi(options => options.AddDocumentTransformer<CookieSecuritySchemeTransformer>());
 
@@ -160,11 +160,11 @@ app.MapRazorComponents<App>()
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
 
-app.MapClubJoinRequestEndpoints();
+app.MapClubJoinRequestsEndpoints();
 app.MapCalcioUsersEndpoints();
 app.MapPlayersEndpoints();
-app.MapSeasonEndpoints();
-app.MapTeamEndpoints();
+app.MapSeasonsEndpoints();
+app.MapTeamsEndpoints();
 
 if (app.Environment.IsDevelopment())
 {

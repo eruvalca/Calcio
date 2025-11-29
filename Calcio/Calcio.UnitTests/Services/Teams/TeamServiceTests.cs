@@ -37,7 +37,7 @@ public class TeamServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new TeamService(httpClient);
+        var service = new TeamsService(httpClient);
 
         // Act
         var result = await service.GetTeamsAsync(clubId, CancellationToken.None);
@@ -65,7 +65,7 @@ public class TeamServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new TeamService(httpClient);
+        var service = new TeamsService(httpClient);
 
         // Act
         var result = await service.GetTeamsAsync(clubId, CancellationToken.None);
@@ -88,7 +88,7 @@ public class TeamServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new TeamService(httpClient);
+        var service = new TeamsService(httpClient);
 
         // Act
         var result = await service.GetTeamsAsync(clubId, CancellationToken.None);
@@ -111,7 +111,7 @@ public class TeamServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new TeamService(httpClient);
+        var service = new TeamsService(httpClient);
 
         // Act
         var result = await service.GetTeamsAsync(clubId, CancellationToken.None);
@@ -134,7 +134,7 @@ public class TeamServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new TeamService(httpClient);
+        var service = new TeamsService(httpClient);
 
         // Act
         var result = await service.GetTeamsAsync(clubId, CancellationToken.None);
@@ -158,7 +158,7 @@ public class TeamServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new TeamService(httpClient);
+        var service = new TeamsService(httpClient);
 
         // Act
         var result = await service.GetTeamsAsync(clubId, CancellationToken.None);
@@ -188,7 +188,7 @@ public class TeamServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new TeamService(httpClient);
+        var service = new TeamsService(httpClient);
 
         // Act
         var result = await service.GetTeamsAsync(clubId, CancellationToken.None);

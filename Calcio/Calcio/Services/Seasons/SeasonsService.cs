@@ -11,10 +11,10 @@ using OneOf.Types;
 
 namespace Calcio.Services.Seasons;
 
-public partial class SeasonService(
+public partial class SeasonsService(
     IDbContextFactory<ReadOnlyDbContext> readOnlyDbContextFactory,
     IHttpContextAccessor httpContextAccessor,
-    ILogger<SeasonService> logger) : AuthenticatedServiceBase(httpContextAccessor), ISeasonService
+    ILogger<SeasonsService> logger) : AuthenticatedServiceBase(httpContextAccessor), ISeasonsService
 {
     public async Task<OneOf<List<SeasonDto>, Unauthorized, Error>> GetSeasonsAsync(long clubId, CancellationToken cancellationToken)
     {

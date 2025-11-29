@@ -177,13 +177,13 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
 
     #region Helpers
 
-    private static SeasonService CreateService(IServiceProvider services)
+    private static SeasonsService CreateService(IServiceProvider services)
     {
         var readOnlyFactory = services.GetRequiredService<IDbContextFactory<ReadOnlyDbContext>>();
         var httpContextAccessor = services.GetRequiredService<IHttpContextAccessor>();
-        var logger = services.GetRequiredService<ILogger<SeasonService>>();
+        var logger = services.GetRequiredService<ILogger<SeasonsService>>();
 
-        return new SeasonService(readOnlyFactory, httpContextAccessor, logger);
+        return new SeasonsService(readOnlyFactory, httpContextAccessor, logger);
     }
 
     #endregion

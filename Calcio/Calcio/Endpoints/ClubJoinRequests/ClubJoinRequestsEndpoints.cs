@@ -10,9 +10,9 @@ using ConflictResult = Microsoft.AspNetCore.Http.HttpResults.Conflict;
 
 namespace Calcio.Endpoints.ClubJoinRequests;
 
-public static class ClubJoinRequestEndpoints
+public static class ClubJoinRequestsEndpoints
 {
-    public static IEndpointRouteBuilder MapClubJoinRequestEndpoints(this IEndpointRouteBuilder endpoints)
+    public static IEndpointRouteBuilder MapClubJoinRequestsEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("api/club-join-requests")
             .RequireAuthorization()
@@ -34,7 +34,7 @@ public static class ClubJoinRequestEndpoints
     }
 
     private static async Task<Results<Ok<ClubJoinRequestDto>, NotFound, UnauthorizedHttpResult, ProblemHttpResult>> GetCurrentRequest(
-        IClubJoinRequestService service,
+        IClubJoinRequestsService service,
         CancellationToken cancellationToken)
     {
         var request = await service.GetRequestForCurrentUserAsync(cancellationToken);
@@ -50,7 +50,7 @@ public static class ClubJoinRequestEndpoints
         [Required]
         [Range(1, long.MaxValue)]
         long clubId,
-        IClubJoinRequestService service,
+        IClubJoinRequestsService service,
         CancellationToken cancellationToken)
     {
         var result = await service.CreateJoinRequestAsync(clubId, cancellationToken);
@@ -64,7 +64,7 @@ public static class ClubJoinRequestEndpoints
     }
 
     private static async Task<Results<NoContent, NotFound, UnauthorizedHttpResult, ProblemHttpResult>> CancelJoinRequest(
-        IClubJoinRequestService service,
+        IClubJoinRequestsService service,
         CancellationToken cancellationToken)
     {
         var result = await service.CancelJoinRequestAsync(cancellationToken);
@@ -80,7 +80,7 @@ public static class ClubJoinRequestEndpoints
         [Required]
         [Range(1, long.MaxValue)]
         long clubId,
-        IClubJoinRequestService service,
+        IClubJoinRequestsService service,
         CancellationToken cancellationToken)
     {
         var result = await service.GetPendingRequestsForClubAsync(clubId, cancellationToken);
@@ -98,7 +98,7 @@ public static class ClubJoinRequestEndpoints
         [Required]
         [Range(1, long.MaxValue)]
         long requestId,
-        IClubJoinRequestService service,
+        IClubJoinRequestsService service,
         CancellationToken cancellationToken)
     {
         var result = await service.ApproveJoinRequestAsync(clubId, requestId, cancellationToken);
@@ -117,7 +117,7 @@ public static class ClubJoinRequestEndpoints
         [Required]
         [Range(1, long.MaxValue)]
         long requestId,
-        IClubJoinRequestService service,
+        IClubJoinRequestsService service,
         CancellationToken cancellationToken)
     {
         var result = await service.RejectJoinRequestAsync(clubId, requestId, cancellationToken);

@@ -10,7 +10,7 @@ using OneOf.Types;
 
 namespace Calcio.Client.Services.Seasons;
 
-public class SeasonService(HttpClient httpClient) : ISeasonService
+public class SeasonsService(HttpClient httpClient) : ISeasonsService
 {
     public async Task<OneOf<List<SeasonDto>, Unauthorized, Error>> GetSeasonsAsync(long clubId, CancellationToken cancellationToken)
     {

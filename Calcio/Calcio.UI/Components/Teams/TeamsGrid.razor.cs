@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Components;
 namespace Calcio.UI.Components.Teams;
 
 [Authorize(Roles = "ClubAdmin")]
-public partial class TeamsGrid(ITeamService teamService)
+public partial class TeamsGrid(ITeamsService teamService)
 {
     [Parameter]
     public long ClubId { get; set; }

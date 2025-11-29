@@ -38,12 +38,12 @@ namespace Calcio.UnitTests.Components.Clubs.Shared;
 public sealed class ClubJoinRequestsGridTests : BunitContext
 {
     // Mock dependencies - we use NSubstitute to create test doubles
-    private readonly IClubJoinRequestService _mockClubJoinRequestService;
+    private readonly IClubJoinRequestsService _mockClubJoinRequestService;
 
     public ClubJoinRequestsGridTests()
     {
         // BEST PRACTICE: Set up mocks in constructor for reuse across tests
-        _mockClubJoinRequestService = Substitute.For<IClubJoinRequestService>();
+        _mockClubJoinRequestService = Substitute.For<IClubJoinRequestsService>();
 
         // BUNIT FEATURE: Register services in the test context's DI container
         // These will be injected into components just like in the real app

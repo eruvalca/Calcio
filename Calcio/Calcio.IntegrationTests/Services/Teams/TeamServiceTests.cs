@@ -176,13 +176,13 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
 
     #region Helpers
 
-    private static TeamService CreateService(IServiceProvider services)
+    private static TeamsService CreateService(IServiceProvider services)
     {
         var readOnlyFactory = services.GetRequiredService<IDbContextFactory<ReadOnlyDbContext>>();
         var httpContextAccessor = services.GetRequiredService<IHttpContextAccessor>();
-        var logger = services.GetRequiredService<ILogger<TeamService>>();
+        var logger = services.GetRequiredService<ILogger<TeamsService>>();
 
-        return new TeamService(readOnlyFactory, httpContextAccessor, logger);
+        return new TeamsService(readOnlyFactory, httpContextAccessor, logger);
     }
 
     #endregion

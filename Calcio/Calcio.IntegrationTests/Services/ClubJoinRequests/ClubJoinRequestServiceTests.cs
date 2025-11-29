@@ -624,15 +624,15 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
 
     #region Helpers
 
-    private static ClubJoinRequestService CreateService(IServiceProvider services)
+    private static ClubJoinRequestsService CreateService(IServiceProvider services)
     {
         var readOnlyFactory = services.GetRequiredService<IDbContextFactory<ReadOnlyDbContext>>();
         var readWriteFactory = services.GetRequiredService<IDbContextFactory<ReadWriteDbContext>>();
         var userManager = services.GetRequiredService<UserManager<CalcioUserEntity>>();
         var httpContextAccessor = services.GetRequiredService<IHttpContextAccessor>();
-        var logger = services.GetRequiredService<ILogger<ClubJoinRequestService>>();
+        var logger = services.GetRequiredService<ILogger<ClubJoinRequestsService>>();
 
-        return new ClubJoinRequestService(readOnlyFactory, readWriteFactory, userManager, httpContextAccessor, logger);
+        return new ClubJoinRequestsService(readOnlyFactory, readWriteFactory, userManager, httpContextAccessor, logger);
     }
 
     #endregion

@@ -6,7 +6,7 @@ using OneOf.Types;
 
 namespace Calcio.Shared.Services.ClubJoinRequests;
 
-public interface IClubJoinRequestService
+public interface IClubJoinRequestsService
 {
     Task<OneOf<ClubJoinRequestDto, NotFound, Unauthorized, Error>> GetRequestForCurrentUserAsync(CancellationToken cancellationToken);
     Task<OneOf<Success, NotFound, Conflict, Unauthorized, Error>> CreateJoinRequestAsync(long clubId, CancellationToken cancellationToken);

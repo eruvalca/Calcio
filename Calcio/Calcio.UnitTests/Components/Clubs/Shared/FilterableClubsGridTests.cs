@@ -29,12 +29,12 @@ namespace Calcio.UnitTests.Components.Clubs.Shared;
 /// </summary>
 public sealed class FilterableClubsGridTests : BunitContext
 {
-    private readonly IClubJoinRequestService _mockClubJoinRequestService;
+    private readonly IClubJoinRequestsService _mockClubJoinRequestService;
     private readonly NavigationManager _mockNavigationManager;
 
     public FilterableClubsGridTests()
     {
-        _mockClubJoinRequestService = Substitute.For<IClubJoinRequestService>();
+        _mockClubJoinRequestService = Substitute.For<IClubJoinRequestsService>();
 
         Services.AddSingleton(_mockClubJoinRequestService);
 

@@ -14,12 +14,12 @@ using OneOf.Types;
 
 namespace Calcio.Services.ClubJoinRequests;
 
-public partial class ClubJoinRequestService(
+public partial class ClubJoinRequestsService(
     IDbContextFactory<ReadOnlyDbContext> readOnlyDbContextFactory,
     IDbContextFactory<ReadWriteDbContext> readWriteDbContextFactory,
     UserManager<CalcioUserEntity> userManager,
     IHttpContextAccessor httpContextAccessor,
-    ILogger<ClubJoinRequestService> logger) : AuthenticatedServiceBase(httpContextAccessor), IClubJoinRequestService
+    ILogger<ClubJoinRequestsService> logger) : AuthenticatedServiceBase(httpContextAccessor), IClubJoinRequestsService
 {
     public async Task<OneOf<ClubJoinRequestDto, NotFound, Unauthorized, Error>> GetRequestForCurrentUserAsync(CancellationToken cancellationToken)
     {

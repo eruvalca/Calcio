@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Components;
 namespace Calcio.UI.Components.Clubs.Shared;
 
 [Authorize(Roles = "ClubAdmin")]
-public partial class SeasonsGrid(ISeasonService seasonService)
+public partial class SeasonsGrid(ISeasonsService seasonService)
 {
     [Parameter]
     public long ClubId { get; set; }

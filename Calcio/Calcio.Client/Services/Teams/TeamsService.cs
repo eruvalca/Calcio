@@ -10,7 +10,7 @@ using OneOf.Types;
 
 namespace Calcio.Client.Services.Teams;
 
-public class TeamService(HttpClient httpClient) : ITeamService
+public class TeamsService(HttpClient httpClient) : ITeamsService
 {
     public async Task<OneOf<List<TeamDto>, Unauthorized, Error>> GetTeamsAsync(long clubId, CancellationToken cancellationToken)
     {

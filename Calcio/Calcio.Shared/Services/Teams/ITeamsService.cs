@@ -6,7 +6,7 @@ using OneOf.Types;
 
 namespace Calcio.Shared.Services.Teams;
 
-public interface ITeamService
+public interface ITeamsService
 {
     Task<OneOf<List<TeamDto>, Unauthorized, Error>> GetTeamsAsync(long clubId, CancellationToken cancellationToken);
 }

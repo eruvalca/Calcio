@@ -33,7 +33,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.GetRequestForCurrentUserAsync(CancellationToken.None);
@@ -58,7 +58,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.GetRequestForCurrentUserAsync(CancellationToken.None);
@@ -79,7 +79,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.GetRequestForCurrentUserAsync(CancellationToken.None);
@@ -100,7 +100,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.GetRequestForCurrentUserAsync(CancellationToken.None);
@@ -127,7 +127,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.CreateJoinRequestAsync(clubId, CancellationToken.None);
@@ -150,7 +150,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.CreateJoinRequestAsync(clubId, CancellationToken.None);
@@ -173,7 +173,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.CreateJoinRequestAsync(clubId, CancellationToken.None);
@@ -196,7 +196,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.CreateJoinRequestAsync(clubId, CancellationToken.None);
@@ -221,7 +221,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.CancelJoinRequestAsync(CancellationToken.None);
@@ -242,7 +242,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.CancelJoinRequestAsync(CancellationToken.None);
@@ -263,7 +263,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.CancelJoinRequestAsync(CancellationToken.None);
@@ -295,7 +295,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.GetPendingRequestsForClubAsync(clubId, CancellationToken.None);
@@ -321,7 +321,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.GetPendingRequestsForClubAsync(clubId, CancellationToken.None);
@@ -344,7 +344,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.GetPendingRequestsForClubAsync(clubId, CancellationToken.None);
@@ -367,7 +367,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.GetPendingRequestsForClubAsync(clubId, CancellationToken.None);
@@ -395,7 +395,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.ApproveJoinRequestAsync(clubId, requestId, CancellationToken.None);
@@ -419,7 +419,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.ApproveJoinRequestAsync(clubId, requestId, CancellationToken.None);
@@ -443,7 +443,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.ApproveJoinRequestAsync(clubId, requestId, CancellationToken.None);
@@ -471,7 +471,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.RejectJoinRequestAsync(clubId, requestId, CancellationToken.None);
@@ -495,7 +495,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.RejectJoinRequestAsync(clubId, requestId, CancellationToken.None);
@@ -519,7 +519,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.RejectJoinRequestAsync(clubId, requestId, CancellationToken.None);
@@ -543,7 +543,7 @@ public class ClubJoinRequestServiceTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
 
-        var service = new ClubJoinRequestService(httpClient);
+        var service = new ClubJoinRequestsService(httpClient);
 
         // Act
         var result = await service.RejectJoinRequestAsync(clubId, requestId, CancellationToken.None);

@@ -18,16 +18,16 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthenticationStateDeserialization();
 
-builder.Services.AddHttpClient<IClubJoinRequestService, ClubJoinRequestService>(client =>
+builder.Services.AddHttpClient<IClubJoinRequestsService, ClubJoinRequestsService>(client =>
     client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
 builder.Services.AddHttpClient<ICalcioUsersService, CalcioUsersService>(client =>
     client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
-builder.Services.AddHttpClient<ISeasonService, SeasonService>(client =>
+builder.Services.AddHttpClient<ISeasonsService, SeasonsService>(client =>
     client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
-builder.Services.AddHttpClient<ITeamService, TeamService>(client =>
+builder.Services.AddHttpClient<ITeamsService, TeamsService>(client =>
     client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
 builder.Services.AddHttpClient<IPlayersService, PlayersService>(client =>
