@@ -407,7 +407,7 @@ public sealed class FilterableClubsGridTests : BunitContext
         cut.WaitForAssertion(() =>
         {
             var alert = cut.Find(".alert-danger");
-            alert.TextContent.ShouldContain("not authorized to request to join");
+            alert.TextContent.ShouldContain("do not have permission");
         });
     }
 

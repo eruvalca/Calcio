@@ -79,7 +79,7 @@ public partial class FilterableClubsGrid(
                     {
                         ServiceProblemKind.NotFound => "The club could not be found.",
                         ServiceProblemKind.Conflict => "You already have a pending request to join a club.",
-                        ServiceProblemKind.Forbidden => "You are not authorized to request to join this club.",
+                        ServiceProblemKind.Forbidden => "You do not have permission to perform this action.",
                         _ => problem.Detail ?? "An unexpected error occurred. Please try again."
                     };
                     IsProcessing = false;
