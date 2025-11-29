@@ -5,12 +5,21 @@ using Calcio.Data.Contexts.Base;
 using Calcio.Data.Interceptors;
 using Calcio.Endpoints.CalcioUsers;
 using Calcio.Endpoints.ClubJoinRequests;
+using Calcio.Endpoints.Players;
+using Calcio.Endpoints.Seasons;
+using Calcio.Endpoints.Teams;
 using Calcio.ServiceDefaults;
 using Calcio.Services.CalcioUsers;
 using Calcio.Services.ClubJoinRequests;
+using Calcio.Services.Players;
+using Calcio.Services.Seasons;
+using Calcio.Services.Teams;
 using Calcio.Shared.Models.Entities;
 using Calcio.Shared.Services.CalcioUsers;
 using Calcio.Shared.Services.ClubJoinRequests;
+using Calcio.Shared.Services.Players;
+using Calcio.Shared.Services.Seasons;
+using Calcio.Shared.Services.Teams;
 using Calcio.UI.Services.Theme;
 
 using Microsoft.AspNetCore.Authentication;
@@ -109,6 +118,9 @@ builder.Services.AddScoped<ThemeService>();
 
 builder.Services.AddScoped<IClubJoinRequestService, ClubJoinRequestService>();
 builder.Services.AddScoped<ICalcioUsersService, CalcioUsersService>();
+builder.Services.AddScoped<IPlayersService, PlayersService>();
+builder.Services.AddScoped<ISeasonService, SeasonService>();
+builder.Services.AddScoped<ITeamService, TeamService>();
 
 builder.Services.AddOpenApi(options => options.AddDocumentTransformer<CookieSecuritySchemeTransformer>());
 
@@ -150,6 +162,9 @@ app.MapAdditionalIdentityEndpoints();
 
 app.MapClubJoinRequestEndpoints();
 app.MapCalcioUsersEndpoints();
+app.MapPlayersEndpoints();
+app.MapSeasonEndpoints();
+app.MapTeamEndpoints();
 
 if (app.Environment.IsDevelopment())
 {

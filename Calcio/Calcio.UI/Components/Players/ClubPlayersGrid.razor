@@ -1,0 +1,69 @@
+@using Calcio.Shared.DTOs.Players
+@using Microsoft.AspNetCore.Components.QuickGrid
+
+<div class="card shadow mb-4">
+    <div class="card-header">
+        <form @onsubmit:preventDefault>
+            <div class="input-group" role="search">
+                <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="PlayerSearch"
+                    name="PlayerSearch" class="form-control" placeholder="Search by name" autocomplete="off" />
+            </div>
+        </form>
+    </div>
+    <div class="card-body">
+        @if (IsLoading)
+        {
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(LoadErrorMessage))
+        {
+            <div class="alert alert-danger" role="alert">@LoadErrorMessage</div>
+        }
+        else if (Players.Count == 0)
+        {
+            <p class="text-muted mb-0">No players in this club.</p>
+        }
+        else
+        {
+            <QuickGrid TGridItem="ClubPlayerDto" Items="FilteredPlayers.AsQueryable()"
+                class="table table-responsive table-borderless table-hover">
+                <PropertyColumn Title="Name" Property="p => p.FullName" Sortable="true" IsDefaultSortColumn="true" />
+                <PropertyColumn Title="Date of Birth" Property="p => p.DateOfBirth" Format="yyyy-MM-dd" Sortable="true" />
+                <TemplateColumn Title="Gender">
+                    @if (context.Gender.HasValue)
+                    {
+                        <span>@context.Gender.Value</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">—</span>
+                    }
+                </TemplateColumn>
+                <TemplateColumn Title="Jersey #">
+                    @if (context.JerseyNumber.HasValue)
+                    {
+                        <span class="badge bg-primary">@context.JerseyNumber</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">—</span>
+                    }
+                </TemplateColumn>
+                <TemplateColumn Title="Tryout #">
+                    @if (context.TryoutNumber.HasValue)
+                    {
+                        <span class="badge bg-secondary">@context.TryoutNumber</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">—</span>
+                    }
+                </TemplateColumn>
+            </QuickGrid>
+        }
+    </div>
+</div>
