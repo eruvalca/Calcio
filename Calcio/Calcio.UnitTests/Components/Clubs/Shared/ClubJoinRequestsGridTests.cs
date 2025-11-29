@@ -244,7 +244,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
         // Setup mock to return success
         _mockClubJoinRequestService
             .ApproveJoinRequestAsync(100, 1, Arg.Any<CancellationToken>())
-            .Returns(new Success());
+            .Returns(new ServiceResult<Success>(new Success()));
 
         // Open the modal
         cut.Find("button.btn-outline-success").Click();
@@ -272,7 +272,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
 
         _mockClubJoinRequestService
             .ApproveJoinRequestAsync(100, 1, Arg.Any<CancellationToken>())
-            .Returns(new NotFound());
+            .Returns(new ServiceResult<Success>(ServiceProblem.NotFound()));
 
         cut.Find("button.btn-outline-success").Click();
 
@@ -289,11 +289,11 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
     }
 
     /// <summary>
-    /// TEST: Verify error message displays when approval fails with Unauthorized.
+    /// TEST: Verify error message displays when approval fails with Forbidden.
     /// CONCEPT: Testing different error scenarios.
     /// </summary>
     [Fact]
-    public async Task WhenApproveReturnsUnauthorized_ShouldDisplayError()
+    public async Task WhenApproveReturnsForbidden_ShouldDisplayError()
     {
         // Arrange
         var requests = CreateTestJoinRequests(1);
@@ -301,7 +301,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
 
         _mockClubJoinRequestService
             .ApproveJoinRequestAsync(100, 1, Arg.Any<CancellationToken>())
-            .Returns(new Unauthorized());
+            .Returns(new ServiceResult<Success>(ServiceProblem.Forbidden()));
 
         cut.Find("button.btn-outline-success").Click();
 
@@ -321,7 +321,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
     /// CONCEPT: Testing fallback error handling.
     /// </summary>
     [Fact]
-    public async Task WhenApproveReturnsError_ShouldDisplayGenericError()
+    public async Task WhenApproveReturnsServerError_ShouldDisplayGenericError()
     {
         // Arrange
         var requests = CreateTestJoinRequests(1);
@@ -329,7 +329,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
 
         _mockClubJoinRequestService
             .ApproveJoinRequestAsync(100, 1, Arg.Any<CancellationToken>())
-            .Returns(new Error());
+            .Returns(new ServiceResult<Success>(ServiceProblem.ServerError()));
 
         cut.Find("button.btn-outline-success").Click();
 
@@ -398,7 +398,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
 
         _mockClubJoinRequestService
             .RejectJoinRequestAsync(100, 1, Arg.Any<CancellationToken>())
-            .Returns(new Success());
+            .Returns(new ServiceResult<Success>(new Success()));
 
         cut.Find("button.btn-outline-danger").Click();
 
@@ -422,7 +422,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
 
         _mockClubJoinRequestService
             .RejectJoinRequestAsync(100, 1, Arg.Any<CancellationToken>())
-            .Returns(new NotFound());
+            .Returns(new ServiceResult<Success>(ServiceProblem.NotFound()));
 
         cut.Find("button.btn-outline-danger").Click();
 
@@ -453,7 +453,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
         var cut = RenderGrid(clubId: 100, joinRequests: requests);
 
         // Setup mock to delay response so we can check the processing state
-        var tcs = new TaskCompletionSource<OneOf.OneOf<Success, NotFound, Unauthorized, Error>>();
+        var tcs = new TaskCompletionSource<ServiceResult<Success>>();
         _mockClubJoinRequestService
             .ApproveJoinRequestAsync(100, 1, Arg.Any<CancellationToken>())
             .Returns(tcs.Task);
@@ -471,7 +471,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
         });
 
         // Cleanup - Complete the task
-        tcs.SetResult(new Success());
+        tcs.SetResult(new ServiceResult<Success>(new Success()));
         await clickTask;
     }
 
@@ -486,7 +486,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
         var requests = CreateTestJoinRequests(1);
         var cut = RenderGrid(clubId: 100, joinRequests: requests);
 
-        var tcs = new TaskCompletionSource<OneOf.OneOf<Success, NotFound, Unauthorized, Error>>();
+        var tcs = new TaskCompletionSource<ServiceResult<Success>>();
         _mockClubJoinRequestService
             .ApproveJoinRequestAsync(100, 1, Arg.Any<CancellationToken>())
             .Returns(tcs.Task);
@@ -503,7 +503,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
         });
 
         // Cleanup
-        tcs.SetResult(new Success());
+        tcs.SetResult(new ServiceResult<Success>(new Success()));
         await clickTask;
     }
 
@@ -524,7 +524,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
 
         _mockClubJoinRequestService
             .ApproveJoinRequestAsync(100, 2, Arg.Any<CancellationToken>())
-            .Returns(new Success());
+            .Returns(new ServiceResult<Success>(new Success()));
 
         // Act - Click approve on the second request
         var approveButtons = cut.FindAll("button.btn-outline-success");

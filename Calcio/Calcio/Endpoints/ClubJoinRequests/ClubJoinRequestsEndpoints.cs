@@ -1,12 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 
+using Calcio.Endpoints.Extensions;
 using Calcio.Endpoints.Filters;
 using Calcio.Shared.DTOs.ClubJoinRequests;
 using Calcio.Shared.Services.ClubJoinRequests;
 
 using Microsoft.AspNetCore.Http.HttpResults;
-
-using ConflictResult = Microsoft.AspNetCore.Http.HttpResults.Conflict;
 
 namespace Calcio.Endpoints.ClubJoinRequests;
 
@@ -16,37 +15,44 @@ public static class ClubJoinRequestsEndpoints
     {
         var group = endpoints.MapGroup("api/club-join-requests")
             .RequireAuthorization()
-            .AddEndpointFilter<UnhandledExceptionFilter>();
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
 
-        group.MapGet("current", GetCurrentRequest);
-        group.MapPost("{clubId:long}", CreateJoinRequest);
-        group.MapDelete("current", CancelJoinRequest);
+        group.MapGet("current", GetCurrentRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+        group.MapPost("{clubId:long}", CreateJoinRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status409Conflict);
+        group.MapDelete("current", CancelJoinRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         var clubAdminGroup = endpoints.MapGroup("api/clubs/{clubId:long}/join-requests")
             .RequireAuthorization(policy => policy.RequireRole("ClubAdmin"))
-            .AddEndpointFilter<UnhandledExceptionFilter>();
+            .AddEndpointFilter<ClubMembershipFilter>()
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
 
         clubAdminGroup.MapGet("", GetPendingRequestsForClub);
-        clubAdminGroup.MapPost("{requestId:long}/approve", ApproveJoinRequest);
-        clubAdminGroup.MapPost("{requestId:long}/reject", RejectJoinRequest);
+        clubAdminGroup.MapPost("{requestId:long}/approve", ApproveJoinRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+        clubAdminGroup.MapPost("{requestId:long}/reject", RejectJoinRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return endpoints;
     }
 
-    private static async Task<Results<Ok<ClubJoinRequestDto>, NotFound, UnauthorizedHttpResult, ProblemHttpResult>> GetCurrentRequest(
+    private static async Task<Results<Ok<ClubJoinRequestDto>, ProblemHttpResult>> GetCurrentRequest(
         IClubJoinRequestsService service,
         CancellationToken cancellationToken)
     {
-        var request = await service.GetRequestForCurrentUserAsync(cancellationToken);
+        var result = await service.GetRequestForCurrentUserAsync(cancellationToken);
 
-        return request.Match<Results<Ok<ClubJoinRequestDto>, NotFound, UnauthorizedHttpResult, ProblemHttpResult>>(
-            dto => TypedResults.Ok(dto),
-            notFound => TypedResults.NotFound(),
-            unauthorized => TypedResults.Unauthorized(),
-            error => TypedResults.Problem(statusCode: StatusCodes.Status500InternalServerError));
+        return result.ToHttpResult(TypedResults.Ok);
     }
 
-    private static async Task<Results<Created, NotFound, ConflictResult, UnauthorizedHttpResult, ProblemHttpResult>> CreateJoinRequest(
+    private static async Task<Results<Created, ProblemHttpResult>> CreateJoinRequest(
         [Required]
         [Range(1, long.MaxValue)]
         long clubId,
@@ -55,28 +61,19 @@ public static class ClubJoinRequestsEndpoints
     {
         var result = await service.CreateJoinRequestAsync(clubId, cancellationToken);
 
-        return result.Match<Results<Created, NotFound, ConflictResult, UnauthorizedHttpResult, ProblemHttpResult>>(
-            success => TypedResults.Created(),
-            notFound => TypedResults.NotFound(),
-            conflict => TypedResults.Conflict(),
-            unauthorized => TypedResults.Unauthorized(),
-            error => TypedResults.Problem(statusCode: StatusCodes.Status500InternalServerError));
+        return result.ToHttpResult(TypedResults.Created());
     }
 
-    private static async Task<Results<NoContent, NotFound, UnauthorizedHttpResult, ProblemHttpResult>> CancelJoinRequest(
+    private static async Task<Results<NoContent, ProblemHttpResult>> CancelJoinRequest(
         IClubJoinRequestsService service,
         CancellationToken cancellationToken)
     {
         var result = await service.CancelJoinRequestAsync(cancellationToken);
 
-        return result.Match<Results<NoContent, NotFound, UnauthorizedHttpResult, ProblemHttpResult>>(
-            success => TypedResults.NoContent(),
-            notFound => TypedResults.NotFound(),
-            unauthorized => TypedResults.Unauthorized(),
-            error => TypedResults.Problem(statusCode: StatusCodes.Status500InternalServerError));
+        return result.ToHttpResult(TypedResults.NoContent());
     }
 
-    private static async Task<Results<Ok<List<ClubJoinRequestWithUserDto>>, UnauthorizedHttpResult, ProblemHttpResult>> GetPendingRequestsForClub(
+    private static async Task<Results<Ok<List<ClubJoinRequestWithUserDto>>, ProblemHttpResult>> GetPendingRequestsForClub(
         [Required]
         [Range(1, long.MaxValue)]
         long clubId,
@@ -85,13 +82,10 @@ public static class ClubJoinRequestsEndpoints
     {
         var result = await service.GetPendingRequestsForClubAsync(clubId, cancellationToken);
 
-        return result.Match<Results<Ok<List<ClubJoinRequestWithUserDto>>, UnauthorizedHttpResult, ProblemHttpResult>>(
-            requests => TypedResults.Ok(requests),
-            unauthorized => TypedResults.Unauthorized(),
-            error => TypedResults.Problem(statusCode: StatusCodes.Status500InternalServerError));
+        return result.ToHttpResult(TypedResults.Ok);
     }
 
-    private static async Task<Results<NoContent, NotFound, UnauthorizedHttpResult, ProblemHttpResult>> ApproveJoinRequest(
+    private static async Task<Results<NoContent, ProblemHttpResult>> ApproveJoinRequest(
         [Required]
         [Range(1, long.MaxValue)]
         long clubId,
@@ -103,14 +97,10 @@ public static class ClubJoinRequestsEndpoints
     {
         var result = await service.ApproveJoinRequestAsync(clubId, requestId, cancellationToken);
 
-        return result.Match<Results<NoContent, NotFound, UnauthorizedHttpResult, ProblemHttpResult>>(
-            success => TypedResults.NoContent(),
-            notFound => TypedResults.NotFound(),
-            unauthorized => TypedResults.Unauthorized(),
-            error => TypedResults.Problem(statusCode: StatusCodes.Status500InternalServerError));
+        return result.ToHttpResult(TypedResults.NoContent());
     }
 
-    private static async Task<Results<NoContent, NotFound, UnauthorizedHttpResult, ProblemHttpResult>> RejectJoinRequest(
+    private static async Task<Results<NoContent, ProblemHttpResult>> RejectJoinRequest(
         [Required]
         [Range(1, long.MaxValue)]
         long clubId,
@@ -122,10 +112,6 @@ public static class ClubJoinRequestsEndpoints
     {
         var result = await service.RejectJoinRequestAsync(clubId, requestId, cancellationToken);
 
-        return result.Match<Results<NoContent, NotFound, UnauthorizedHttpResult, ProblemHttpResult>>(
-            success => TypedResults.NoContent(),
-            notFound => TypedResults.NotFound(),
-            unauthorized => TypedResults.Unauthorized(),
-            error => TypedResults.Problem(statusCode: StatusCodes.Status500InternalServerError));
+        return result.ToHttpResult(TypedResults.NoContent());
     }
 }

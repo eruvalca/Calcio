@@ -8,7 +8,6 @@ using Calcio.Shared.Services.CalcioUsers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-using OneOf;
 using OneOf.Types;
 
 namespace Calcio.Services.CalcioUsers;
@@ -20,17 +19,10 @@ public partial class CalcioUsersService(
     IHttpContextAccessor httpContextAccessor,
     ILogger<CalcioUsersService> logger) : AuthenticatedServiceBase(httpContextAccessor), ICalcioUsersService
 {
-    public async Task<OneOf<List<ClubMemberDto>, Unauthorized, Error>> GetClubMembersAsync(long clubId, CancellationToken cancellationToken)
+    public async Task<ServiceResult<List<ClubMemberDto>>> GetClubMembersAsync(long clubId, CancellationToken cancellationToken)
     {
+        // Club membership is validated by ClubMembershipFilter before this service is called.
         await using var dbContext = await readOnlyDbContextFactory.CreateDbContextAsync(cancellationToken);
-
-        var isClubMember = await dbContext.Clubs
-            .AnyAsync(c => c.ClubId == clubId, cancellationToken);
-
-        if (!isClubMember)
-        {
-            return new Unauthorized();
-        }
 
         var users = await dbContext.Users
             .Where(u => u.ClubId == clubId && u.Id != CurrentUserId)
@@ -46,29 +38,22 @@ public partial class CalcioUsersService(
         return members.OrderByDescending(m => m.IsClubAdmin).ThenBy(m => m.FullName).ToList();
     }
 
-    public async Task<OneOf<Success, NotFound, Unauthorized, Error>> RemoveClubMemberAsync(long clubId, long userId, CancellationToken cancellationToken)
+    public async Task<ServiceResult<Success>> RemoveClubMemberAsync(long clubId, long userId, CancellationToken cancellationToken)
     {
+        // Club membership is validated by ClubMembershipFilter before this service is called.
         if (userId == CurrentUserId)
         {
-            return new Unauthorized();
+            return ServiceProblem.Forbidden("You cannot remove yourself from the club.");
         }
 
         await using var dbContext = await readWriteDbContextFactory.CreateDbContextAsync(cancellationToken);
-
-        var isClubMember = await dbContext.Clubs
-            .AnyAsync(c => c.ClubId == clubId, cancellationToken);
-
-        if (!isClubMember)
-        {
-            return new Unauthorized();
-        }
 
         var userToRemove = await dbContext.Users
             .FirstOrDefaultAsync(u => u.Id == userId && u.ClubId == clubId, cancellationToken);
 
         if (userToRemove is null)
         {
-            return new NotFound();
+            return ServiceProblem.NotFound();
         }
 
         userToRemove.ClubId = null;

@@ -1,4 +1,5 @@
 using Calcio.Shared.DTOs.CalcioUsers;
+using Calcio.Shared.Results;
 using Calcio.Shared.Services.CalcioUsers;
 
 using Microsoft.AspNetCore.Authorization;
@@ -48,14 +49,13 @@ public partial class ClubMembersGrid(ICalcioUsersService calcioUsersService)
                 Members = members;
                 IsLoading = false;
             },
-            unauthorized =>
+            problem =>
             {
-                LoadErrorMessage = "You are not authorized to view club members.";
-                IsLoading = false;
-            },
-            error =>
-            {
-                LoadErrorMessage = "An unexpected error occurred while loading members.";
+                LoadErrorMessage = problem.Kind switch
+                {
+                    ServiceProblemKind.Forbidden => "You are not authorized to view the club members requested.",
+                    _ => problem.Detail ?? "An unexpected error occurred while loading members."
+                };
                 IsLoading = false;
             });
     }
@@ -91,19 +91,14 @@ public partial class ClubMembersGrid(ICalcioUsersService calcioUsersService)
                     ConfirmingRemoveMember = null;
                     IsProcessing = false;
                 },
-                notFound =>
+                problem =>
                 {
-                    ErrorMessage = "The member could not be found.";
-                    IsProcessing = false;
-                },
-                unauthorized =>
-                {
-                    ErrorMessage = "You are not authorized to remove this member.";
-                    IsProcessing = false;
-                },
-                error =>
-                {
-                    ErrorMessage = "An unexpected error occurred. Please try again.";
+                    ErrorMessage = problem.Kind switch
+                    {
+                        ServiceProblemKind.NotFound => "The member could not be found.",
+                        ServiceProblemKind.Forbidden => "You are not authorized to remove this member.",
+                        _ => problem.Detail ?? "An unexpected error occurred. Please try again."
+                    };
                     IsProcessing = false;
                 });
         }

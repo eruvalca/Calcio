@@ -1,4 +1,5 @@
 using Calcio.Shared.DTOs.Players;
+using Calcio.Shared.Results;
 using Calcio.Shared.Services.Players;
 
 using Microsoft.AspNetCore.Authorization;
@@ -43,14 +44,13 @@ public partial class ClubPlayersGrid(IPlayersService playersService)
                 Players = players;
                 IsLoading = false;
             },
-            unauthorized =>
+            problem =>
             {
-                LoadErrorMessage = "You are not authorized to view club players.";
-                IsLoading = false;
-            },
-            error =>
-            {
-                LoadErrorMessage = "An unexpected error occurred while loading players.";
+                LoadErrorMessage = problem.Kind switch
+                {
+                    ServiceProblemKind.Forbidden => "You are not authorized to view the club players requested.",
+                    _ => problem.Detail ?? "An unexpected error occurred while loading players."
+                };
                 IsLoading = false;
             });
     }

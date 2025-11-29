@@ -9,7 +9,6 @@ using Calcio.Shared.Services.ClubJoinRequests;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-using OneOf;
 using OneOf.Types;
 
 namespace Calcio.Services.ClubJoinRequests;
@@ -21,7 +20,7 @@ public partial class ClubJoinRequestsService(
     IHttpContextAccessor httpContextAccessor,
     ILogger<ClubJoinRequestsService> logger) : AuthenticatedServiceBase(httpContextAccessor), IClubJoinRequestsService
 {
-    public async Task<OneOf<ClubJoinRequestDto, NotFound, Unauthorized, Error>> GetRequestForCurrentUserAsync(CancellationToken cancellationToken)
+    public async Task<ServiceResult<ClubJoinRequestDto>> GetRequestForCurrentUserAsync(CancellationToken cancellationToken)
     {
         await using var dbContext = await readOnlyDbContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -33,11 +32,11 @@ public partial class ClubJoinRequestsService(
             .FirstOrDefaultAsync(cancellationToken);
 
         return request is null
-            ? new NotFound()
+            ? ServiceProblem.NotFound()
             : request;
     }
 
-    public async Task<OneOf<Success, NotFound, Conflict, Unauthorized, Error>> CreateJoinRequestAsync(long clubId, CancellationToken cancellationToken)
+    public async Task<ServiceResult<Success>> CreateJoinRequestAsync(long clubId, CancellationToken cancellationToken)
     {
         await using var dbContext = await readWriteDbContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -48,7 +47,7 @@ public partial class ClubJoinRequestsService(
         {
             if (existingRequest.Status == RequestStatus.Pending)
             {
-                return new Conflict();
+                return ServiceProblem.Conflict("You already have a pending request to join a club.");
             }
 
             // Delete rejected request to allow new request
@@ -61,7 +60,7 @@ public partial class ClubJoinRequestsService(
 
         if (!clubExists)
         {
-            return new NotFound();
+            return ServiceProblem.NotFound();
         }
 
         var joinRequest = new ClubJoinRequestEntity
@@ -79,7 +78,7 @@ public partial class ClubJoinRequestsService(
         return new Success();
     }
 
-    public async Task<OneOf<Success, NotFound, Unauthorized, Error>> CancelJoinRequestAsync(CancellationToken cancellationToken)
+    public async Task<ServiceResult<Success>> CancelJoinRequestAsync(CancellationToken cancellationToken)
     {
         await using var dbContext = await readWriteDbContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -88,7 +87,7 @@ public partial class ClubJoinRequestsService(
 
         if (joinRequest is null)
         {
-            return new NotFound();
+            return ServiceProblem.NotFound();
         }
 
         dbContext.Remove(joinRequest);
@@ -98,17 +97,10 @@ public partial class ClubJoinRequestsService(
         return new Success();
     }
 
-    public async Task<OneOf<List<ClubJoinRequestWithUserDto>, Unauthorized, Error>> GetPendingRequestsForClubAsync(long clubId, CancellationToken cancellationToken)
+    public async Task<ServiceResult<List<ClubJoinRequestWithUserDto>>> GetPendingRequestsForClubAsync(long clubId, CancellationToken cancellationToken)
     {
+        // Club membership is validated by ClubMembershipFilter before this service is called.
         await using var dbContext = await readOnlyDbContextFactory.CreateDbContextAsync(cancellationToken);
-
-        var isClubMember = await dbContext.Clubs
-            .AnyAsync(c => c.ClubId == clubId, cancellationToken);
-
-        if (!isClubMember)
-        {
-            return new Unauthorized();
-        }
 
         var requests = await dbContext.ClubJoinRequests
             .Include(r => r.RequestingUser)
@@ -120,18 +112,10 @@ public partial class ClubJoinRequestsService(
         return requests;
     }
 
-    public async Task<OneOf<Success, NotFound, Unauthorized, Error>> ApproveJoinRequestAsync(long clubId, long requestId, CancellationToken cancellationToken)
+    public async Task<ServiceResult<Success>> ApproveJoinRequestAsync(long clubId, long requestId, CancellationToken cancellationToken)
     {
+        // Club membership is validated by ClubMembershipFilter before this service is called.
         await using var dbContext = await readWriteDbContextFactory.CreateDbContextAsync(cancellationToken);
-
-        // Check club membership first (authorization before data access)
-        var isClubMember = await dbContext.Clubs
-            .AnyAsync(c => c.ClubId == clubId, cancellationToken);
-
-        if (!isClubMember)
-        {
-            return new Unauthorized();
-        }
 
         var joinRequest = await dbContext.ClubJoinRequests
             .Include(r => r.RequestingUser)
@@ -140,7 +124,7 @@ public partial class ClubJoinRequestsService(
 
         if (joinRequest is null)
         {
-            return new NotFound();
+            return ServiceProblem.NotFound();
         }
 
         var requestingUserId = joinRequest.RequestingUserId;
@@ -170,25 +154,17 @@ public partial class ClubJoinRequestsService(
         return new Success();
     }
 
-    public async Task<OneOf<Success, NotFound, Unauthorized, Error>> RejectJoinRequestAsync(long clubId, long requestId, CancellationToken cancellationToken)
+    public async Task<ServiceResult<Success>> RejectJoinRequestAsync(long clubId, long requestId, CancellationToken cancellationToken)
     {
+        // Club membership is validated by ClubMembershipFilter before this service is called.
         await using var dbContext = await readWriteDbContextFactory.CreateDbContextAsync(cancellationToken);
-
-        // Check club membership first (authorization before data access)
-        var isClubMember = await dbContext.Clubs
-            .AnyAsync(c => c.ClubId == clubId, cancellationToken);
-
-        if (!isClubMember)
-        {
-            return new Unauthorized();
-        }
 
         var joinRequest = await dbContext.ClubJoinRequests
             .FirstOrDefaultAsync(r => r.ClubJoinRequestId == requestId && r.ClubId == clubId && r.Status == RequestStatus.Pending, cancellationToken);
 
         if (joinRequest is null)
         {
-            return new NotFound();
+            return ServiceProblem.NotFound();
         }
 
         // Mark as rejected - record will be deleted when user requests to join another club or creates their own

@@ -1,4 +1,5 @@
 using Calcio.Shared.DTOs.Teams;
+using Calcio.Shared.Results;
 using Calcio.Shared.Services.Teams;
 
 using Microsoft.AspNetCore.Authorization;
@@ -34,14 +35,13 @@ public partial class TeamsGrid(ITeamsService teamService)
                 Teams = teams;
                 IsLoading = false;
             },
-            unauthorized =>
+            problem =>
             {
-                ErrorMessage = "You are not authorized to view teams.";
-                IsLoading = false;
-            },
-            error =>
-            {
-                ErrorMessage = "An unexpected error occurred while loading teams.";
+                ErrorMessage = problem.Kind switch
+                {
+                    ServiceProblemKind.Forbidden => "You are not authorized to view the teams requested.",
+                    _ => problem.Detail ?? "An unexpected error occurred while loading teams."
+                };
                 IsLoading = false;
             });
     }

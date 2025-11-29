@@ -8,8 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using OneOf.Types;
-
 using Shouldly;
 
 namespace Calcio.IntegrationTests.Services.Seasons;
@@ -35,15 +33,15 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
         var result = await service.GetSeasonsAsync(club.ClubId, cancellationToken);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var seasons = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var seasons = result.Value;
         seasons.ShouldNotBeEmpty();
         seasons.ShouldAllBe(s => s.SeasonId > 0);
         seasons.ShouldAllBe(s => !string.IsNullOrEmpty(s.Name));
     }
 
     [Fact]
-    public async Task GetSeasonsAsync_WhenUserIsNotMember_ReturnsUnauthorized()
+    public async Task GetSeasonsAsync_WhenUserIsNotMember_ReturnsEmptyList()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -62,9 +60,9 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
         // Act
         var result = await service.GetSeasonsAsync(otherClub.ClubId, cancellationToken);
 
-        // Assert
-        result.IsT1.ShouldBeTrue();
-        result.AsT1.ShouldBeOfType<Unauthorized>();
+        // Assert - Global query filters return empty result for clubs user doesn't belong to
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeEmpty();
     }
 
     [Fact]
@@ -84,8 +82,8 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
         var result = await service.GetSeasonsAsync(club.ClubId, cancellationToken);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var seasons = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var seasons = result.Value;
 
         if (seasons.Count > 1)
         {
@@ -119,8 +117,8 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
         var result = await service.GetSeasonsAsync(club.ClubId, cancellationToken);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var seasons = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var seasons = result.Value;
         seasons.Count.ShouldBe(expectedCount);
     }
 
@@ -144,8 +142,8 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
         var result = await service.GetSeasonsAsync(club.ClubId, cancellationToken);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var seasons = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var seasons = result.Value;
         var actualSeason = seasons.FirstOrDefault(s => s.SeasonId == expectedSeason.SeasonId);
 
         actualSeason.ShouldNotBeNull();
@@ -156,7 +154,7 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
     }
 
     [Fact]
-    public async Task GetSeasonsAsync_WhenClubDoesNotExist_ReturnsUnauthorized()
+    public async Task GetSeasonsAsync_WhenClubDoesNotExist_ReturnsEmptyList()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -168,9 +166,9 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
         // Act
         var result = await service.GetSeasonsAsync(999999, cancellationToken);
 
-        // Assert
-        result.IsT1.ShouldBeTrue();
-        result.AsT1.ShouldBeOfType<Unauthorized>();
+        // Assert - Global query filters return empty result for non-existent clubs
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeEmpty();
     }
 
     #endregion

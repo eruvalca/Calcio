@@ -5,8 +5,6 @@ using Calcio.Client.Services.Teams;
 using Calcio.Shared.DTOs.Teams;
 using Calcio.Shared.Results;
 
-using OneOf.Types;
-
 using RichardSzalay.MockHttp;
 
 using Shouldly;
@@ -43,8 +41,8 @@ public class TeamServiceTests
         var result = await service.GetTeamsAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var list = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var list = result.Value;
         list.Count.ShouldBe(2);
         list[0].Name.ShouldBe("U12 Red");
         list[0].BirthYear.ShouldBe(2012);
@@ -71,19 +69,19 @@ public class TeamServiceTests
         var result = await service.GetTeamsAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        result.AsT0.ShouldBeEmpty();
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeEmpty();
     }
 
     [Fact]
-    public async Task GetTeamsAsync_WhenUnauthorized_ReturnsUnauthorized()
+    public async Task GetTeamsAsync_WhenForbidden_ReturnsForbiddenProblem()
     {
         // Arrange
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/teams")
-            .Respond(HttpStatusCode.Unauthorized);
+            .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
@@ -94,12 +92,12 @@ public class TeamServiceTests
         var result = await service.GetTeamsAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT1.ShouldBeTrue();
-        result.AsT1.ShouldBeOfType<Unauthorized>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
 
     [Fact]
-    public async Task GetTeamsAsync_WhenServerError_ReturnsError()
+    public async Task GetTeamsAsync_WhenServerError_ReturnsServerErrorProblem()
     {
         // Arrange
         var clubId = 10L;
@@ -117,8 +115,8 @@ public class TeamServiceTests
         var result = await service.GetTeamsAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT2.ShouldBeTrue();
-        result.AsT2.ShouldBeOfType<Error>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.ServerError);
     }
 
     [Fact]
@@ -140,8 +138,8 @@ public class TeamServiceTests
         var result = await service.GetTeamsAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        result.AsT0.ShouldBeEmpty();
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeEmpty();
     }
 
     [Fact]
@@ -164,8 +162,8 @@ public class TeamServiceTests
         var result = await service.GetTeamsAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var teams = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var teams = result.Value;
         teams.Count.ShouldBe(1);
 
         var team = teams[0];
@@ -194,8 +192,8 @@ public class TeamServiceTests
         var result = await service.GetTeamsAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var teams = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var teams = result.Value;
         teams.Count.ShouldBe(1);
         teams[0].BirthYear.ShouldBeNull();
     }

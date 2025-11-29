@@ -327,7 +327,7 @@ public sealed class FilterableClubsGridTests : BunitContext
 
         _mockClubJoinRequestService
             .CreateJoinRequestAsync(1, Arg.Any<CancellationToken>())
-            .Returns(new Success());
+            .Returns(new ServiceResult<Success>(new Success()));
 
         cut.Find("button.btn-outline-primary").Click();
 
@@ -348,7 +348,7 @@ public sealed class FilterableClubsGridTests : BunitContext
 
         _mockClubJoinRequestService
             .CreateJoinRequestAsync(1, Arg.Any<CancellationToken>())
-            .Returns(new NotFound());
+            .Returns(new ServiceResult<Success>(ServiceProblem.NotFound()));
 
         cut.Find("button.btn-outline-primary").Click();
 
@@ -372,7 +372,7 @@ public sealed class FilterableClubsGridTests : BunitContext
 
         _mockClubJoinRequestService
             .CreateJoinRequestAsync(1, Arg.Any<CancellationToken>())
-            .Returns(new Conflict());
+            .Returns(new ServiceResult<Success>(ServiceProblem.Conflict()));
 
         cut.Find("button.btn-outline-primary").Click();
 
@@ -388,7 +388,7 @@ public sealed class FilterableClubsGridTests : BunitContext
     }
 
     [Fact]
-    public async Task WhenJoinReturnsUnauthorized_ShouldDisplayError()
+    public async Task WhenJoinReturnsForbidden_ShouldDisplayError()
     {
         // Arrange
         var clubs = CreateTestClubs(1);
@@ -396,7 +396,7 @@ public sealed class FilterableClubsGridTests : BunitContext
 
         _mockClubJoinRequestService
             .CreateJoinRequestAsync(1, Arg.Any<CancellationToken>())
-            .Returns(new Unauthorized());
+            .Returns(new ServiceResult<Success>(ServiceProblem.Forbidden()));
 
         cut.Find("button.btn-outline-primary").Click();
 
@@ -407,12 +407,12 @@ public sealed class FilterableClubsGridTests : BunitContext
         cut.WaitForAssertion(() =>
         {
             var alert = cut.Find(".alert-danger");
-            alert.TextContent.ShouldContain("must be logged in");
+            alert.TextContent.ShouldContain("not authorized to request to join");
         });
     }
 
     [Fact]
-    public async Task WhenJoinReturnsError_ShouldDisplayGenericError()
+    public async Task WhenJoinReturnsServerError_ShouldDisplayGenericError()
     {
         // Arrange
         var clubs = CreateTestClubs(1);
@@ -420,7 +420,7 @@ public sealed class FilterableClubsGridTests : BunitContext
 
         _mockClubJoinRequestService
             .CreateJoinRequestAsync(1, Arg.Any<CancellationToken>())
-            .Returns(new Error());
+            .Returns(new ServiceResult<Success>(ServiceProblem.ServerError()));
 
         cut.Find("button.btn-outline-primary").Click();
 
@@ -483,7 +483,7 @@ public sealed class FilterableClubsGridTests : BunitContext
 
         _mockClubJoinRequestService
             .CancelJoinRequestAsync(Arg.Any<CancellationToken>())
-            .Returns(new Success());
+            .Returns(new ServiceResult<Success>(new Success()));
 
         cut.Find("button.btn-outline-danger").Click();
 
@@ -505,7 +505,7 @@ public sealed class FilterableClubsGridTests : BunitContext
 
         _mockClubJoinRequestService
             .CancelJoinRequestAsync(Arg.Any<CancellationToken>())
-            .Returns(new NotFound());
+            .Returns(new ServiceResult<Success>(ServiceProblem.NotFound()));
 
         cut.Find("button.btn-outline-danger").Click();
 
@@ -521,7 +521,7 @@ public sealed class FilterableClubsGridTests : BunitContext
     }
 
     [Fact]
-    public async Task WhenCancelRequestReturnsUnauthorized_ShouldDisplayError()
+    public async Task WhenCancelRequestReturnsForbidden_ShouldDisplayError()
     {
         // Arrange
         var clubs = CreateTestClubs(1);
@@ -530,7 +530,7 @@ public sealed class FilterableClubsGridTests : BunitContext
 
         _mockClubJoinRequestService
             .CancelJoinRequestAsync(Arg.Any<CancellationToken>())
-            .Returns(new Unauthorized());
+            .Returns(new ServiceResult<Success>(ServiceProblem.Forbidden()));
 
         cut.Find("button.btn-outline-danger").Click();
 
@@ -541,12 +541,12 @@ public sealed class FilterableClubsGridTests : BunitContext
         cut.WaitForAssertion(() =>
         {
             var alert = cut.Find(".alert-danger");
-            alert.TextContent.ShouldContain("must be logged in");
+            alert.TextContent.ShouldContain("not authorized to cancel");
         });
     }
 
     [Fact]
-    public async Task WhenCancelRequestReturnsError_ShouldDisplayGenericError()
+    public async Task WhenCancelRequestReturnsServerError_ShouldDisplayGenericError()
     {
         // Arrange
         var clubs = CreateTestClubs(1);
@@ -555,7 +555,7 @@ public sealed class FilterableClubsGridTests : BunitContext
 
         _mockClubJoinRequestService
             .CancelJoinRequestAsync(Arg.Any<CancellationToken>())
-            .Returns(new Error());
+            .Returns(new ServiceResult<Success>(ServiceProblem.ServerError()));
 
         cut.Find("button.btn-outline-danger").Click();
 
@@ -581,7 +581,7 @@ public sealed class FilterableClubsGridTests : BunitContext
         var clubs = CreateTestClubs(1);
         var cut = RenderGrid(clubs: clubs);
 
-        var tcs = new TaskCompletionSource<OneOf.OneOf<Success, NotFound, Conflict, Unauthorized, Error>>();
+        var tcs = new TaskCompletionSource<ServiceResult<Success>>();
         _mockClubJoinRequestService
             .CreateJoinRequestAsync(1, Arg.Any<CancellationToken>())
             .Returns(tcs.Task);
@@ -604,7 +604,7 @@ public sealed class FilterableClubsGridTests : BunitContext
         });
 
         // Cleanup
-        tcs.SetResult(new Success());
+        tcs.SetResult(new ServiceResult<Success>(new Success()));
         await clickTask;
     }
 
@@ -616,7 +616,7 @@ public sealed class FilterableClubsGridTests : BunitContext
         var pendingRequest = new ClubJoinRequestDto(1, 1, 100, RequestStatus.Pending);
         var cut = RenderGrid(clubs: clubs, currentJoinRequest: pendingRequest);
 
-        var tcs = new TaskCompletionSource<OneOf.OneOf<Success, NotFound, Unauthorized, Error>>();
+        var tcs = new TaskCompletionSource<ServiceResult<Success>>();
         _mockClubJoinRequestService
             .CancelJoinRequestAsync(Arg.Any<CancellationToken>())
             .Returns(tcs.Task);
@@ -636,7 +636,7 @@ public sealed class FilterableClubsGridTests : BunitContext
         });
 
         // Cleanup
-        tcs.SetResult(new Success());
+        tcs.SetResult(new ServiceResult<Success>(new Success()));
         await clickTask;
     }
 

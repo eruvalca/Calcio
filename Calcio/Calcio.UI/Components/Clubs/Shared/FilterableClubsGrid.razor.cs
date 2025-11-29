@@ -1,6 +1,7 @@
 using Calcio.Shared.DTOs.ClubJoinRequests;
 using Calcio.Shared.DTOs.Clubs;
 using Calcio.Shared.Enums;
+using Calcio.Shared.Results;
 using Calcio.Shared.Services.ClubJoinRequests;
 
 using Microsoft.AspNetCore.Authorization;
@@ -72,24 +73,15 @@ public partial class FilterableClubsGrid(
                     IsProcessing = false;
                     navigationManager.Refresh();
                 },
-                notFound =>
+                problem =>
                 {
-                    ErrorMessage = "The club could not be found.";
-                    IsProcessing = false;
-                },
-                conflict =>
-                {
-                    ErrorMessage = "You already have a pending request to join a club.";
-                    IsProcessing = false;
-                },
-                unauthorized =>
-                {
-                    ErrorMessage = "You must be logged in to request to join a club.";
-                    IsProcessing = false;
-                },
-                error =>
-                {
-                    ErrorMessage = "An unexpected error occurred. Please try again.";
+                    ErrorMessage = problem.Kind switch
+                    {
+                        ServiceProblemKind.NotFound => "The club could not be found.",
+                        ServiceProblemKind.Conflict => "You already have a pending request to join a club.",
+                        ServiceProblemKind.Forbidden => "You are not authorized to request to join this club.",
+                        _ => problem.Detail ?? "An unexpected error occurred. Please try again."
+                    };
                     IsProcessing = false;
                 });
         }
@@ -123,19 +115,14 @@ public partial class FilterableClubsGrid(
                     IsProcessing = false;
                     navigationManager.Refresh();
                 },
-                notFound =>
+                problem =>
                 {
-                    ErrorMessage = "No pending request found to cancel.";
-                    IsProcessing = false;
-                },
-                unauthorized =>
-                {
-                    ErrorMessage = "You must be logged in to cancel a request.";
-                    IsProcessing = false;
-                },
-                error =>
-                {
-                    ErrorMessage = "An unexpected error occurred. Please try again.";
+                    ErrorMessage = problem.Kind switch
+                    {
+                        ServiceProblemKind.NotFound => "No pending request found to cancel.",
+                        ServiceProblemKind.Forbidden => "You are not authorized to cancel this request.",
+                        _ => problem.Detail ?? "An unexpected error occurred. Please try again."
+                    };
                     IsProcessing = false;
                 });
         }

@@ -5,8 +5,6 @@ using Calcio.Client.Services.CalcioUsers;
 using Calcio.Shared.DTOs.CalcioUsers;
 using Calcio.Shared.Results;
 
-using OneOf.Types;
-
 using RichardSzalay.MockHttp;
 
 using Shouldly;
@@ -43,8 +41,8 @@ public class CalcioUsersServiceTests
         var result = await service.GetClubMembersAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var list = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var list = result.Value;
         list.Count.ShouldBe(2);
         list[0].FullName.ShouldBe("John Admin");
         list[0].IsClubAdmin.ShouldBeTrue();
@@ -71,19 +69,19 @@ public class CalcioUsersServiceTests
         var result = await service.GetClubMembersAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        result.AsT0.ShouldBeEmpty();
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeEmpty();
     }
 
     [Fact]
-    public async Task GetClubMembersAsync_WhenUnauthorized_ReturnsUnauthorized()
+    public async Task GetClubMembersAsync_WhenForbidden_ReturnsForbiddenProblem()
     {
         // Arrange
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/members")
-            .Respond(HttpStatusCode.Unauthorized);
+            .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
@@ -94,12 +92,12 @@ public class CalcioUsersServiceTests
         var result = await service.GetClubMembersAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT1.ShouldBeTrue();
-        result.AsT1.ShouldBeOfType<Unauthorized>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
 
     [Fact]
-    public async Task GetClubMembersAsync_WhenServerError_ReturnsError()
+    public async Task GetClubMembersAsync_WhenServerError_ReturnsServerErrorProblem()
     {
         // Arrange
         var clubId = 10L;
@@ -117,8 +115,8 @@ public class CalcioUsersServiceTests
         var result = await service.GetClubMembersAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT2.ShouldBeTrue();
-        result.AsT2.ShouldBeOfType<Error>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.ServerError);
     }
 
     #endregion
@@ -145,12 +143,11 @@ public class CalcioUsersServiceTests
         var result = await service.RemoveClubMemberAsync(clubId, userId, CancellationToken.None);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        result.AsT0.ShouldBeOfType<Success>();
+        result.IsSuccess.ShouldBeTrue();
     }
 
     [Fact]
-    public async Task RemoveClubMemberAsync_WhenNotFound_ReturnsNotFound()
+    public async Task RemoveClubMemberAsync_WhenNotFound_ReturnsNotFoundProblem()
     {
         // Arrange
         var clubId = 10L;
@@ -169,12 +166,12 @@ public class CalcioUsersServiceTests
         var result = await service.RemoveClubMemberAsync(clubId, userId, CancellationToken.None);
 
         // Assert
-        result.IsT1.ShouldBeTrue();
-        result.AsT1.ShouldBeOfType<NotFound>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
 
     [Fact]
-    public async Task RemoveClubMemberAsync_WhenUnauthorized_ReturnsUnauthorized()
+    public async Task RemoveClubMemberAsync_WhenForbidden_ReturnsForbiddenProblem()
     {
         // Arrange
         var clubId = 10L;
@@ -182,7 +179,7 @@ public class CalcioUsersServiceTests
 
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/api/clubs/{clubId}/members/{userId}")
-            .Respond(HttpStatusCode.Unauthorized);
+            .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
@@ -193,12 +190,12 @@ public class CalcioUsersServiceTests
         var result = await service.RemoveClubMemberAsync(clubId, userId, CancellationToken.None);
 
         // Assert
-        result.IsT2.ShouldBeTrue();
-        result.AsT2.ShouldBeOfType<Unauthorized>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
 
     [Fact]
-    public async Task RemoveClubMemberAsync_WhenServerError_ReturnsError()
+    public async Task RemoveClubMemberAsync_WhenServerError_ReturnsServerErrorProblem()
     {
         // Arrange
         var clubId = 10L;
@@ -217,8 +214,8 @@ public class CalcioUsersServiceTests
         var result = await service.RemoveClubMemberAsync(clubId, userId, CancellationToken.None);
 
         // Assert
-        result.IsT3.ShouldBeTrue();
-        result.AsT3.ShouldBeOfType<Error>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.ServerError);
     }
 
     #endregion

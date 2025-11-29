@@ -1,4 +1,5 @@
 using Calcio.Shared.DTOs.Seasons;
+using Calcio.Shared.Results;
 using Calcio.Shared.Services.Seasons;
 
 using Microsoft.AspNetCore.Authorization;
@@ -34,14 +35,13 @@ public partial class SeasonsGrid(ISeasonsService seasonService)
                 Seasons = seasons;
                 IsLoading = false;
             },
-            unauthorized =>
+            problem =>
             {
-                ErrorMessage = "You are not authorized to view seasons.";
-                IsLoading = false;
-            },
-            error =>
-            {
-                ErrorMessage = "An unexpected error occurred while loading seasons.";
+                ErrorMessage = problem.Kind switch
+                {
+                    ServiceProblemKind.Forbidden => "You are not authorized to view seasons.",
+                    _ => problem.Detail ?? "An unexpected error occurred while loading seasons."
+                };
                 IsLoading = false;
             });
     }

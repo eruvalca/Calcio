@@ -8,8 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using OneOf.Types;
-
 using Shouldly;
 
 namespace Calcio.IntegrationTests.Services.Teams;
@@ -35,15 +33,15 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
         var result = await service.GetTeamsAsync(club.ClubId, cancellationToken);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var teams = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var teams = result.Value;
         teams.ShouldNotBeEmpty();
         teams.ShouldAllBe(t => t.TeamId > 0);
         teams.ShouldAllBe(t => !string.IsNullOrEmpty(t.Name));
     }
 
     [Fact]
-    public async Task GetTeamsAsync_WhenUserIsNotMember_ReturnsUnauthorized()
+    public async Task GetTeamsAsync_WhenUserIsNotMember_ReturnsEmptyList()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -62,9 +60,9 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
         // Act
         var result = await service.GetTeamsAsync(otherClub.ClubId, cancellationToken);
 
-        // Assert
-        result.IsT1.ShouldBeTrue();
-        result.AsT1.ShouldBeOfType<Unauthorized>();
+        // Assert - Global query filters return empty result for clubs user doesn't belong to
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeEmpty();
     }
 
     [Fact]
@@ -84,8 +82,8 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
         var result = await service.GetTeamsAsync(club.ClubId, cancellationToken);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var teams = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var teams = result.Value;
 
         if (teams.Count > 1)
         {
@@ -120,8 +118,8 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
         var result = await service.GetTeamsAsync(club.ClubId, cancellationToken);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var teams = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var teams = result.Value;
         teams.Count.ShouldBe(expectedCount);
     }
 
@@ -145,8 +143,8 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
         var result = await service.GetTeamsAsync(club.ClubId, cancellationToken);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var teams = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var teams = result.Value;
         var actualTeam = teams.FirstOrDefault(t => t.TeamId == expectedTeam.TeamId);
 
         actualTeam.ShouldNotBeNull();
@@ -155,7 +153,7 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
     }
 
     [Fact]
-    public async Task GetTeamsAsync_WhenClubDoesNotExist_ReturnsUnauthorized()
+    public async Task GetTeamsAsync_WhenClubDoesNotExist_ReturnsEmptyList()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -167,9 +165,9 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
         // Act
         var result = await service.GetTeamsAsync(999999, cancellationToken);
 
-        // Assert
-        result.IsT1.ShouldBeTrue();
-        result.AsT1.ShouldBeOfType<Unauthorized>();
+        // Assert - Global query filters return empty result for non-existent clubs
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeEmpty();
     }
 
     #endregion

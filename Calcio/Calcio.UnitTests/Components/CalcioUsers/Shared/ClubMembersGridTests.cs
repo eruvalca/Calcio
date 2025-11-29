@@ -74,7 +74,7 @@ public sealed class ClubMembersGridTests : BunitContext
     public void WhenLoading_ShouldDisplaySpinner()
     {
         // Arrange - Setup mock to never complete
-        var tcs = new TaskCompletionSource<OneOf.OneOf<List<ClubMemberDto>, Unauthorized, Error>>();
+        var tcs = new TaskCompletionSource<ServiceResult<List<ClubMemberDto>>>();
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
             .Returns(tcs.Task);
@@ -97,7 +97,7 @@ public sealed class ClubMembersGridTests : BunitContext
         // Arrange
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new List<ClubMemberDto>());
+            .Returns(new ServiceResult<List<ClubMemberDto>>(new List<ClubMemberDto>()));
 
         // Act
         var cut = RenderGrid();
@@ -117,7 +117,7 @@ public sealed class ClubMembersGridTests : BunitContext
         var members = CreateTestMembers(2);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         // Act
         var cut = RenderGrid();
@@ -143,7 +143,7 @@ public sealed class ClubMembersGridTests : BunitContext
         var members = CreateTestMembers(1);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         // Act
         var cut = RenderGrid();
@@ -166,7 +166,7 @@ public sealed class ClubMembersGridTests : BunitContext
         var members = CreateTestMembers(1);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         // Act
         var cut = RenderGrid();
@@ -185,12 +185,12 @@ public sealed class ClubMembersGridTests : BunitContext
     #region Error State Tests
 
     [Fact]
-    public void WhenLoadReturnsUnauthorized_ShouldDisplayErrorMessage()
+    public void WhenLoadReturnsForbidden_ShouldDisplayErrorMessage()
     {
         // Arrange
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new Unauthorized());
+            .Returns(new ServiceResult<List<ClubMemberDto>>(ServiceProblem.Forbidden()));
 
         // Act
         var cut = RenderGrid();
@@ -204,12 +204,12 @@ public sealed class ClubMembersGridTests : BunitContext
     }
 
     [Fact]
-    public void WhenLoadReturnsError_ShouldDisplayErrorMessage()
+    public void WhenLoadReturnsServerError_ShouldDisplayErrorMessage()
     {
         // Arrange
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new Error());
+            .Returns(new ServiceResult<List<ClubMemberDto>>(ServiceProblem.ServerError()));
 
         // Act
         var cut = RenderGrid();
@@ -233,7 +233,7 @@ public sealed class ClubMembersGridTests : BunitContext
         var members = CreateTestMembers(1);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         var cut = RenderGrid();
 
@@ -256,7 +256,7 @@ public sealed class ClubMembersGridTests : BunitContext
         var members = CreateTestMembers(1);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         var cut = RenderGrid();
 
@@ -278,7 +278,7 @@ public sealed class ClubMembersGridTests : BunitContext
         var members = CreateTestMembers(1);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         var cut = RenderGrid();
 
@@ -300,11 +300,11 @@ public sealed class ClubMembersGridTests : BunitContext
         var members = CreateTestMembers(1);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         _mockCalcioUsersService
             .RemoveClubMemberAsync(100, 101, Arg.Any<CancellationToken>())
-            .Returns(new Success());
+            .Returns(new ServiceResult<Success>(new Success()));
 
         var cut = RenderGrid();
 
@@ -327,11 +327,11 @@ public sealed class ClubMembersGridTests : BunitContext
         var members = CreateTestMembers(2);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         _mockCalcioUsersService
             .RemoveClubMemberAsync(100, 101, Arg.Any<CancellationToken>())
-            .Returns(new Success());
+            .Returns(new ServiceResult<Success>(new Success()));
 
         var cut = RenderGrid();
 
@@ -359,11 +359,11 @@ public sealed class ClubMembersGridTests : BunitContext
         var members = CreateTestMembers(1);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         _mockCalcioUsersService
             .RemoveClubMemberAsync(100, 101, Arg.Any<CancellationToken>())
-            .Returns(new NotFound());
+            .Returns(new ServiceResult<Success>(ServiceProblem.NotFound()));
 
         var cut = RenderGrid();
 
@@ -383,17 +383,17 @@ public sealed class ClubMembersGridTests : BunitContext
     }
 
     [Fact]
-    public async Task WhenRemoveReturnsUnauthorized_ShouldDisplayError()
+    public async Task WhenRemoveReturnsForbidden_ShouldDisplayError()
     {
         // Arrange
         var members = CreateTestMembers(1);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         _mockCalcioUsersService
             .RemoveClubMemberAsync(100, 101, Arg.Any<CancellationToken>())
-            .Returns(new Unauthorized());
+            .Returns(new ServiceResult<Success>(ServiceProblem.Forbidden()));
 
         var cut = RenderGrid();
 
@@ -413,17 +413,17 @@ public sealed class ClubMembersGridTests : BunitContext
     }
 
     [Fact]
-    public async Task WhenRemoveReturnsError_ShouldDisplayGenericError()
+    public async Task WhenRemoveReturnsServerError_ShouldDisplayGenericError()
     {
         // Arrange
         var members = CreateTestMembers(1);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         _mockCalcioUsersService
             .RemoveClubMemberAsync(100, 101, Arg.Any<CancellationToken>())
-            .Returns(new Error());
+            .Returns(new ServiceResult<Success>(ServiceProblem.ServerError()));
 
         var cut = RenderGrid();
 
@@ -453,7 +453,7 @@ public sealed class ClubMembersGridTests : BunitContext
         var members = CreateTestMembers(3);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         // Act
         var cut = RenderGrid();
@@ -473,7 +473,7 @@ public sealed class ClubMembersGridTests : BunitContext
         var members = CreateTestMembers(3);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         var cut = RenderGrid();
 
@@ -502,7 +502,7 @@ public sealed class ClubMembersGridTests : BunitContext
         var members = CreateTestMembers(3);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         var cut = RenderGrid();
 
@@ -530,7 +530,7 @@ public sealed class ClubMembersGridTests : BunitContext
         var members = CreateTestMembers(3);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         var cut = RenderGrid();
 
@@ -556,7 +556,7 @@ public sealed class ClubMembersGridTests : BunitContext
         var members = CreateTestMembers(2);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         var cut = RenderGrid();
 
@@ -582,7 +582,7 @@ public sealed class ClubMembersGridTests : BunitContext
         var members = CreateTestMembers(2);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         var cut = RenderGrid();
 
@@ -607,7 +607,7 @@ public sealed class ClubMembersGridTests : BunitContext
         var members = CreateTestMembers(3);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         var cut = RenderGrid();
 
@@ -636,7 +636,7 @@ public sealed class ClubMembersGridTests : BunitContext
         var members = CreateTestMembers(3);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         var cut = RenderGrid();
 
@@ -665,9 +665,9 @@ public sealed class ClubMembersGridTests : BunitContext
         var members = CreateTestMembers(1);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
-        var tcs = new TaskCompletionSource<OneOf.OneOf<Success, NotFound, Unauthorized, Error>>();
+        var tcs = new TaskCompletionSource<ServiceResult<Success>>();
         _mockCalcioUsersService
             .RemoveClubMemberAsync(100, 101, Arg.Any<CancellationToken>())
             .Returns(tcs.Task);
@@ -689,7 +689,7 @@ public sealed class ClubMembersGridTests : BunitContext
         });
 
         // Cleanup
-        tcs.SetResult(new Success());
+        tcs.SetResult(new ServiceResult<Success>(new Success()));
         await clickTask;
     }
 
@@ -700,9 +700,9 @@ public sealed class ClubMembersGridTests : BunitContext
         var members = CreateTestMembers(1);
         _mockCalcioUsersService
             .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(members);
+            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
-        var tcs = new TaskCompletionSource<OneOf.OneOf<Success, NotFound, Unauthorized, Error>>();
+        var tcs = new TaskCompletionSource<ServiceResult<Success>>();
         _mockCalcioUsersService
             .RemoveClubMemberAsync(100, 101, Arg.Any<CancellationToken>())
             .Returns(tcs.Task);
@@ -723,7 +723,7 @@ public sealed class ClubMembersGridTests : BunitContext
         });
 
         // Cleanup
-        tcs.SetResult(new Success());
+        tcs.SetResult(new ServiceResult<Success>(new Success()));
         await clickTask;
     }
 

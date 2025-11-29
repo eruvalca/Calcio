@@ -5,35 +5,45 @@ using Calcio.Shared.DTOs.CalcioUsers;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.CalcioUsers;
 
-using OneOf;
 using OneOf.Types;
 
 namespace Calcio.Client.Services.CalcioUsers;
 
 public class CalcioUsersService(HttpClient httpClient) : ICalcioUsersService
 {
-    public async Task<OneOf<List<ClubMemberDto>, Unauthorized, Error>> GetClubMembersAsync(long clubId, CancellationToken cancellationToken)
+    public async Task<ServiceResult<List<ClubMemberDto>>> GetClubMembersAsync(long clubId, CancellationToken cancellationToken)
     {
         var response = await httpClient.GetAsync($"api/clubs/{clubId}/members", cancellationToken);
 
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadFromJsonAsync<List<ClubMemberDto>>(cancellationToken) ?? [];
+        }
+
         return response.StatusCode switch
         {
-            HttpStatusCode.OK => await response.Content.ReadFromJsonAsync<List<ClubMemberDto>>(cancellationToken) ?? [],
-            HttpStatusCode.Unauthorized => new Unauthorized(),
-            _ => new Error()
+            HttpStatusCode.NotFound => ServiceProblem.NotFound(),
+            HttpStatusCode.Forbidden => ServiceProblem.Forbidden(),
+            HttpStatusCode.Conflict => ServiceProblem.Conflict(),
+            _ => ServiceProblem.ServerError()
         };
     }
 
-    public async Task<OneOf<Success, NotFound, Unauthorized, Error>> RemoveClubMemberAsync(long clubId, long userId, CancellationToken cancellationToken)
+    public async Task<ServiceResult<Success>> RemoveClubMemberAsync(long clubId, long userId, CancellationToken cancellationToken)
     {
         var response = await httpClient.DeleteAsync($"api/clubs/{clubId}/members/{userId}", cancellationToken);
 
+        if (response.IsSuccessStatusCode)
+        {
+            return new Success();
+        }
+
         return response.StatusCode switch
         {
-            HttpStatusCode.NoContent => new Success(),
-            HttpStatusCode.NotFound => new NotFound(),
-            HttpStatusCode.Unauthorized => new Unauthorized(),
-            _ => new Error()
+            HttpStatusCode.NotFound => ServiceProblem.NotFound(),
+            HttpStatusCode.Forbidden => ServiceProblem.Forbidden(),
+            HttpStatusCode.Conflict => ServiceProblem.Conflict(),
+            _ => ServiceProblem.ServerError()
         };
     }
 }

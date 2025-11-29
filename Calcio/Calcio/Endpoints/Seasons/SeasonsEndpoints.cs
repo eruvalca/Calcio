@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
+using Calcio.Endpoints.Extensions;
 using Calcio.Endpoints.Filters;
 using Calcio.Shared.DTOs.Seasons;
 using Calcio.Shared.Services.Seasons;
@@ -14,14 +15,17 @@ public static class SeasonsEndpoints
     {
         var group = endpoints.MapGroup("api/clubs/{clubId:long}/seasons")
             .RequireAuthorization()
-            .AddEndpointFilter<UnhandledExceptionFilter>();
+            .AddEndpointFilter<ClubMembershipFilter>()
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
 
         group.MapGet("", GetSeasons);
 
         return endpoints;
     }
 
-    private static async Task<Results<Ok<List<SeasonDto>>, UnauthorizedHttpResult, ProblemHttpResult>> GetSeasons(
+    private static async Task<Results<Ok<List<SeasonDto>>, ProblemHttpResult>> GetSeasons(
         [Required]
         [Range(1, long.MaxValue)]
         long clubId,
@@ -30,9 +34,6 @@ public static class SeasonsEndpoints
     {
         var result = await service.GetSeasonsAsync(clubId, cancellationToken);
 
-        return result.Match<Results<Ok<List<SeasonDto>>, UnauthorizedHttpResult, ProblemHttpResult>>(
-            seasons => TypedResults.Ok(seasons),
-            unauthorized => TypedResults.Unauthorized(),
-            error => TypedResults.Problem(statusCode: StatusCodes.Status500InternalServerError));
+        return result.ToHttpResult(TypedResults.Ok);
     }
 }

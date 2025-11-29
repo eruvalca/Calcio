@@ -6,8 +6,6 @@ using Calcio.Shared.DTOs.ClubJoinRequests;
 using Calcio.Shared.Enums;
 using Calcio.Shared.Results;
 
-using OneOf.Types;
-
 using RichardSzalay.MockHttp;
 
 using Shouldly;
@@ -39,8 +37,8 @@ public class ClubJoinRequestServiceTests
         var result = await service.GetRequestForCurrentUserAsync(CancellationToken.None);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var dto = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var dto = result.Value;
         dto.ClubJoinRequestId.ShouldBe(expectedDto.ClubJoinRequestId);
         dto.ClubId.ShouldBe(expectedDto.ClubId);
         dto.RequestingUserId.ShouldBe(expectedDto.RequestingUserId);
@@ -48,7 +46,7 @@ public class ClubJoinRequestServiceTests
     }
 
     [Fact]
-    public async Task GetRequestForCurrentUserAsync_WhenNotFound_ReturnsNotFound()
+    public async Task GetRequestForCurrentUserAsync_WhenNotFound_ReturnsNotFoundProblem()
     {
         // Arrange
         var mockHttp = new MockHttpMessageHandler();
@@ -64,17 +62,17 @@ public class ClubJoinRequestServiceTests
         var result = await service.GetRequestForCurrentUserAsync(CancellationToken.None);
 
         // Assert
-        result.IsT1.ShouldBeTrue();
-        result.AsT1.ShouldBeOfType<NotFound>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
 
     [Fact]
-    public async Task GetRequestForCurrentUserAsync_WhenUnauthorized_ReturnsUnauthorized()
+    public async Task GetRequestForCurrentUserAsync_WhenForbidden_ReturnsForbiddenProblem()
     {
         // Arrange
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/club-join-requests/current")
-            .Respond(HttpStatusCode.Unauthorized);
+            .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
@@ -85,12 +83,12 @@ public class ClubJoinRequestServiceTests
         var result = await service.GetRequestForCurrentUserAsync(CancellationToken.None);
 
         // Assert
-        result.IsT2.ShouldBeTrue();
-        result.AsT2.ShouldBeOfType<Unauthorized>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
 
     [Fact]
-    public async Task GetRequestForCurrentUserAsync_WhenServerError_ReturnsError()
+    public async Task GetRequestForCurrentUserAsync_WhenServerError_ReturnsServerErrorProblem()
     {
         // Arrange
         var mockHttp = new MockHttpMessageHandler();
@@ -106,8 +104,8 @@ public class ClubJoinRequestServiceTests
         var result = await service.GetRequestForCurrentUserAsync(CancellationToken.None);
 
         // Assert
-        result.IsT3.ShouldBeTrue();
-        result.AsT3.ShouldBeOfType<Error>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.ServerError);
     }
 
     #endregion
@@ -133,12 +131,11 @@ public class ClubJoinRequestServiceTests
         var result = await service.CreateJoinRequestAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        result.AsT0.ShouldBeOfType<Success>();
+        result.IsSuccess.ShouldBeTrue();
     }
 
     [Fact]
-    public async Task CreateJoinRequestAsync_WhenClubNotFound_ReturnsNotFound()
+    public async Task CreateJoinRequestAsync_WhenClubNotFound_ReturnsNotFoundProblem()
     {
         // Arrange
         var clubId = 999L;
@@ -156,12 +153,12 @@ public class ClubJoinRequestServiceTests
         var result = await service.CreateJoinRequestAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT1.ShouldBeTrue();
-        result.AsT1.ShouldBeOfType<NotFound>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
 
     [Fact]
-    public async Task CreateJoinRequestAsync_WhenConflict_ReturnsConflict()
+    public async Task CreateJoinRequestAsync_WhenConflict_ReturnsConflictProblem()
     {
         // Arrange
         var clubId = 10L;
@@ -179,19 +176,19 @@ public class ClubJoinRequestServiceTests
         var result = await service.CreateJoinRequestAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT2.ShouldBeTrue();
-        result.AsT2.ShouldBeOfType<Conflict>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Conflict);
     }
 
     [Fact]
-    public async Task CreateJoinRequestAsync_WhenUnauthorized_ReturnsUnauthorized()
+    public async Task CreateJoinRequestAsync_WhenForbidden_ReturnsForbiddenProblem()
     {
         // Arrange
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/club-join-requests/{clubId}")
-            .Respond(HttpStatusCode.Unauthorized);
+            .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
@@ -202,8 +199,8 @@ public class ClubJoinRequestServiceTests
         var result = await service.CreateJoinRequestAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT3.ShouldBeTrue();
-        result.AsT3.ShouldBeOfType<Unauthorized>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
 
     #endregion
@@ -227,12 +224,11 @@ public class ClubJoinRequestServiceTests
         var result = await service.CancelJoinRequestAsync(CancellationToken.None);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        result.AsT0.ShouldBeOfType<Success>();
+        result.IsSuccess.ShouldBeTrue();
     }
 
     [Fact]
-    public async Task CancelJoinRequestAsync_WhenNotFound_ReturnsNotFound()
+    public async Task CancelJoinRequestAsync_WhenNotFound_ReturnsNotFoundProblem()
     {
         // Arrange
         var mockHttp = new MockHttpMessageHandler();
@@ -248,17 +244,17 @@ public class ClubJoinRequestServiceTests
         var result = await service.CancelJoinRequestAsync(CancellationToken.None);
 
         // Assert
-        result.IsT1.ShouldBeTrue();
-        result.AsT1.ShouldBeOfType<NotFound>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
 
     [Fact]
-    public async Task CancelJoinRequestAsync_WhenUnauthorized_ReturnsUnauthorized()
+    public async Task CancelJoinRequestAsync_WhenForbidden_ReturnsForbiddenProblem()
     {
         // Arrange
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/api/club-join-requests/current")
-            .Respond(HttpStatusCode.Unauthorized);
+            .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
@@ -269,8 +265,8 @@ public class ClubJoinRequestServiceTests
         var result = await service.CancelJoinRequestAsync(CancellationToken.None);
 
         // Assert
-        result.IsT2.ShouldBeTrue();
-        result.AsT2.ShouldBeOfType<Unauthorized>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
 
     #endregion
@@ -301,8 +297,8 @@ public class ClubJoinRequestServiceTests
         var result = await service.GetPendingRequestsForClubAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var list = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var list = result.Value;
         list.Count.ShouldBe(2);
         list[0].RequestingUserFullName.ShouldBe("John Doe");
         list[1].RequestingUserFullName.ShouldBe("Jane Doe");
@@ -327,19 +323,19 @@ public class ClubJoinRequestServiceTests
         var result = await service.GetPendingRequestsForClubAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        result.AsT0.ShouldBeEmpty();
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeEmpty();
     }
 
     [Fact]
-    public async Task GetPendingRequestsForClubAsync_WhenUnauthorized_ReturnsUnauthorized()
+    public async Task GetPendingRequestsForClubAsync_WhenForbidden_ReturnsForbiddenProblem()
     {
         // Arrange
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/join-requests")
-            .Respond(HttpStatusCode.Unauthorized);
+            .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
@@ -350,12 +346,12 @@ public class ClubJoinRequestServiceTests
         var result = await service.GetPendingRequestsForClubAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT1.ShouldBeTrue();
-        result.AsT1.ShouldBeOfType<Unauthorized>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
 
     [Fact]
-    public async Task GetPendingRequestsForClubAsync_WhenServerError_ReturnsError()
+    public async Task GetPendingRequestsForClubAsync_WhenServerError_ReturnsServerErrorProblem()
     {
         // Arrange
         var clubId = 10L;
@@ -373,8 +369,8 @@ public class ClubJoinRequestServiceTests
         var result = await service.GetPendingRequestsForClubAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT2.ShouldBeTrue();
-        result.AsT2.ShouldBeOfType<Error>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.ServerError);
     }
 
     #endregion
@@ -401,12 +397,11 @@ public class ClubJoinRequestServiceTests
         var result = await service.ApproveJoinRequestAsync(clubId, requestId, CancellationToken.None);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        result.AsT0.ShouldBeOfType<Success>();
+        result.IsSuccess.ShouldBeTrue();
     }
 
     [Fact]
-    public async Task ApproveJoinRequestAsync_WhenNotFound_ReturnsNotFound()
+    public async Task ApproveJoinRequestAsync_WhenNotFound_ReturnsNotFoundProblem()
     {
         // Arrange
         var clubId = 10L;
@@ -425,12 +420,12 @@ public class ClubJoinRequestServiceTests
         var result = await service.ApproveJoinRequestAsync(clubId, requestId, CancellationToken.None);
 
         // Assert
-        result.IsT1.ShouldBeTrue();
-        result.AsT1.ShouldBeOfType<NotFound>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
 
     [Fact]
-    public async Task ApproveJoinRequestAsync_WhenUnauthorized_ReturnsUnauthorized()
+    public async Task ApproveJoinRequestAsync_WhenForbidden_ReturnsForbiddenProblem()
     {
         // Arrange
         var clubId = 10L;
@@ -438,7 +433,7 @@ public class ClubJoinRequestServiceTests
 
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/join-requests/{requestId}/approve")
-            .Respond(HttpStatusCode.Unauthorized);
+            .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
@@ -449,8 +444,8 @@ public class ClubJoinRequestServiceTests
         var result = await service.ApproveJoinRequestAsync(clubId, requestId, CancellationToken.None);
 
         // Assert
-        result.IsT2.ShouldBeTrue();
-        result.AsT2.ShouldBeOfType<Unauthorized>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
 
     #endregion
@@ -477,12 +472,11 @@ public class ClubJoinRequestServiceTests
         var result = await service.RejectJoinRequestAsync(clubId, requestId, CancellationToken.None);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        result.AsT0.ShouldBeOfType<Success>();
+        result.IsSuccess.ShouldBeTrue();
     }
 
     [Fact]
-    public async Task RejectJoinRequestAsync_WhenNotFound_ReturnsNotFound()
+    public async Task RejectJoinRequestAsync_WhenNotFound_ReturnsNotFoundProblem()
     {
         // Arrange
         var clubId = 10L;
@@ -501,12 +495,12 @@ public class ClubJoinRequestServiceTests
         var result = await service.RejectJoinRequestAsync(clubId, requestId, CancellationToken.None);
 
         // Assert
-        result.IsT1.ShouldBeTrue();
-        result.AsT1.ShouldBeOfType<NotFound>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
 
     [Fact]
-    public async Task RejectJoinRequestAsync_WhenUnauthorized_ReturnsUnauthorized()
+    public async Task RejectJoinRequestAsync_WhenForbidden_ReturnsForbiddenProblem()
     {
         // Arrange
         var clubId = 10L;
@@ -514,7 +508,7 @@ public class ClubJoinRequestServiceTests
 
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/join-requests/{requestId}/reject")
-            .Respond(HttpStatusCode.Unauthorized);
+            .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
@@ -525,12 +519,12 @@ public class ClubJoinRequestServiceTests
         var result = await service.RejectJoinRequestAsync(clubId, requestId, CancellationToken.None);
 
         // Assert
-        result.IsT2.ShouldBeTrue();
-        result.AsT2.ShouldBeOfType<Unauthorized>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
 
     [Fact]
-    public async Task RejectJoinRequestAsync_WhenServerError_ReturnsError()
+    public async Task RejectJoinRequestAsync_WhenServerError_ReturnsServerErrorProblem()
     {
         // Arrange
         var clubId = 10L;
@@ -549,8 +543,8 @@ public class ClubJoinRequestServiceTests
         var result = await service.RejectJoinRequestAsync(clubId, requestId, CancellationToken.None);
 
         // Assert
-        result.IsT3.ShouldBeTrue();
-        result.AsT3.ShouldBeOfType<Error>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.ServerError);
     }
 
     #endregion

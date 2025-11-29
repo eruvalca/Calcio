@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
+using Calcio.Endpoints.Extensions;
 using Calcio.Endpoints.Filters;
 using Calcio.Shared.DTOs.CalcioUsers;
 using Calcio.Shared.Services.CalcioUsers;
@@ -14,15 +15,19 @@ public static class CalcioUsersEndpoints
     {
         var group = endpoints.MapGroup("api/clubs/{clubId:long}/members")
             .RequireAuthorization(policy => policy.RequireRole("ClubAdmin"))
-            .AddEndpointFilter<UnhandledExceptionFilter>();
+            .AddEndpointFilter<ClubMembershipFilter>()
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
 
         group.MapGet("", GetClubMembers);
-        group.MapDelete("{userId:long}", RemoveClubMember);
+        group.MapDelete("{userId:long}", RemoveClubMember)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return endpoints;
     }
 
-    private static async Task<Results<Ok<List<ClubMemberDto>>, UnauthorizedHttpResult, ProblemHttpResult>> GetClubMembers(
+    private static async Task<Results<Ok<List<ClubMemberDto>>, ProblemHttpResult>> GetClubMembers(
         [Required]
         [Range(1, long.MaxValue)]
         long clubId,
@@ -31,13 +36,10 @@ public static class CalcioUsersEndpoints
     {
         var result = await service.GetClubMembersAsync(clubId, cancellationToken);
 
-        return result.Match<Results<Ok<List<ClubMemberDto>>, UnauthorizedHttpResult, ProblemHttpResult>>(
-            members => TypedResults.Ok(members),
-            unauthorized => TypedResults.Unauthorized(),
-            error => TypedResults.Problem(statusCode: StatusCodes.Status500InternalServerError));
+        return result.ToHttpResult(TypedResults.Ok);
     }
 
-    private static async Task<Results<NoContent, NotFound, UnauthorizedHttpResult, ProblemHttpResult>> RemoveClubMember(
+    private static async Task<Results<NoContent, ProblemHttpResult>> RemoveClubMember(
         [Required]
         [Range(1, long.MaxValue)]
         long clubId,
@@ -49,10 +51,6 @@ public static class CalcioUsersEndpoints
     {
         var result = await service.RemoveClubMemberAsync(clubId, userId, cancellationToken);
 
-        return result.Match<Results<NoContent, NotFound, UnauthorizedHttpResult, ProblemHttpResult>>(
-            success => TypedResults.NoContent(),
-            notFound => TypedResults.NotFound(),
-            unauthorized => TypedResults.Unauthorized(),
-            error => TypedResults.Problem(statusCode: StatusCodes.Status500InternalServerError));
+        return result.ToHttpResult(TypedResults.NoContent());
     }
 }

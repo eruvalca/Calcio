@@ -33,8 +33,8 @@ public class PlayersServiceTests(CustomApplicationFactory factory) : BaseDbConte
         var result = await service.GetClubPlayersAsync(club.ClubId, cancellationToken);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var players = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var players = result.Value;
         players.ShouldNotBeEmpty();
         players.All(p => p.PlayerId > 0).ShouldBeTrue();
         players.All(p => !string.IsNullOrEmpty(p.FirstName)).ShouldBeTrue();
@@ -43,7 +43,7 @@ public class PlayersServiceTests(CustomApplicationFactory factory) : BaseDbConte
     }
 
     [Fact]
-    public async Task GetClubPlayersAsync_WhenUserIsNotMember_ReturnsUnauthorized()
+    public async Task GetClubPlayersAsync_WhenUserIsNotMember_ReturnsEmptyList()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -62,9 +62,9 @@ public class PlayersServiceTests(CustomApplicationFactory factory) : BaseDbConte
         // Act
         var result = await service.GetClubPlayersAsync(otherClub.ClubId, cancellationToken);
 
-        // Assert
-        result.IsT1.ShouldBeTrue();
-        result.AsT1.ShouldBeOfType<Unauthorized>();
+        // Assert - Global query filters return empty result for clubs user doesn't belong to
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeEmpty();
     }
 
     [Fact]
@@ -84,8 +84,8 @@ public class PlayersServiceTests(CustomApplicationFactory factory) : BaseDbConte
         var result = await service.GetClubPlayersAsync(club.ClubId, cancellationToken);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var players = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var players = result.Value;
 
         if (players.Count > 1)
         {
@@ -117,8 +117,8 @@ public class PlayersServiceTests(CustomApplicationFactory factory) : BaseDbConte
         var result = await service.GetClubPlayersAsync(club.ClubId, cancellationToken);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var players = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var players = result.Value;
 
         var player = players.FirstOrDefault(p => p.PlayerId == expectedPlayer.PlayerId);
         player.ShouldNotBeNull();
@@ -132,7 +132,7 @@ public class PlayersServiceTests(CustomApplicationFactory factory) : BaseDbConte
     }
 
     [Fact]
-    public async Task GetClubPlayersAsync_WhenClubDoesNotExist_ReturnsUnauthorized()
+    public async Task GetClubPlayersAsync_WhenClubDoesNotExist_ReturnsEmptyList()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -144,9 +144,9 @@ public class PlayersServiceTests(CustomApplicationFactory factory) : BaseDbConte
         // Act
         var result = await service.GetClubPlayersAsync(999999, cancellationToken);
 
-        // Assert
-        result.IsT1.ShouldBeTrue();
-        result.AsT1.ShouldBeOfType<Unauthorized>();
+        // Assert - Global query filters return empty result for non-existent clubs
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeEmpty();
     }
 
     [Fact]
@@ -166,8 +166,8 @@ public class PlayersServiceTests(CustomApplicationFactory factory) : BaseDbConte
         var result = await service.GetClubPlayersAsync(club.ClubId, cancellationToken);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var players = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var players = result.Value;
 
         // Verify all returned players belong to the specified club
         // The query filter ensures this, but we can verify via the database

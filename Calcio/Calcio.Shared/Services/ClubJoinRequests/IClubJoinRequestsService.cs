@@ -1,17 +1,16 @@
 using Calcio.Shared.DTOs.ClubJoinRequests;
 using Calcio.Shared.Results;
 
-using OneOf;
 using OneOf.Types;
 
 namespace Calcio.Shared.Services.ClubJoinRequests;
 
 public interface IClubJoinRequestsService
 {
-    Task<OneOf<ClubJoinRequestDto, NotFound, Unauthorized, Error>> GetRequestForCurrentUserAsync(CancellationToken cancellationToken);
-    Task<OneOf<Success, NotFound, Conflict, Unauthorized, Error>> CreateJoinRequestAsync(long clubId, CancellationToken cancellationToken);
-    Task<OneOf<Success, NotFound, Unauthorized, Error>> CancelJoinRequestAsync(CancellationToken cancellationToken);
-    Task<OneOf<List<ClubJoinRequestWithUserDto>, Unauthorized, Error>> GetPendingRequestsForClubAsync(long clubId, CancellationToken cancellationToken);
-    Task<OneOf<Success, NotFound, Unauthorized, Error>> ApproveJoinRequestAsync(long clubId, long requestId, CancellationToken cancellationToken);
-    Task<OneOf<Success, NotFound, Unauthorized, Error>> RejectJoinRequestAsync(long clubId, long requestId, CancellationToken cancellationToken);
+    Task<ServiceResult<ClubJoinRequestDto>> GetRequestForCurrentUserAsync(CancellationToken cancellationToken);
+    Task<ServiceResult<Success>> CreateJoinRequestAsync(long clubId, CancellationToken cancellationToken);
+    Task<ServiceResult<Success>> CancelJoinRequestAsync(CancellationToken cancellationToken);
+    Task<ServiceResult<List<ClubJoinRequestWithUserDto>>> GetPendingRequestsForClubAsync(long clubId, CancellationToken cancellationToken);
+    Task<ServiceResult<Success>> ApproveJoinRequestAsync(long clubId, long requestId, CancellationToken cancellationToken);
+    Task<ServiceResult<Success>> RejectJoinRequestAsync(long clubId, long requestId, CancellationToken cancellationToken);
 }

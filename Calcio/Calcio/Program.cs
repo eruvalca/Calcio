@@ -31,6 +31,8 @@ using Microsoft.OpenApi;
 
 using Scalar.AspNetCore;
 
+using System.Diagnostics;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
@@ -124,6 +126,18 @@ builder.Services.AddScoped<ITeamsService, TeamsService>();
 
 builder.Services.AddOpenApi(options => options.AddDocumentTransformer<CookieSecuritySchemeTransformer>());
 
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = context =>
+    {
+        var traceId = Activity.Current?.TraceId.ToString();
+        if (!string.IsNullOrEmpty(traceId))
+        {
+            context.ProblemDetails.Extensions["traceId"] = traceId;
+        }
+    };
+});
+
 builder.Services.AddValidation();
 
 var app = builder.Build();
@@ -145,7 +159,19 @@ else
     app.UseHsts();
 }
 
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+// For API routes, use ProblemDetails for error responses
+app.UseWhen(
+    context => context.Request.Path.StartsWithSegments("/api"),
+    appBuilder =>
+    {
+        appBuilder.UseExceptionHandler();
+        appBuilder.UseStatusCodePages();
+    });
+
+// For non-API routes, use the not-found page
+app.UseWhen(
+    context => !context.Request.Path.StartsWithSegments("/api"),
+    appBuilder => appBuilder.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true));
 app.UseHttpsRedirection();
 
 app.UseAntiforgery();

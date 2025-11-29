@@ -5,8 +5,6 @@ using Calcio.Client.Services.Seasons;
 using Calcio.Shared.DTOs.Seasons;
 using Calcio.Shared.Results;
 
-using OneOf.Types;
-
 using RichardSzalay.MockHttp;
 
 using Shouldly;
@@ -76,14 +74,14 @@ public class SeasonServiceTests
     }
 
     [Fact]
-    public async Task GetSeasonsAsync_WhenUnauthorized_ReturnsUnauthorized()
+    public async Task GetSeasonsAsync_WhenForbidden_ReturnsForbiddenProblem()
     {
         // Arrange
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/seasons")
-            .Respond(HttpStatusCode.Unauthorized);
+            .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
@@ -94,12 +92,12 @@ public class SeasonServiceTests
         var result = await service.GetSeasonsAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT1.ShouldBeTrue();
-        result.AsT1.ShouldBeOfType<Unauthorized>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
 
     [Fact]
-    public async Task GetSeasonsAsync_WhenServerError_ReturnsError()
+    public async Task GetSeasonsAsync_WhenServerError_ReturnsServerErrorProblem()
     {
         // Arrange
         var clubId = 10L;
@@ -117,8 +115,8 @@ public class SeasonServiceTests
         var result = await service.GetSeasonsAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT2.ShouldBeTrue();
-        result.AsT2.ShouldBeOfType<Error>();
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.ServerError);
     }
 
     [Fact]

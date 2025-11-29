@@ -1,4 +1,5 @@
 using Calcio.Shared.DTOs.ClubJoinRequests;
+using Calcio.Shared.Results;
 using Calcio.Shared.Services.ClubJoinRequests;
 
 using Microsoft.AspNetCore.Authorization;
@@ -56,19 +57,14 @@ public partial class ClubJoinRequestsGrid(
                     IsProcessing = false;
                     navigationManager.Refresh();
                 },
-                notFound =>
+                problem =>
                 {
-                    ErrorMessage = "The join request could not be found.";
-                    IsProcessing = false;
-                },
-                unauthorized =>
-                {
-                    ErrorMessage = "You are not authorized to approve this request.";
-                    IsProcessing = false;
-                },
-                error =>
-                {
-                    ErrorMessage = "An unexpected error occurred. Please try again.";
+                    ErrorMessage = problem.Kind switch
+                    {
+                        ServiceProblemKind.NotFound => "The join request could not be found.",
+                        ServiceProblemKind.Forbidden => "You are not authorized to approve this request.",
+                        _ => problem.Detail ?? "An unexpected error occurred. Please try again."
+                    };
                     IsProcessing = false;
                 });
         }
@@ -105,19 +101,14 @@ public partial class ClubJoinRequestsGrid(
                     IsProcessing = false;
                     navigationManager.Refresh();
                 },
-                notFound =>
+                problem =>
                 {
-                    ErrorMessage = "The join request could not be found.";
-                    IsProcessing = false;
-                },
-                unauthorized =>
-                {
-                    ErrorMessage = "You are not authorized to reject this request.";
-                    IsProcessing = false;
-                },
-                error =>
-                {
-                    ErrorMessage = "An unexpected error occurred. Please try again.";
+                    ErrorMessage = problem.Kind switch
+                    {
+                        ServiceProblemKind.NotFound => "The join request could not be found.",
+                        ServiceProblemKind.Forbidden => "You are not authorized to reject this request.",
+                        _ => problem.Detail ?? "An unexpected error occurred. Please try again."
+                    };
                     IsProcessing = false;
                 });
         }

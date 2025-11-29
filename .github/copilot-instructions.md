@@ -91,30 +91,47 @@
 
 ## Service Layer Patterns
 
+### ServiceResult & ServiceProblem
+
+- Use `ServiceResult<TSuccess>` (from `Calcio.Shared.Results`) as the return type for all service methods.
+- `ServiceResult<TSuccess>` is a discriminated union: either a success value or a `ServiceProblem`.
+- Use `ServiceProblem` static factory methods: `NotFound()`, `Forbidden()`, `Conflict()`, `BadRequest()`, `ServerError()`.
+- Check results with `.IsSuccess` / `.IsProblem` properties; access `.Value` or `.Problem` accordingly.
+- Use `.Match<TResult>()` in endpoints to convert to HTTP results; use `.Switch()` in components for side effects.
+- For void-like operations, use `ServiceResult<Success>` with `OneOf.Types.Success`.
+- 401 Unauthorized is handled at the middleware layer, not in service results.
+
 ### Server-side Services
 
 - Services requiring authenticated user context should inherit from `AuthenticatedServiceBase` to access `CurrentUserId`.
 - Make service classes `partial` when using source-generated logging.
+- Return `ServiceProblem.NotFound()` when entities are not found or hidden by global query filters.
+- Return `ServiceProblem.Conflict()` for business rule violations (e.g., duplicate requests).
 
 ### Client-side Services (Blazor WASM)
 
 - Implement shared service interfaces (from `Calcio.Shared`) using `HttpClient`.
-- Map HTTP status codes to `OneOf` result types using switch expressions.
+- Map HTTP status codes to `ServiceProblem` using switch expressions.
 - Register services via `AddHttpClient<TInterface, TImplementation>()` with base address.
-
-### OneOf Library Usage
-
-- Use `OneOf<T1, T2, ...>` for service method return types representing multiple outcomes.
-- Prefer built-in types from `OneOf.Types` (`Success`, `NotFound`, etc.); define custom types in `Calcio.Shared/Results/` only when needed.
-- Use `.Match<TResult>()` in endpoints to convert to HTTP results; use `.Switch()` in components for side effects.
+- Return `ServiceProblem.NotFound()` for 404, `ServiceProblem.Forbidden()` for 403, `ServiceProblem.Conflict()` for 409, `ServiceProblem.ServerError()` as fallback.
 
 ## Minimal API Endpoints
 
 - Place endpoints in `Endpoints/` folder, organized by feature.
-- Use `MapGroup()` with `.RequireAuthorization()` and `.AddEndpointFilter<UnhandledExceptionFilter>()`.
+- Use `MapGroup()` with `.RequireAuthorization()`.
 - Always use `TypedResults` (not `Results`) and declare explicit `Results<T1, T2, ...>` return types.
-- Always include `ProblemHttpResult` in return types to account for unhandled exceptions.
-- When `Conflict` is ambiguous, use alias: `using ConflictResult = Microsoft.AspNetCore.Http.HttpResults.Conflict;`.
+- Use `ProblemHttpResult` as the single error result type; all HTTP errors return RFC 7807 ProblemDetails.
+- Use `.ProducesProblem(StatusCodes.StatusXXX)` on route groups to document common error responses (401, 403, 500).
+- Use `.ProducesProblem()` on individual endpoints for endpoint-specific errors (404, 409).
+- Return errors via `TypedResults.Problem(statusCode: StatusCodes.StatusXXX)` for consistent ProblemDetails format.
+- Convert `ServiceResult<T>` to HTTP results using `.ToHttpResult()` extension methods (from `Calcio.Endpoints.Extensions`).
+- Use `ClubMembershipFilter` for endpoints requiring club membership validation.
+- API routes (`/api/*`) use ProblemDetails via `UseExceptionHandler()` and `UseStatusCodePages()`.
+- Non-API routes use `UseStatusCodePagesWithReExecute("/not-found")` for user-friendly error pages.
+
+## Endpoint Filters
+
+- `ClubMembershipFilter`: validates the user belongs to the club specified by `clubId` route parameter before the endpoint executes. Returns 403 Forbidden if unauthorized.
 
 ## DTOs & Extensions
 
@@ -134,3 +151,21 @@
 - Ensure that any new UI components or pages adhere to Bootstrap's grid system and component styles for consistency.
 - Ensure responsiveness across different device sizes.
 - Stock bootstrap components and styles should be used wherever possible to maintain a consistent look and feel and custom implementations or styling should be avoided unless absolutely necessary.
+
+## Testing
+
+### Unit Tests (Calcio.UnitTests)
+
+- Use bUnit for Blazor component tests with `BunitContext` base class.
+- Use NSubstitute for mocking dependencies.
+- Use Shouldly for assertions.
+- Use `RichardSzalay.MockHttp` for mocking HttpClient in client service tests.
+- Test `ServiceResult` outcomes with `.IsSuccess`, `.IsProblem`, `.Value`, and `.Problem.Kind`.
+
+### Integration Tests (Calcio.IntegrationTests)
+
+- Use `CustomApplicationFactory` for test fixture setup.
+- Inherit from `BaseDbContextTests` for database-dependent tests.
+- Use `SetCurrentUser(scope.ServiceProvider, userId)` to set test user context.
+- Test global query filter behavior: unauthorized access returns empty results, not errors.
+- Verify `ServiceProblemKind` values for error scenarios.

@@ -6,9 +6,6 @@ using Calcio.Shared.Services.Teams;
 
 using Microsoft.EntityFrameworkCore;
 
-using OneOf;
-using OneOf.Types;
-
 namespace Calcio.Services.Teams;
 
 public partial class TeamsService(
@@ -16,17 +13,10 @@ public partial class TeamsService(
     IHttpContextAccessor httpContextAccessor,
     ILogger<TeamsService> logger) : AuthenticatedServiceBase(httpContextAccessor), ITeamsService
 {
-    public async Task<OneOf<List<TeamDto>, Unauthorized, Error>> GetTeamsAsync(long clubId, CancellationToken cancellationToken)
+    public async Task<ServiceResult<List<TeamDto>>> GetTeamsAsync(long clubId, CancellationToken cancellationToken)
     {
+        // Club membership is validated by ClubMembershipFilter before this service is called.
         await using var dbContext = await readOnlyDbContextFactory.CreateDbContextAsync(cancellationToken);
-
-        var isClubMember = await dbContext.Clubs
-            .AnyAsync(c => c.ClubId == clubId, cancellationToken);
-
-        if (!isClubMember)
-        {
-            return new Unauthorized();
-        }
 
         var teams = await dbContext.Teams
             .Where(t => t.ClubId == clubId)
