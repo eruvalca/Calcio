@@ -1,10 +1,56 @@
 @using Calcio.Shared.DTOs.Teams
+@using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.QuickGrid
 
 <div class="card shadow mb-4">
-    <div class="card-header">
+    <div class="card-header d-flex justify-content-between align-items-center">
         <h6 class="mb-0">Teams</h6>
+        @if (!ShowCreateForm)
+        {
+            <button type="button" class="btn btn-sm btn-primary" @onclick="ToggleCreateForm">
+                <i class="bi bi-plus-lg me-1"></i>New Team
+            </button>
+        }
     </div>
+    @if (ShowCreateForm)
+    {
+        <div class="card-body border-bottom">
+            <EditForm Model="CreateInput" OnValidSubmit="HandleCreateTeam" FormName="createTeam">
+                <DataAnnotationsValidator />
+                @if (!string.IsNullOrEmpty(CreateErrorMessage))
+                {
+                    <div class="alert alert-danger py-2" role="alert">@CreateErrorMessage</div>
+                }
+                <div class="row g-3 align-items-end">
+                    <div class="col-12 col-md-5">
+                        <label for="teamName" class="form-label small mb-1">Team Name</label>
+                        <InputText @bind-Value="CreateInput.Name" id="teamName" class="form-control form-control-sm"
+                            placeholder="e.g., U12 Red" />
+                        <ValidationMessage For="() => CreateInput.Name" class="text-danger small" />
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label for="graduationYear" class="form-label small mb-1">Graduation Year</label>
+                        <InputNumber @bind-Value="CreateInput.GraduationYear" id="graduationYear" class="form-control form-control-sm"
+                            min="@CurrentYear" max="@MaxYear" />
+                        <ValidationMessage For="() => CreateInput.GraduationYear" class="text-danger small" />
+                    </div>
+                    <div class="col-6 col-md-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-sm btn-success flex-grow-1" disabled="@IsCreating">
+                            @if (IsCreating)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                            }
+                            Create
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="ToggleCreateForm"
+                            disabled="@IsCreating">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    }
     <div class="card-body">
         @if (IsLoading)
         {
@@ -27,9 +73,7 @@
             <QuickGrid TGridItem="TeamDto" Items="Teams.AsQueryable()"
                 class="table table-responsive table-borderless table-hover">
                 <PropertyColumn Title="Name" Property="t => t.Name" />
-                <TemplateColumn Title="Graduation Year">
-                    @(context.GraduationYear?.ToString() ?? "—")
-                </TemplateColumn>
+                <PropertyColumn Title="Graduation Year" Property="t => t.GraduationYear" />
             </QuickGrid>
         }
     </div>

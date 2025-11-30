@@ -172,16 +172,20 @@ public class TeamServiceTests
         team.GraduationYear.ShouldBe(2015);
     }
 
+    #endregion
+
+    #region CreateTeamAsync Tests
+
     [Fact]
-    public async Task GetTeamsAsync_WhenGraduationYearNull_ReturnsTeamWithNullGraduationYear()
+    public async Task CreateTeamAsync_WhenCreated_ReturnsSuccess()
     {
         // Arrange
         var clubId = 10L;
-        var expectedTeam = new TeamDto(42, "Test Team", null);
+        var dto = new CreateTeamDto("U12 Red", 2030);
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/teams")
-            .Respond(HttpStatusCode.OK, JsonContent.Create(new List<TeamDto> { expectedTeam }));
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/teams")
+            .Respond(HttpStatusCode.Created);
 
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(BaseUrl);
@@ -189,13 +193,113 @@ public class TeamServiceTests
         var service = new TeamsService(httpClient);
 
         // Act
-        var result = await service.GetTeamsAsync(clubId, CancellationToken.None);
+        var result = await service.CreateTeamAsync(clubId, dto, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var teams = result.Value;
-        teams.Count.ShouldBe(1);
-        teams[0].GraduationYear.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task CreateTeamAsync_WhenForbidden_ReturnsForbiddenProblem()
+    {
+        // Arrange
+        var clubId = 10L;
+        var dto = new CreateTeamDto("U12 Red", 2030);
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/teams")
+            .Respond(HttpStatusCode.Forbidden);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new TeamsService(httpClient);
+
+        // Act
+        var result = await service.CreateTeamAsync(clubId, dto, CancellationToken.None);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
+    }
+
+    [Fact]
+    public async Task CreateTeamAsync_WhenConflict_ReturnsConflictProblem()
+    {
+        // Arrange
+        var clubId = 10L;
+        var dto = new CreateTeamDto("U12 Red", 2030);
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/teams")
+            .Respond(HttpStatusCode.Conflict);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new TeamsService(httpClient);
+
+        // Act
+        var result = await service.CreateTeamAsync(clubId, dto, CancellationToken.None);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Conflict);
+    }
+
+    [Fact]
+    public async Task CreateTeamAsync_WhenServerError_ReturnsServerErrorProblem()
+    {
+        // Arrange
+        var clubId = 10L;
+        var dto = new CreateTeamDto("U12 Red", 2030);
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/teams")
+            .Respond(HttpStatusCode.InternalServerError);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new TeamsService(httpClient);
+
+        // Act
+        var result = await service.CreateTeamAsync(clubId, dto, CancellationToken.None);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.ServerError);
+    }
+
+    [Fact]
+    public async Task CreateTeamAsync_WithGraduationYear_SendsCorrectPayload()
+    {
+        // Arrange
+        var clubId = 10L;
+        var graduationYear = 2030;
+        var dto = new CreateTeamDto("U12 Red", graduationYear);
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/teams")
+            .With(request =>
+            {
+                var content = request.Content?.ReadAsStringAsync().Result;
+                return content is not null &&
+                       content.Contains("U12 Red") &&
+                       content.Contains(graduationYear.ToString());
+            })
+            .Respond(HttpStatusCode.Created);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new TeamsService(httpClient);
+
+        // Act
+        var result = await service.CreateTeamAsync(clubId, dto, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
     }
 
     #endregion

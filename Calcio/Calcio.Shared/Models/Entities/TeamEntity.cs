@@ -6,7 +6,7 @@ public class TeamEntity : BaseEntity
 {
     public long TeamId { get; set; } = default!;
     public required string Name { get; set; }
-    public int? GraduationYear { get; set; }
+    public required int GraduationYear { get; set; }
 
     public ICollection<PlayerCampaignAssignmentEntity> PlayerAssignments { get; set; } = [];
 

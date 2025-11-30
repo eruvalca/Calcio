@@ -1,6 +1,7 @@
 using Calcio.Data.Contexts;
 using Calcio.IntegrationTests.Data.Contexts;
 using Calcio.Services.Teams;
+using Calcio.Shared.DTOs.Teams;
 using Calcio.Shared.Results;
 
 using Microsoft.AspNetCore.Http;
@@ -172,15 +173,105 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
 
     #endregion
 
+    #region CreateTeamAsync Tests
+
+    [Fact]
+    public async Task CreateTeamAsync_WhenValidInput_CreatesTeamSuccessfully()
+    {
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+
+        var readOnlyDbContext = scope.ServiceProvider.GetRequiredService<ReadOnlyDbContext>();
+        var service = CreateService(scope.ServiceProvider);
+
+        var club = await readOnlyDbContext.Clubs.FirstAsync(cancellationToken);
+        var dto = new CreateTeamDto("New Test Team", 2030);
+
+        // Act
+        var result = await service.CreateTeamAsync(club.ClubId, dto, cancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        // Verify the team was created in the database
+        var createdTeam = await readOnlyDbContext.Teams
+            .FirstOrDefaultAsync(t => t.Name == "New Test Team" && t.ClubId == club.ClubId, cancellationToken);
+
+        createdTeam.ShouldNotBeNull();
+        createdTeam.Name.ShouldBe(dto.Name);
+        createdTeam.GraduationYear.ShouldBe(dto.GraduationYear);
+        createdTeam.CreatedById.ShouldBe(UserAId);
+    }
+
+    [Fact]
+    public async Task CreateTeamAsync_SetsCreatedByIdToCurrentUser()
+    {
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+
+        var readOnlyDbContext = scope.ServiceProvider.GetRequiredService<ReadOnlyDbContext>();
+        var service = CreateService(scope.ServiceProvider);
+
+        var club = await readOnlyDbContext.Clubs.FirstAsync(cancellationToken);
+        var dto = new CreateTeamDto("Team With CreatedBy", 2028);
+
+        // Act
+        var result = await service.CreateTeamAsync(club.ClubId, dto, cancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var createdTeam = await readOnlyDbContext.Teams
+            .FirstOrDefaultAsync(t => t.Name == "Team With CreatedBy" && t.ClubId == club.ClubId, cancellationToken);
+
+        createdTeam.ShouldNotBeNull();
+        createdTeam.CreatedById.ShouldBe(UserAId);
+    }
+
+    [Fact]
+    public async Task CreateTeamAsync_WithGraduationYear_StoresGraduationYearCorrectly()
+    {
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+
+        var readOnlyDbContext = scope.ServiceProvider.GetRequiredService<ReadOnlyDbContext>();
+        var service = CreateService(scope.ServiceProvider);
+
+        var club = await readOnlyDbContext.Clubs.FirstAsync(cancellationToken);
+        var graduationYear = DateTime.Today.Year + 5;
+        var dto = new CreateTeamDto("Team With Year", graduationYear);
+
+        // Act
+        var result = await service.CreateTeamAsync(club.ClubId, dto, cancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var createdTeam = await readOnlyDbContext.Teams
+            .FirstOrDefaultAsync(t => t.Name == "Team With Year" && t.ClubId == club.ClubId, cancellationToken);
+
+        createdTeam.ShouldNotBeNull();
+        createdTeam.GraduationYear.ShouldBe(graduationYear);
+    }
+
+    #endregion
+
     #region Helpers
 
     private static TeamsService CreateService(IServiceProvider services)
     {
         var readOnlyFactory = services.GetRequiredService<IDbContextFactory<ReadOnlyDbContext>>();
+        var readWriteFactory = services.GetRequiredService<IDbContextFactory<ReadWriteDbContext>>();
         var httpContextAccessor = services.GetRequiredService<IHttpContextAccessor>();
         var logger = services.GetRequiredService<ILogger<TeamsService>>();
 
-        return new TeamsService(readOnlyFactory, httpContextAccessor, logger);
+        return new TeamsService(readOnlyFactory, readWriteFactory, httpContextAccessor, logger);
     }
 
     #endregion

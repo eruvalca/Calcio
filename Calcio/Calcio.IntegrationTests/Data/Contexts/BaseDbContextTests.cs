@@ -104,6 +104,7 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
 
         var teamFaker = new Faker<TeamEntity>()
             .RuleFor(t => t.Name, f => $"{f.Company.CompanyName()}-{f.UniqueIndex}")
+            .RuleFor(t => t.GraduationYear, f => f.Date.Future(10).Year)
             .RuleFor(t => t.Club, club);
 
         var teams = teamFaker.Generate(2);
@@ -116,6 +117,7 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
             .RuleFor(p => p.FirstName, f => f.Name.FirstName())
             .RuleFor(p => p.LastName, f => f.Name.LastName())
             .RuleFor(p => p.DateOfBirth, f => DateOnly.FromDateTime(f.Date.Past(20)))
+            .RuleFor(p => p.GraduationYear, f => f.Date.Future(10).Year)
             .RuleFor(p => p.Club, club);
 
         var players = playerFaker.Generate(2);
@@ -311,6 +313,7 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
         var team = new TeamEntity
         {
             Name = $"Team {uniqueSuffix}",
+            GraduationYear = DateTime.Today.Year + 5,
             Club = club,
             ClubId = club.ClubId,
             CreatedById = UserAId
@@ -321,6 +324,7 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
             FirstName = "Cascade",
             LastName = uniqueSuffix,
             DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-12)),
+            GraduationYear = DateTime.Today.Year + 6,
             Club = club,
             ClubId = club.ClubId,
             CreatedById = UserAId

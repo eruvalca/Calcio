@@ -22,6 +22,15 @@ public static class TeamsEndpoints
 
         group.MapGet("", GetTeams);
 
+        var clubAdminGroup = endpoints.MapGroup("api/clubs/{clubId:long}/teams")
+            .RequireAuthorization(policy => policy.RequireRole("ClubAdmin"))
+            .AddEndpointFilter<ClubMembershipFilter>()
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+        clubAdminGroup.MapPost("", CreateTeam);
+
         return endpoints;
     }
 
@@ -35,5 +44,18 @@ public static class TeamsEndpoints
         var result = await service.GetTeamsAsync(clubId, cancellationToken);
 
         return result.ToHttpResult(TypedResults.Ok);
+    }
+
+    private static async Task<Results<Created, ProblemHttpResult>> CreateTeam(
+        [Required]
+        [Range(1, long.MaxValue)]
+        long clubId,
+        CreateTeamDto dto,
+        ITeamsService service,
+        CancellationToken cancellationToken)
+    {
+        var result = await service.CreateTeamAsync(clubId, dto, cancellationToken);
+
+        return result.ToHttpResult(TypedResults.Created());
     }
 }

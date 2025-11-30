@@ -5,6 +5,8 @@ using Calcio.Shared.DTOs.Teams;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.Teams;
 
+using OneOf.Types;
+
 namespace Calcio.Client.Services.Teams;
 
 public class TeamsService(HttpClient httpClient) : ITeamsService
@@ -22,5 +24,22 @@ public class TeamsService(HttpClient httpClient) : ITeamsService
                 HttpStatusCode.Conflict => ServiceProblem.Conflict(),
                 _ => ServiceProblem.ServerError()
             });
+    }
+
+    public async Task<ServiceResult<Success>> CreateTeamAsync(long clubId, CreateTeamDto dto, CancellationToken cancellationToken)
+    {
+        var response = await httpClient.PostAsJsonAsync($"api/clubs/{clubId}/teams", dto, cancellationToken);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return new Success();
+        }
+
+        return response.StatusCode switch
+        {
+            HttpStatusCode.Forbidden => ServiceProblem.Forbidden(),
+            HttpStatusCode.Conflict => ServiceProblem.Conflict(),
+            _ => ServiceProblem.ServerError()
+        };
     }
 }

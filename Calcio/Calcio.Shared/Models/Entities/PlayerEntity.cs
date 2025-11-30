@@ -14,7 +14,7 @@ public class PlayerEntity : BaseEntity
     public Gender? Gender { get; set; }
     public int? JerseyNumber { get; set; }
     public int? TryoutNumber { get; set; }
-    public int? GraduationYear { get; set; }
+    public required int GraduationYear { get; set; }
 
     public ICollection<NoteEntity> Notes { get; set; } = [];
     public ICollection<PlayerTagEntity> Tags { get; set; } = [];

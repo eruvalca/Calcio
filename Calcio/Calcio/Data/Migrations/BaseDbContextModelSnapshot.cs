@@ -335,7 +335,7 @@ namespace Calcio.Data.Migrations
                     b.Property<int?>("Gender")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("GraduationYear")
+                    b.Property<int>("GraduationYear")
                         .HasColumnType("integer");
 
                     b.Property<int?>("JerseyNumber")
@@ -511,7 +511,7 @@ namespace Calcio.Data.Migrations
                     b.Property<long>("CreatedById")
                         .HasColumnType("bigint");
 
-                    b.Property<int?>("GraduationYear")
+                    b.Property<int>("GraduationYear")
                         .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("ModifiedAt")
