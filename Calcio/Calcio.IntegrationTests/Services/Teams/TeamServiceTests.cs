@@ -149,7 +149,7 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
 
         actualTeam.ShouldNotBeNull();
         actualTeam.Name.ShouldBe(expectedTeam.Name);
-        actualTeam.BirthYear.ShouldBe(expectedTeam.BirthYear);
+        actualTeam.GraduationYear.ShouldBe(expectedTeam.GraduationYear);
     }
 
     [Fact]

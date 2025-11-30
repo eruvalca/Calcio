@@ -8,6 +8,6 @@ public static class TeamEntityExtensions
     extension(TeamEntity team)
     {
         public TeamDto ToTeamDto()
-            => new(team.TeamId, team.Name, team.BirthYear);
+            => new(team.TeamId, team.Name, team.GraduationYear);
     }
 }

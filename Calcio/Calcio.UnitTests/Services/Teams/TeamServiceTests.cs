@@ -45,9 +45,9 @@ public class TeamServiceTests
         var list = result.Value;
         list.Count.ShouldBe(2);
         list[0].Name.ShouldBe("U12 Red");
-        list[0].BirthYear.ShouldBe(2012);
+        list[0].GraduationYear.ShouldBe(2012);
         list[1].Name.ShouldBe("U14 Blue");
-        list[1].BirthYear.ShouldBe(2010);
+        list[1].GraduationYear.ShouldBe(2010);
     }
 
     [Fact]
@@ -169,11 +169,11 @@ public class TeamServiceTests
         var team = teams[0];
         team.TeamId.ShouldBe(42);
         team.Name.ShouldBe("Test Team");
-        team.BirthYear.ShouldBe(2015);
+        team.GraduationYear.ShouldBe(2015);
     }
 
     [Fact]
-    public async Task GetTeamsAsync_WhenBirthYearNull_ReturnsTeamWithNullBirthYear()
+    public async Task GetTeamsAsync_WhenGraduationYearNull_ReturnsTeamWithNullGraduationYear()
     {
         // Arrange
         var clubId = 10L;
@@ -195,7 +195,7 @@ public class TeamServiceTests
         result.IsSuccess.ShouldBeTrue();
         var teams = result.Value;
         teams.Count.ShouldBe(1);
-        teams[0].BirthYear.ShouldBeNull();
+        teams[0].GraduationYear.ShouldBeNull();
     }
 
     #endregion

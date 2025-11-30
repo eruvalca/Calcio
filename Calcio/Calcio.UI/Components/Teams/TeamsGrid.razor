@@ -27,8 +27,8 @@
             <QuickGrid TGridItem="TeamDto" Items="Teams.AsQueryable()"
                 class="table table-responsive table-borderless table-hover">
                 <PropertyColumn Title="Name" Property="t => t.Name" />
-                <TemplateColumn Title="Birth Year">
-                    @(context.BirthYear?.ToString() ?? "—")
+                <TemplateColumn Title="Graduation Year">
+                    @(context.GraduationYear?.ToString() ?? "—")
                 </TemplateColumn>
             </QuickGrid>
         }
