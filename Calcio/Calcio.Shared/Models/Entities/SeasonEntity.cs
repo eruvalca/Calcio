@@ -14,5 +14,5 @@ public class SeasonEntity : BaseEntity
     public required long ClubId { get; set; }
     public ClubEntity Club { get; set; } = null!;
 
-    public bool IsComplete => EndDate.HasValue;
+    public bool IsComplete => EndDate.HasValue && EndDate.Value < DateOnly.FromDateTime(DateTime.UtcNow);
 }

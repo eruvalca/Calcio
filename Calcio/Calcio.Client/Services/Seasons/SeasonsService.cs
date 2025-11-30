@@ -5,6 +5,8 @@ using Calcio.Shared.DTOs.Seasons;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.Seasons;
 
+using OneOf.Types;
+
 namespace Calcio.Client.Services.Seasons;
 
 public class SeasonsService(HttpClient httpClient) : ISeasonsService
@@ -22,5 +24,22 @@ public class SeasonsService(HttpClient httpClient) : ISeasonsService
                 HttpStatusCode.Conflict => ServiceProblem.Conflict(),
                 _ => ServiceProblem.ServerError()
             });
+    }
+
+    public async Task<ServiceResult<Success>> CreateSeasonAsync(long clubId, CreateSeasonDto dto, CancellationToken cancellationToken)
+    {
+        var response = await httpClient.PostAsJsonAsync($"api/clubs/{clubId}/seasons", dto, cancellationToken);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return new Success();
+        }
+
+        return response.StatusCode switch
+        {
+            HttpStatusCode.Forbidden => ServiceProblem.Forbidden(),
+            HttpStatusCode.Conflict => ServiceProblem.Conflict(),
+            _ => ServiceProblem.ServerError()
+        };
     }
 }

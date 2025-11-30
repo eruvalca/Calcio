@@ -177,4 +177,167 @@ public class SeasonServiceTests
     }
 
     #endregion
+
+    #region CreateSeasonAsync Tests
+
+    [Fact]
+    public async Task CreateSeasonAsync_WhenCreated_ReturnsSuccess()
+    {
+        // Arrange
+        var clubId = 10L;
+        var dto = new CreateSeasonDto("Spring 2025", DateOnly.FromDateTime(DateTime.Today), DateOnly.FromDateTime(DateTime.Today.AddMonths(3)));
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/seasons")
+            .Respond(HttpStatusCode.Created);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new SeasonsService(httpClient);
+
+        // Act
+        var result = await service.CreateSeasonAsync(clubId, dto, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task CreateSeasonAsync_WhenForbidden_ReturnsForbiddenProblem()
+    {
+        // Arrange
+        var clubId = 10L;
+        var dto = new CreateSeasonDto("Spring 2025", DateOnly.FromDateTime(DateTime.Today));
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/seasons")
+            .Respond(HttpStatusCode.Forbidden);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new SeasonsService(httpClient);
+
+        // Act
+        var result = await service.CreateSeasonAsync(clubId, dto, CancellationToken.None);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
+    }
+
+    [Fact]
+    public async Task CreateSeasonAsync_WhenConflict_ReturnsConflictProblem()
+    {
+        // Arrange
+        var clubId = 10L;
+        var dto = new CreateSeasonDto("Spring 2025", DateOnly.FromDateTime(DateTime.Today));
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/seasons")
+            .Respond(HttpStatusCode.Conflict);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new SeasonsService(httpClient);
+
+        // Act
+        var result = await service.CreateSeasonAsync(clubId, dto, CancellationToken.None);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Conflict);
+    }
+
+    [Fact]
+    public async Task CreateSeasonAsync_WhenServerError_ReturnsServerErrorProblem()
+    {
+        // Arrange
+        var clubId = 10L;
+        var dto = new CreateSeasonDto("Spring 2025", DateOnly.FromDateTime(DateTime.Today));
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/seasons")
+            .Respond(HttpStatusCode.InternalServerError);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new SeasonsService(httpClient);
+
+        // Act
+        var result = await service.CreateSeasonAsync(clubId, dto, CancellationToken.None);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.ServerError);
+    }
+
+    [Fact]
+    public async Task CreateSeasonAsync_WithEndDate_SendsCorrectPayload()
+    {
+        // Arrange
+        var clubId = 10L;
+        var startDate = DateOnly.FromDateTime(DateTime.Today);
+        var endDate = DateOnly.FromDateTime(DateTime.Today.AddMonths(6));
+        var dto = new CreateSeasonDto("Fall 2025", startDate, endDate);
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/seasons")
+            .With(request =>
+            {
+                var content = request.Content?.ReadAsStringAsync().Result;
+                return content is not null &&
+                       content.Contains("Fall 2025") &&
+                       content.Contains(startDate.ToString("yyyy-MM-dd")) &&
+                       content.Contains(endDate.ToString("yyyy-MM-dd"));
+            })
+            .Respond(HttpStatusCode.Created);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new SeasonsService(httpClient);
+
+        // Act
+        var result = await service.CreateSeasonAsync(clubId, dto, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task CreateSeasonAsync_WithoutEndDate_SendsNullEndDate()
+    {
+        // Arrange
+        var clubId = 10L;
+        var startDate = DateOnly.FromDateTime(DateTime.Today);
+        var dto = new CreateSeasonDto("Spring 2025", startDate);
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/seasons")
+            .With(request =>
+            {
+                var content = request.Content?.ReadAsStringAsync().Result;
+                return content is not null &&
+                       content.Contains("Spring 2025") &&
+                       content.Contains("\"endDate\":null");
+            })
+            .Respond(HttpStatusCode.Created);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new SeasonsService(httpClient);
+
+        // Act
+        var result = await service.CreateSeasonAsync(clubId, dto, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+    }
+
+    #endregion
 }

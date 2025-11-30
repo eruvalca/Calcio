@@ -1,10 +1,62 @@
 @using Calcio.Shared.DTOs.Seasons
+@using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.QuickGrid
 
 <div class="card shadow mb-4">
-    <div class="card-header">
+    <div class="card-header d-flex justify-content-between align-items-center">
         <h6 class="mb-0">Seasons</h6>
+        @if (!ShowCreateForm)
+        {
+            <button type="button" class="btn btn-sm btn-primary" @onclick="ToggleCreateForm">
+                <i class="bi bi-plus-lg me-1"></i>New Season
+            </button>
+        }
     </div>
+    @if (ShowCreateForm)
+    {
+        <div class="card-body border-bottom">
+            <EditForm Model="CreateInput" OnValidSubmit="HandleCreateSeason" FormName="createSeason">
+                <DataAnnotationsValidator />
+                @if (!string.IsNullOrEmpty(CreateErrorMessage))
+                {
+                    <div class="alert alert-danger py-2" role="alert">@CreateErrorMessage</div>
+                }
+                <div class="row g-3 align-items-end">
+                    <div class="col-12 col-md-4">
+                        <label for="seasonName" class="form-label small mb-1">Season Name</label>
+                        <InputText @bind-Value="CreateInput.Name" id="seasonName" class="form-control form-control-sm"
+                            placeholder="e.g., Spring 2025" />
+                        <ValidationMessage For="() => CreateInput.Name" class="text-danger small" />
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label for="startDate" class="form-label small mb-1">Start Date</label>
+                        <InputDate @bind-Value="CreateInput.StartDate" id="startDate" class="form-control form-control-sm"
+                            min="@Today" />
+                        <ValidationMessage For="() => CreateInput.StartDate" class="text-danger small" />
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label for="endDate" class="form-label small mb-1">End Date</label>
+                        <InputDate @bind-Value="CreateInput.EndDate" id="endDate" class="form-control form-control-sm"
+                            min="@Tomorrow" />
+                        <ValidationMessage For="() => CreateInput.EndDate" class="text-danger small" />
+                    </div>
+                    <div class="col-12 col-md-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-sm btn-success flex-grow-1" disabled="@IsCreating">
+                            @if (IsCreating)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                            }
+                            Create
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="ToggleCreateForm"
+                            disabled="@IsCreating">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    }
     <div class="card-body">
         @if (IsLoading)
         {

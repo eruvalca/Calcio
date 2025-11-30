@@ -22,6 +22,15 @@ public static class SeasonsEndpoints
 
         group.MapGet("", GetSeasons);
 
+        var clubAdminGroup = endpoints.MapGroup("api/clubs/{clubId:long}/seasons")
+            .RequireAuthorization(policy => policy.RequireRole("ClubAdmin"))
+            .AddEndpointFilter<ClubMembershipFilter>()
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+        clubAdminGroup.MapPost("", CreateSeason);
+
         return endpoints;
     }
 
@@ -35,5 +44,18 @@ public static class SeasonsEndpoints
         var result = await service.GetSeasonsAsync(clubId, cancellationToken);
 
         return result.ToHttpResult(TypedResults.Ok);
+    }
+
+    private static async Task<Results<Created, ProblemHttpResult>> CreateSeason(
+        [Required]
+        [Range(1, long.MaxValue)]
+        long clubId,
+        CreateSeasonDto dto,
+        ISeasonsService service,
+        CancellationToken cancellationToken)
+    {
+        var result = await service.CreateSeasonAsync(clubId, dto, cancellationToken);
+
+        return result.ToHttpResult(TypedResults.Created());
     }
 }

@@ -1,6 +1,7 @@
 using Calcio.Data.Contexts;
 using Calcio.IntegrationTests.Data.Contexts;
 using Calcio.Services.Seasons;
+using Calcio.Shared.DTOs.Seasons;
 using Calcio.Shared.Results;
 
 using Microsoft.AspNetCore.Http;
@@ -173,15 +174,170 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
 
     #endregion
 
+    #region CreateSeasonAsync Tests
+
+    [Fact]
+    public async Task CreateSeasonAsync_WhenValidInput_CreatesSeasonSuccessfully()
+    {
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+
+        var readOnlyDbContext = scope.ServiceProvider.GetRequiredService<ReadOnlyDbContext>();
+        var service = CreateService(scope.ServiceProvider);
+
+        var club = await readOnlyDbContext.Clubs.FirstAsync(cancellationToken);
+        var dto = new CreateSeasonDto("New Test Season", DateOnly.FromDateTime(DateTime.Today.AddDays(1)), DateOnly.FromDateTime(DateTime.Today.AddMonths(3)));
+
+        // Act
+        var result = await service.CreateSeasonAsync(club.ClubId, dto, cancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        // Verify the season was created in the database
+        var createdSeason = await readOnlyDbContext.Seasons
+            .FirstOrDefaultAsync(s => s.Name == "New Test Season" && s.ClubId == club.ClubId, cancellationToken);
+
+        createdSeason.ShouldNotBeNull();
+        createdSeason.Name.ShouldBe(dto.Name);
+        createdSeason.StartDate.ShouldBe(dto.StartDate);
+        createdSeason.EndDate.ShouldBe(dto.EndDate);
+        createdSeason.CreatedById.ShouldBe(UserAId);
+    }
+
+    [Fact]
+    public async Task CreateSeasonAsync_WithoutEndDate_CreatesSeasonSuccessfully()
+    {
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+
+        var readOnlyDbContext = scope.ServiceProvider.GetRequiredService<ReadOnlyDbContext>();
+        var service = CreateService(scope.ServiceProvider);
+
+        var club = await readOnlyDbContext.Clubs.FirstAsync(cancellationToken);
+        var dto = new CreateSeasonDto("Open-Ended Season", DateOnly.FromDateTime(DateTime.Today.AddDays(1)));
+
+        // Act
+        var result = await service.CreateSeasonAsync(club.ClubId, dto, cancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var createdSeason = await readOnlyDbContext.Seasons
+            .FirstOrDefaultAsync(s => s.Name == "Open-Ended Season" && s.ClubId == club.ClubId, cancellationToken);
+
+        createdSeason.ShouldNotBeNull();
+        createdSeason.EndDate.ShouldBeNull();
+        createdSeason.IsComplete.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task CreateSeasonAsync_SetsCreatedByIdToCurrentUser()
+    {
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+
+        var readOnlyDbContext = scope.ServiceProvider.GetRequiredService<ReadOnlyDbContext>();
+        var service = CreateService(scope.ServiceProvider);
+
+        var club = await readOnlyDbContext.Clubs.FirstAsync(cancellationToken);
+        var dto = new CreateSeasonDto("Season With CreatedBy", DateOnly.FromDateTime(DateTime.Today.AddDays(1)));
+
+        // Act
+        var result = await service.CreateSeasonAsync(club.ClubId, dto, cancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var createdSeason = await readOnlyDbContext.Seasons
+            .FirstOrDefaultAsync(s => s.Name == "Season With CreatedBy" && s.ClubId == club.ClubId, cancellationToken);
+
+        createdSeason.ShouldNotBeNull();
+        createdSeason.CreatedById.ShouldBe(UserAId);
+    }
+
+    [Fact]
+    public async Task CreateSeasonAsync_WithEndDateInPast_SeasonIsComplete()
+    {
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+
+        var readOnlyDbContext = scope.ServiceProvider.GetRequiredService<ReadOnlyDbContext>();
+        var readWriteDbContext = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
+        var service = CreateService(scope.ServiceProvider);
+
+        var club = await readOnlyDbContext.Clubs.FirstAsync(cancellationToken);
+
+        // Create a season directly with a past end date for testing IsComplete logic
+        var pastSeason = new Calcio.Shared.Models.Entities.SeasonEntity
+        {
+            Name = "Past Season",
+            StartDate = DateOnly.FromDateTime(DateTime.Today.AddMonths(-6)),
+            EndDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
+            ClubId = club.ClubId,
+            CreatedById = UserAId
+        };
+
+        readWriteDbContext.Seasons.Add(pastSeason);
+        await readWriteDbContext.SaveChangesAsync(cancellationToken);
+
+        // Act - Retrieve the season and verify IsComplete
+        var retrievedSeason = await readOnlyDbContext.Seasons
+            .FirstOrDefaultAsync(s => s.Name == "Past Season" && s.ClubId == club.ClubId, cancellationToken);
+
+        // Assert
+        retrievedSeason.ShouldNotBeNull();
+        retrievedSeason.IsComplete.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task CreateSeasonAsync_WithEndDateInFuture_SeasonIsNotComplete()
+    {
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+
+        var readOnlyDbContext = scope.ServiceProvider.GetRequiredService<ReadOnlyDbContext>();
+        var service = CreateService(scope.ServiceProvider);
+
+        var club = await readOnlyDbContext.Clubs.FirstAsync(cancellationToken);
+        var dto = new CreateSeasonDto("Future End Season", DateOnly.FromDateTime(DateTime.Today.AddDays(1)), DateOnly.FromDateTime(DateTime.Today.AddMonths(6)));
+
+        // Act
+        var result = await service.CreateSeasonAsync(club.ClubId, dto, cancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var createdSeason = await readOnlyDbContext.Seasons
+            .FirstOrDefaultAsync(s => s.Name == "Future End Season" && s.ClubId == club.ClubId, cancellationToken);
+
+        createdSeason.ShouldNotBeNull();
+        createdSeason.EndDate.ShouldNotBeNull();
+        createdSeason.IsComplete.ShouldBeFalse();
+    }
+
+    #endregion
+
     #region Helpers
 
     private static SeasonsService CreateService(IServiceProvider services)
     {
         var readOnlyFactory = services.GetRequiredService<IDbContextFactory<ReadOnlyDbContext>>();
+        var readWriteFactory = services.GetRequiredService<IDbContextFactory<ReadWriteDbContext>>();
         var httpContextAccessor = services.GetRequiredService<IHttpContextAccessor>();
         var logger = services.GetRequiredService<ILogger<SeasonsService>>();
 
-        return new SeasonsService(readOnlyFactory, httpContextAccessor, logger);
+        return new SeasonsService(readOnlyFactory, readWriteFactory, httpContextAccessor, logger);
     }
 
     #endregion
