@@ -169,3 +169,8 @@
 - Use `SetCurrentUser(scope.ServiceProvider, userId)` to set test user context.
 - Test global query filter behavior: unauthorized access returns empty results, not errors.
 - Verify `ServiceProblemKind` values for error scenarios.
+
+### Testing Guidelines
+
+- When writing code for new features or fixing bugs, always include appropriate unit and/or integration tests to cover the changes.
+- When modifying existing code, ensure that existing tests are updated as necessary to reflect the changes and that all tests pass successfully before finalizing the changes.
