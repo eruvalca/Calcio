@@ -115,6 +115,7 @@ public partial class Init : Migration
                 Gender = table.Column<int>(type: "integer", nullable: true),
                 JerseyNumber = table.Column<int>(type: "integer", nullable: true),
                 TryoutNumber = table.Column<int>(type: "integer", nullable: true),
+                GraduationYear = table.Column<int>(type: "integer", nullable: false),
                 ClubId = table.Column<long>(type: "bigint", nullable: false),
                 CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                 CreatedById = table.Column<long>(type: "bigint", nullable: false),
@@ -190,7 +191,7 @@ public partial class Init : Migration
                 TeamId = table.Column<long>(type: "bigint", nullable: false)
                     .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                 Name = table.Column<string>(type: "text", nullable: false),
-                BirthYear = table.Column<int>(type: "integer", nullable: true),
+                GraduationYear = table.Column<int>(type: "integer", nullable: false),
                 ClubId = table.Column<long>(type: "bigint", nullable: false),
                 CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                 CreatedById = table.Column<long>(type: "bigint", nullable: false),

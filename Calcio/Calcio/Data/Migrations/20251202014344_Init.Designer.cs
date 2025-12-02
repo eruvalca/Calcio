@@ -15,8 +15,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Calcio.Data.Migrations;
 
 [DbContext(typeof(BaseDbContext))]
-[Migration("20251130032155_GraduationYear")]
-partial class GraduationYear
+[Migration("20251202014344_Init")]
+partial class Init
 {
     /// <inheritdoc />
     protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -341,7 +341,7 @@ partial class GraduationYear
                 b.Property<int?>("Gender")
                     .HasColumnType("integer");
 
-                b.Property<int?>("GraduationYear")
+                b.Property<int>("GraduationYear")
                     .HasColumnType("integer");
 
                 b.Property<int?>("JerseyNumber")
@@ -517,7 +517,7 @@ partial class GraduationYear
                 b.Property<long>("CreatedById")
                     .HasColumnType("bigint");
 
-                b.Property<int?>("GraduationYear")
+                b.Property<int>("GraduationYear")
                     .HasColumnType("integer");
 
                 b.Property<DateTimeOffset?>("ModifiedAt")
