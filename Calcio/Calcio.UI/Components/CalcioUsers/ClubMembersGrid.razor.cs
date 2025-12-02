@@ -13,17 +13,14 @@ public partial class ClubMembersGrid(ICalcioUsersService calcioUsersService)
     [Parameter]
     public required long ClubId { get; set; }
 
-    private List<ClubMemberDto> Members { get; set; } = [];
+    [Parameter]
+    public List<ClubMemberDto> Members { get; set; } = [];
 
     private string SearchTerm { get; set; } = string.Empty;
 
     private ClubMemberDto? ConfirmingRemoveMember { get; set; }
 
-    private bool IsLoading { get; set; } = true;
-
     private bool IsProcessing { get; set; }
-
-    private string? LoadErrorMessage { get; set; }
 
     private string? ErrorMessage { get; set; }
 
@@ -32,33 +29,6 @@ public partial class ClubMembersGrid(ICalcioUsersService calcioUsersService)
             ? Members
             : Members.Where(member => member.FullName.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)
                 || member.Email.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
-
-    protected override async Task OnInitializedAsync()
-        => await LoadMembersAsync();
-
-    private async Task LoadMembersAsync()
-    {
-        IsLoading = true;
-        LoadErrorMessage = null;
-
-        var result = await calcioUsersService.GetClubMembersAsync(ClubId, CancellationToken);
-
-        result.Switch(
-            members =>
-            {
-                Members = members;
-                IsLoading = false;
-            },
-            problem =>
-            {
-                LoadErrorMessage = problem.Kind switch
-                {
-                    ServiceProblemKind.Forbidden => "You are not authorized to view the club members requested.",
-                    _ => problem.Detail ?? "An unexpected error occurred while loading members."
-                };
-                IsLoading = false;
-            });
-    }
 
     private void ShowRemoveConfirmation(ClubMemberDto member)
     {

@@ -62,30 +62,10 @@ public sealed class ClubMembersGridTests : BunitContext
         return members;
     }
 
-    private IRenderedComponent<ClubMembersGrid> RenderGrid(long clubId = 100)
+    private IRenderedComponent<ClubMembersGrid> RenderGrid(long clubId = 100, List<ClubMemberDto>? members = null)
         => Render<ClubMembersGrid>(parameters => parameters
-            .Add(p => p.ClubId, clubId));
-
-    #endregion
-
-    #region Loading State Tests
-
-    [Fact]
-    public void WhenLoading_ShouldDisplaySpinner()
-    {
-        // Arrange - Setup mock to never complete
-        var tcs = new TaskCompletionSource<ServiceResult<List<ClubMemberDto>>>();
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(tcs.Task);
-
-        // Act
-        var cut = RenderGrid();
-
-        // Assert
-        cut.Find(".spinner-border").ShouldNotBeNull();
-        cut.FindAll("table").ShouldBeEmpty();
-    }
+            .Add(p => p.ClubId, clubId)
+            .Add(p => p.Members, members ?? []));
 
     #endregion
 
@@ -94,20 +74,12 @@ public sealed class ClubMembersGridTests : BunitContext
     [Fact]
     public void WhenNoMembers_ShouldDisplayEmptyMessage()
     {
-        // Arrange
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(new List<ClubMemberDto>()));
-
         // Act
         var cut = RenderGrid();
 
-        // Wait for async load to complete
-        cut.WaitForAssertion(() =>
-        {
-            var emptyMessage = cut.Find(".text-muted");
-            emptyMessage.TextContent.ShouldBe("No members in this club.");
-        });
+        // Assert
+        var emptyMessage = cut.Find(".text-muted");
+        emptyMessage.TextContent.ShouldBe("No members in this club.");
     }
 
     [Fact]
@@ -115,25 +87,19 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(2);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         // Act
-        var cut = RenderGrid();
+        var cut = RenderGrid(members: members);
 
         // Assert
-        cut.WaitForAssertion(() =>
-        {
-            cut.Find("table").ShouldNotBeNull();
+        cut.Find("table").ShouldNotBeNull();
 
-            var rows = cut.FindAll("tbody tr");
-            rows.Count.ShouldBe(3); // 1 admin + 2 members
+        var rows = cut.FindAll("tbody tr");
+        rows.Count.ShouldBe(3); // 1 admin + 2 members
 
-            cut.Markup.ShouldContain("Admin User");
-            cut.Markup.ShouldContain("Member 1");
-            cut.Markup.ShouldContain("Member 2");
-        });
+        cut.Markup.ShouldContain("Admin User");
+        cut.Markup.ShouldContain("Member 1");
+        cut.Markup.ShouldContain("Member 2");
     }
 
     [Fact]
@@ -141,22 +107,16 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(1);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         // Act
-        var cut = RenderGrid();
+        var cut = RenderGrid(members: members);
 
         // Assert
-        cut.WaitForAssertion(() =>
-        {
-            var adminBadge = cut.Find(".badge.bg-primary");
-            adminBadge.TextContent.ShouldBe("Club Admin");
+        var adminBadge = cut.Find(".badge.bg-primary");
+        adminBadge.TextContent.ShouldBe("Club Admin");
 
-            var memberBadge = cut.Find(".badge.bg-secondary");
-            memberBadge.TextContent.ShouldBe("Member");
-        });
+        var memberBadge = cut.Find(".badge.bg-secondary");
+        memberBadge.TextContent.ShouldBe("Member");
     }
 
     [Fact]
@@ -164,62 +124,14 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(1);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         // Act
-        var cut = RenderGrid();
+        var cut = RenderGrid(members: members);
 
         // Assert
-        cut.WaitForAssertion(() =>
-        {
-            // Only 1 remove button for the non-admin member
-            var removeButtons = cut.FindAll("button.btn-outline-danger");
-            removeButtons.Count.ShouldBe(1);
-        });
-    }
-
-    #endregion
-
-    #region Error State Tests
-
-    [Fact]
-    public void WhenLoadReturnsForbidden_ShouldDisplayErrorMessage()
-    {
-        // Arrange
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(ServiceProblem.Forbidden()));
-
-        // Act
-        var cut = RenderGrid();
-
-        // Assert
-        cut.WaitForAssertion(() =>
-        {
-            var alert = cut.Find(".alert-danger");
-            alert.TextContent.ShouldContain("not authorized");
-        });
-    }
-
-    [Fact]
-    public void WhenLoadReturnsServerError_ShouldDisplayErrorMessage()
-    {
-        // Arrange
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(ServiceProblem.ServerError()));
-
-        // Act
-        var cut = RenderGrid();
-
-        // Assert
-        cut.WaitForAssertion(() =>
-        {
-            var alert = cut.Find(".alert-danger");
-            alert.TextContent.ShouldContain("unexpected error");
-        });
+        // Only 1 remove button for the non-admin member
+        var removeButtons = cut.FindAll("button.btn-outline-danger");
+        removeButtons.Count.ShouldBe(1);
     }
 
     #endregion
@@ -231,13 +143,7 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(1);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
-
-        var cut = RenderGrid();
-
-        cut.WaitForState(() => cut.FindAll("button.btn-outline-danger").Count > 0);
+        var cut = RenderGrid(members: members);
 
         // Act
         cut.Find("button.btn-outline-danger").Click();
@@ -254,13 +160,7 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(1);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
-
-        var cut = RenderGrid();
-
-        cut.WaitForState(() => cut.FindAll("button.btn-outline-danger").Count > 0);
+        var cut = RenderGrid(members: members);
 
         cut.Find("button.btn-outline-danger").Click();
 
@@ -276,13 +176,7 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(1);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
-
-        var cut = RenderGrid();
-
-        cut.WaitForState(() => cut.FindAll("button.btn-outline-danger").Count > 0);
+        var cut = RenderGrid(members: members);
 
         cut.Find("button.btn-outline-danger").Click();
 
@@ -298,17 +192,12 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(1);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         _mockCalcioUsersService
             .RemoveClubMemberAsync(100, 101, Arg.Any<CancellationToken>())
             .Returns(new ServiceResult<Success>(new Success()));
 
-        var cut = RenderGrid();
-
-        cut.WaitForState(() => cut.FindAll("button.btn-outline-danger").Count > 0);
+        var cut = RenderGrid(members: members);
 
         cut.Find("button.btn-outline-danger").Click();
 
@@ -325,17 +214,12 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(2);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         _mockCalcioUsersService
             .RemoveClubMemberAsync(100, 101, Arg.Any<CancellationToken>())
             .Returns(new ServiceResult<Success>(new Success()));
 
-        var cut = RenderGrid();
-
-        cut.WaitForState(() => cut.FindAll("button.btn-outline-danger").Count > 0);
+        var cut = RenderGrid(members: members);
 
         // Click first non-admin member's remove button
         cut.FindAll("button.btn-outline-danger")[0].Click();
@@ -357,17 +241,12 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(1);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         _mockCalcioUsersService
             .RemoveClubMemberAsync(100, 101, Arg.Any<CancellationToken>())
             .Returns(new ServiceResult<Success>(ServiceProblem.NotFound()));
 
-        var cut = RenderGrid();
-
-        cut.WaitForState(() => cut.FindAll("button.btn-outline-danger").Count > 0);
+        var cut = RenderGrid(members: members);
 
         cut.Find("button.btn-outline-danger").Click();
 
@@ -387,17 +266,12 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(1);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         _mockCalcioUsersService
             .RemoveClubMemberAsync(100, 101, Arg.Any<CancellationToken>())
             .Returns(new ServiceResult<Success>(ServiceProblem.Forbidden()));
 
-        var cut = RenderGrid();
-
-        cut.WaitForState(() => cut.FindAll("button.btn-outline-danger").Count > 0);
+        var cut = RenderGrid(members: members);
 
         cut.Find("button.btn-outline-danger").Click();
 
@@ -417,17 +291,12 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(1);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         _mockCalcioUsersService
             .RemoveClubMemberAsync(100, 101, Arg.Any<CancellationToken>())
             .Returns(new ServiceResult<Success>(ServiceProblem.ServerError()));
 
-        var cut = RenderGrid();
-
-        cut.WaitForState(() => cut.FindAll("button.btn-outline-danger").Count > 0);
+        var cut = RenderGrid(members: members);
 
         cut.Find("button.btn-outline-danger").Click();
 
@@ -451,19 +320,13 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(3);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         // Act
-        var cut = RenderGrid();
+        var cut = RenderGrid(members: members);
 
         // Assert
-        cut.WaitForAssertion(() =>
-        {
-            var rows = cut.FindAll("tbody tr");
-            rows.Count.ShouldBe(4); // 1 admin + 3 members
-        });
+        var rows = cut.FindAll("tbody tr");
+        rows.Count.ShouldBe(4); // 1 admin + 3 members
     }
 
     [Fact]
@@ -471,13 +334,7 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(3);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
-
-        var cut = RenderGrid();
-
-        cut.WaitForState(() => cut.FindAll("tbody tr").Count == 4);
+        var cut = RenderGrid(members: members);
 
         // Act
         var searchInput = cut.Find("#MemberSearch");
@@ -500,13 +357,7 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(3);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
-
-        var cut = RenderGrid();
-
-        cut.WaitForState(() => cut.FindAll("tbody tr").Count == 4);
+        var cut = RenderGrid(members: members);
 
         // Act
         var searchInput = cut.Find("#MemberSearch");
@@ -528,13 +379,7 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(3);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
-
-        var cut = RenderGrid();
-
-        cut.WaitForState(() => cut.FindAll("tbody tr").Count == 4);
+        var cut = RenderGrid(members: members);
 
         // Act
         var searchInput = cut.Find("#MemberSearch");
@@ -554,13 +399,7 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(2);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
-
-        var cut = RenderGrid();
-
-        cut.WaitForState(() => cut.FindAll("tbody tr").Count == 3);
+        var cut = RenderGrid(members: members);
 
         // Act
         var searchInput = cut.Find("#MemberSearch");
@@ -580,13 +419,7 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(2);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
-
-        var cut = RenderGrid();
-
-        cut.WaitForState(() => cut.FindAll("tbody tr").Count == 3);
+        var cut = RenderGrid(members: members);
 
         // Act
         var searchInput = cut.Find("#MemberSearch");
@@ -605,13 +438,7 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(3);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
-
-        var cut = RenderGrid();
-
-        cut.WaitForState(() => cut.FindAll("tbody tr").Count == 4);
+        var cut = RenderGrid(members: members);
 
         var searchInput = cut.Find("#MemberSearch");
         searchInput.Input("Member 1");
@@ -634,13 +461,7 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(3);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
-
-        var cut = RenderGrid();
-
-        cut.WaitForState(() => cut.FindAll("tbody tr").Count == 4);
+        var cut = RenderGrid(members: members);
 
         // Act
         var searchInput = cut.Find("#MemberSearch");
@@ -663,18 +484,13 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(1);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         var tcs = new TaskCompletionSource<ServiceResult<Success>>();
         _mockCalcioUsersService
             .RemoveClubMemberAsync(100, 101, Arg.Any<CancellationToken>())
             .Returns(tcs.Task);
 
-        var cut = RenderGrid();
-
-        cut.WaitForState(() => cut.FindAll("button.btn-outline-danger").Count > 0);
+        var cut = RenderGrid(members: members);
 
         cut.Find("button.btn-outline-danger").Click();
 
@@ -698,18 +514,13 @@ public sealed class ClubMembersGridTests : BunitContext
     {
         // Arrange
         var members = CreateTestMembers(1);
-        _mockCalcioUsersService
-            .GetClubMembersAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<ClubMemberDto>>(members));
 
         var tcs = new TaskCompletionSource<ServiceResult<Success>>();
         _mockCalcioUsersService
             .RemoveClubMemberAsync(100, 101, Arg.Any<CancellationToken>())
             .Returns(tcs.Task);
 
-        var cut = RenderGrid();
-
-        cut.WaitForState(() => cut.FindAll("button.btn-outline-danger").Count > 0);
+        var cut = RenderGrid(members: members);
 
         cut.Find("button.btn-outline-danger").Click();
 

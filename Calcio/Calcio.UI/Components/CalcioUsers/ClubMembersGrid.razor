@@ -11,19 +11,7 @@
         </form>
     </div>
     <div class="card-body">
-        @if (IsLoading)
-        {
-            <div class="d-flex justify-content-center">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-        }
-        else if (!string.IsNullOrEmpty(LoadErrorMessage))
-        {
-            <div class="alert alert-danger" role="alert">@LoadErrorMessage</div>
-        }
-        else if (Members.Count == 0)
+        @if (Members.Count == 0)
         {
             <p class="text-muted mb-0">No members in this club.</p>
         }
