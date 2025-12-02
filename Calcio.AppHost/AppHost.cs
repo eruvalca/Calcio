@@ -7,7 +7,13 @@ var postgres = builder.AddPostgres("postgres", pgUser, pgPassword)
     .WithImageTag("17.7")
     .WithContainerName("postgres")
     .WithDataVolume()
-    .WithLifetime(ContainerLifetime.Persistent);
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithEndpoint("tcp", endpoint =>
+    {
+        endpoint.Port = 15432;
+        endpoint.TargetPort = 5432;
+        endpoint.IsProxied = false;
+    });
 
 var postgresDb = postgres.AddDatabase("calcioDb");
 
