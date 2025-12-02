@@ -49,8 +49,9 @@ public sealed class AuditSaveChangesInterceptor(IHttpContextAccessor httpContext
         {
             if (entry.State == EntityState.Added)
             {
+                // CreatedById is a required property set by the service layer.
+                // We only set timestamps here; CreatedById is trusted from the entity.
                 entry.Entity.CreatedAt = createdTimestamp;
-                entry.Entity.CreatedById = userId;
                 entry.Entity.ModifiedAt = modifiedTimestamp;
                 entry.Entity.ModifiedById = userId;
             }
