@@ -114,7 +114,11 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
         readWriteDbContext.Add(club);
         await readWriteDbContext.SaveChangesAsync(CancellationToken);
 
-        var roleResult = await userManager.AddToRoleAsync(currentUser, "ClubAdmin");
+        // Get a fresh user instance from UserManager to avoid tracking conflicts
+        var userForRole = await userManager.FindByIdAsync(UserId.ToString())
+            ?? throw new InvalidOperationException("Current user cannot be null.");
+
+        var roleResult = await userManager.AddToRoleAsync(userForRole, "ClubAdmin");
         if (!roleResult.Succeeded)
         {
             var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
@@ -122,7 +126,7 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
         }
         else
         {
-            await signInManager.RefreshSignInAsync(currentUser);
+            await signInManager.RefreshSignInAsync(userForRole);
         }
 
         LogClubCreated(logger, club.Name);

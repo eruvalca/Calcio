@@ -199,20 +199,23 @@ if (app.Environment.IsDevelopment())
     try
     {
         var context = services.GetRequiredService<BaseDbContext>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole<long>>>();
 
         var strategy = context.Database.CreateExecutionStrategy();
-        await strategy.ExecuteAsync(async () => await context.Database.MigrateAsync());
-
-        var roleManager = services.GetRequiredService<RoleManager<IdentityRole<long>>>();
-        string[] roles = ["Admin", "ClubAdmin", "StandardUser"];
-
-        foreach (var role in roles)
+        await strategy.ExecuteAsync(async () =>
         {
-            if (!await roleManager.RoleExistsAsync(role))
+            await context.Database.MigrateAsync();
+
+            string[] roles = ["Admin", "ClubAdmin", "StandardUser"];
+
+            foreach (var role in roles)
             {
-                await roleManager.CreateAsync(new IdentityRole<long>(role));
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    await roleManager.CreateAsync(new IdentityRole<long>(role));
+                }
             }
-        }
+        });
     }
     catch (Exception ex)
     {

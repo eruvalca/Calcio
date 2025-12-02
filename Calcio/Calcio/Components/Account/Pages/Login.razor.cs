@@ -11,6 +11,7 @@ namespace Calcio.Components.Account.Pages;
 
 public partial class Login(
     SignInManager<CalcioUserEntity> signInManager,
+    UserManager<CalcioUserEntity> userManager,
     ILogger<Login> logger,
     NavigationManager navigationManager,
     IdentityRedirectManager redirectManager)
@@ -85,7 +86,10 @@ public partial class Login(
         }
         else
         {
-            errorMessage = "Error: Invalid login attempt.";
+            var user = await userManager.FindByEmailAsync(Input.Email);
+            errorMessage = user is null
+                ? "Error: No account found with that email address."
+                : "Error: Invalid login attempt.";
         }
     }
 

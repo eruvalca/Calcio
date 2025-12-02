@@ -13,6 +13,7 @@ var postgresDb = postgres.AddDatabase("calcioDb");
 
 builder.AddProject<Projects.Calcio>("calcio")
     .WithReference(postgresDb, connectionName: "DefaultConnection")
+    .WaitFor(postgres)
     .WaitFor(postgresDb);
 
 builder.Build().Run();
