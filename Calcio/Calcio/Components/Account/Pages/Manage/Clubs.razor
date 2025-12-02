@@ -36,7 +36,8 @@
     @if (IsClubAdmin)
     {
         <h5>Manage Club Members</h5>
-        <ClubMembersGrid ClubId="UserClubs[0].ClubId" @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
+        <ClubMembersGrid ClubId="UserClubs[0].ClubId" Members="ClubMembers"
+            @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
 
         <h5>Manage Club Players</h5>
         <ClubPlayersGrid ClubId="UserClubs[0].ClubId" @rendermode="new InteractiveAutoRenderMode(prerender: false)" />

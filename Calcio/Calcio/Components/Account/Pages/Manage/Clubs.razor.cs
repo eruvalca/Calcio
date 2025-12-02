@@ -1,12 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 using Calcio.Data.Contexts;
+using Calcio.Shared.DTOs.CalcioUsers;
 using Calcio.Shared.DTOs.ClubJoinRequests;
 using Calcio.Shared.DTOs.Clubs;
 using Calcio.Shared.Enums;
 using Calcio.Shared.Extensions.ClubJoinRequests;
 using Calcio.Shared.Extensions.Clubs;
 using Calcio.Shared.Models.Entities;
+using Calcio.Shared.Services.CalcioUsers;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -20,6 +22,7 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
     UserManager<CalcioUserEntity> userManager,
     SignInManager<CalcioUserEntity> signInManager,
     IdentityRedirectManager redirectManager,
+    ICalcioUsersService calcioUsersService,
     ILogger<Clubs> logger)
 {
     private static readonly string[] UsStateAbbreviations =
@@ -38,6 +41,7 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
     private List<BaseClubDto> AllClubs { get; set; } = [];
     private ClubJoinRequestDto? CurrentJoinRequest { get; set; }
     private List<ClubJoinRequestWithUserDto> ClubJoinRequests { get; set; } = [];
+    private List<ClubMemberDto> ClubMembers { get; set; } = [];
     private bool IsClubAdmin { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -78,6 +82,11 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
                 .OrderBy(r => r.CreatedAt)
                 .Select(r => r.ToClubJoinRequestWithUserDto())
                 .ToListAsync(CancellationToken);
+
+            var membersResult = await calcioUsersService.GetClubMembersAsync(UserClubs[0].ClubId, CancellationToken);
+            membersResult.Switch(
+                members => ClubMembers = members,
+                _ => ClubMembers = []);
         }
     }
 
