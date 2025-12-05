@@ -5,7 +5,7 @@ using Calcio.Shared.Services.CalcioUsers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 
-namespace Calcio.UI.Components.CalcioUsers;
+namespace Calcio.UI.Components.CalcioUsers.Shared;
 
 [Authorize(Roles = "ClubAdmin")]
 public partial class ClubMembersGrid(ICalcioUsersService calcioUsersService)

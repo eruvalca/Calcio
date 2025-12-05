@@ -3,7 +3,7 @@ using Bunit;
 using Calcio.Shared.DTOs.CalcioUsers;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.CalcioUsers;
-using Calcio.UI.Components.CalcioUsers;
+using Calcio.UI.Components.CalcioUsers.Shared;
 
 using Microsoft.Extensions.DependencyInjection;
 

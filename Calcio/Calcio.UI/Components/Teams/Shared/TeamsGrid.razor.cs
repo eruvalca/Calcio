@@ -8,7 +8,7 @@ using Calcio.Shared.Validation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 
-namespace Calcio.UI.Components.Teams;
+namespace Calcio.UI.Components.Teams.Shared;
 
 [Authorize(Roles = "ClubAdmin")]
 public partial class TeamsGrid(ITeamsService teamService)

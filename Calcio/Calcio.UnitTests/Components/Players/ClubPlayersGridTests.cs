@@ -4,7 +4,7 @@ using Calcio.Shared.DTOs.Players;
 using Calcio.Shared.Enums;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.Players;
-using Calcio.UI.Components.Players;
+using Calcio.UI.Components.Players.Shared;
 
 using Microsoft.Extensions.DependencyInjection;
 

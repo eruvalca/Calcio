@@ -3,7 +3,7 @@ using Bunit;
 using Calcio.Shared.DTOs.Teams;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.Teams;
-using Calcio.UI.Components.Teams;
+using Calcio.UI.Components.Teams.Shared;
 
 using Microsoft.Extensions.DependencyInjection;
 
