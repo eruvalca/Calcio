@@ -3,11 +3,15 @@
 using Calcio.Shared.DTOs.CalcioUsers;
 using Calcio.Shared.DTOs.ClubJoinRequests;
 using Calcio.Shared.DTOs.Clubs;
+using Calcio.Shared.DTOs.Players;
+using Calcio.Shared.DTOs.Seasons;
 using Calcio.Shared.Enums;
 using Calcio.Shared.Models.Entities;
 using Calcio.Shared.Services.CalcioUsers;
 using Calcio.Shared.Services.ClubJoinRequests;
 using Calcio.Shared.Services.Clubs;
+using Calcio.Shared.Services.Players;
+using Calcio.Shared.Services.Seasons;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -19,6 +23,8 @@ public partial class Clubs(
     IClubsService clubsService,
     IClubJoinRequestsService clubJoinRequestsService,
     ICalcioUsersService calcioUsersService,
+    IPlayersService playersService,
+    ISeasonsService seasonsService,
     UserManager<CalcioUserEntity> userManager,
     SignInManager<CalcioUserEntity> signInManager,
     IdentityRedirectManager redirectManager)
@@ -40,6 +46,8 @@ public partial class Clubs(
     private ClubJoinRequestDto? CurrentJoinRequest { get; set; }
     private List<ClubJoinRequestWithUserDto> ClubJoinRequests { get; set; } = [];
     private List<ClubMemberDto> ClubMembers { get; set; } = [];
+    private List<ClubPlayerDto> ClubPlayers { get; set; } = [];
+    private List<SeasonDto> ClubSeasons { get; set; } = [];
     private bool IsClubAdmin { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -80,6 +88,16 @@ public partial class Clubs(
             membersResult.Switch(
                 members => ClubMembers = members,
                 problem => ClubMembers = []);
+
+            var playersResult = await playersService.GetClubPlayersAsync(UserClubs[0].Id, CancellationToken);
+            playersResult.Switch(
+                players => ClubPlayers = players,
+                problem => ClubPlayers = []);
+
+            var seasonsResult = await seasonsService.GetSeasonsAsync(UserClubs[0].Id, CancellationToken);
+            seasonsResult.Switch(
+                seasons => ClubSeasons = seasons,
+                problem => ClubSeasons = []);
         }
     }
 

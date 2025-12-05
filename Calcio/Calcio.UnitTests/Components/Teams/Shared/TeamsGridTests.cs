@@ -13,7 +13,7 @@ using OneOf.Types;
 
 using Shouldly;
 
-namespace Calcio.UnitTests.Components.Teams;
+namespace Calcio.UnitTests.Components.Teams.Shared;
 
 public sealed class TeamsGridTests : BunitContext
 {

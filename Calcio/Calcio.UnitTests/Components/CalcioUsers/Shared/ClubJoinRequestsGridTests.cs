@@ -14,7 +14,7 @@ using OneOf.Types;
 
 using Shouldly;
 
-namespace Calcio.UnitTests.Components.Clubs.Shared;
+namespace Calcio.UnitTests.Components.CalcioUsers.Shared;
 
 /// <summary>
 /// Unit tests for the ClubJoinRequestsGrid Blazor component using bUnit.

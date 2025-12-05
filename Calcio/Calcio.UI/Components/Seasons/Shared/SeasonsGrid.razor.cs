@@ -11,16 +11,15 @@ using Microsoft.AspNetCore.Components;
 namespace Calcio.UI.Components.Seasons.Shared;
 
 [Authorize(Roles = "ClubAdmin")]
-public partial class SeasonsGrid(ISeasonsService seasonService)
+public partial class SeasonsGrid(
+    ISeasonsService seasonService,
+    NavigationManager navigationManager)
 {
     [Parameter]
     public long ClubId { get; set; }
 
-    private List<SeasonDto> Seasons { get; set; } = [];
-
-    private bool IsLoading { get; set; } = true;
-
-    private string? ErrorMessage { get; set; }
+    [Parameter]
+    public List<SeasonDto> Seasons { get; set; } = [];
 
     private bool ShowCreateForm { get; set; }
 
@@ -33,33 +32,6 @@ public partial class SeasonsGrid(ISeasonsService seasonService)
     private static DateOnly Today => DateOnly.FromDateTime(DateTime.Today);
 
     private static DateOnly Tomorrow => Today.AddDays(1);
-
-    protected override async Task OnInitializedAsync()
-        => await LoadSeasonsAsync();
-
-    private async Task LoadSeasonsAsync()
-    {
-        IsLoading = true;
-        ErrorMessage = null;
-
-        var result = await seasonService.GetSeasonsAsync(ClubId, CancellationToken);
-
-        result.Switch(
-            seasons =>
-            {
-                Seasons = seasons;
-                IsLoading = false;
-            },
-            problem =>
-            {
-                ErrorMessage = problem.Kind switch
-                {
-                    ServiceProblemKind.Forbidden => "You are not authorized to view seasons.",
-                    _ => problem.Detail ?? "An unexpected error occurred while loading seasons."
-                };
-                IsLoading = false;
-            });
-    }
 
     private void ToggleCreateForm()
     {
@@ -91,7 +63,7 @@ public partial class SeasonsGrid(ISeasonsService seasonService)
                 ShowCreateForm = false;
                 CreateInput = new CreateSeasonInputModel();
                 IsCreating = false;
-                InvokeAsync(LoadSeasonsAsync);
+                navigationManager.Refresh();
             },
             problem =>
             {

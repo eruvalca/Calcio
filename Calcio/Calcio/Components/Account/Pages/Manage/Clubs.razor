@@ -41,10 +41,11 @@
             @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
 
         <h5>Manage Club Players</h5>
-        <ClubPlayersGrid ClubId="UserClubs[0].Id" @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
+        <ClubPlayersGrid Players="ClubPlayers" @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
 
         <h5>Manage Seasons</h5>
-        <SeasonsGrid ClubId="UserClubs[0].Id" @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
+        <SeasonsGrid ClubId="UserClubs[0].Id" Seasons="ClubSeasons"
+            @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
 
         <h5>Manage Teams</h5>
         <TeamsGrid ClubId="UserClubs[0].Id" @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
