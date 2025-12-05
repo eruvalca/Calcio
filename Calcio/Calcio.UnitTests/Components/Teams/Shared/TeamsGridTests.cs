@@ -39,39 +39,16 @@ public sealed class TeamsGridTests : BunitContext
                     GraduationYear: DateTime.Today.Year + i))
         ];
 
-    private IRenderedComponent<TeamsGrid> RenderGrid(long clubId = 100, List<TeamDto>? teams = null)
-    {
-        _mockTeamsService
-            .GetTeamsAsync(clubId, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<TeamDto>>(teams ?? []));
-
-        return Render<TeamsGrid>(parameters => parameters
-            .Add(p => p.ClubId, clubId));
-    }
+    private IRenderedComponent<TeamsGrid> RenderGrid(
+        long clubId = 100,
+        List<TeamDto>? teams = null)
+        => Render<TeamsGrid>(parameters => parameters
+            .Add(p => p.ClubId, clubId)
+            .Add(p => p.Teams, teams ?? []));
 
     #endregion
 
-    #region Initial Loading Tests
-
-    [Fact]
-    public void WhenLoading_ShouldDisplaySpinner()
-    {
-        // Arrange
-        var tcs = new TaskCompletionSource<ServiceResult<List<TeamDto>>>();
-        _mockTeamsService
-            .GetTeamsAsync(100, Arg.Any<CancellationToken>())
-            .Returns(tcs.Task);
-
-        // Act
-        var cut = Render<TeamsGrid>(parameters => parameters
-            .Add(p => p.ClubId, 100));
-
-        // Assert
-        cut.FindAll(".spinner-border").Count.ShouldBe(1);
-
-        // Cleanup
-        tcs.SetResult(new ServiceResult<List<TeamDto>>(new List<TeamDto>()));
-    }
+    #region Initial Rendering Tests
 
     [Fact]
     public void WhenNoTeams_ShouldDisplayEmptyMessage()
@@ -80,12 +57,10 @@ public sealed class TeamsGridTests : BunitContext
         var cut = RenderGrid(teams: []);
 
         // Assert
-        cut.WaitForAssertion(() =>
-        {
-            var emptyMessage = cut.Find(".text-muted");
-            emptyMessage.TextContent.ShouldBe("No teams found.");
-            cut.FindAll("table").ShouldBeEmpty();
-        });
+        var emptyMessage = cut.Find(".text-muted");
+        emptyMessage.TextContent.ShouldBe("No teams found.");
+
+        cut.FindAll("table").ShouldBeEmpty();
     }
 
     [Fact]
@@ -98,32 +73,10 @@ public sealed class TeamsGridTests : BunitContext
         var cut = RenderGrid(teams: teams);
 
         // Assert
-        cut.WaitForAssertion(() =>
-        {
-            cut.Find("table").ShouldNotBeNull();
-            cut.Markup.ShouldContain("Team 1");
-            cut.Markup.ShouldContain("Team 2");
-        });
-    }
+        cut.Find("table").ShouldNotBeNull();
 
-    [Fact]
-    public void WhenLoadFails_ShouldDisplayErrorMessage()
-    {
-        // Arrange
-        _mockTeamsService
-            .GetTeamsAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<TeamDto>>(ServiceProblem.Forbidden()));
-
-        // Act
-        var cut = Render<TeamsGrid>(parameters => parameters
-            .Add(p => p.ClubId, 100));
-
-        // Assert
-        cut.WaitForAssertion(() =>
-        {
-            var alert = cut.Find(".alert-danger");
-            alert.TextContent.ShouldContain("not authorized");
-        });
+        cut.Markup.ShouldContain("Team 1");
+        cut.Markup.ShouldContain("Team 2");
     }
 
     #endregion
@@ -137,11 +90,8 @@ public sealed class TeamsGridTests : BunitContext
         var cut = RenderGrid(teams: []);
 
         // Assert
-        cut.WaitForAssertion(() =>
-        {
-            var button = cut.Find("button.btn-primary");
-            button.TextContent.ShouldContain("New Team");
-        });
+        var button = cut.Find("button.btn-primary");
+        button.TextContent.ShouldContain("New Team");
     }
 
     [Fact]
@@ -151,18 +101,12 @@ public sealed class TeamsGridTests : BunitContext
         var cut = RenderGrid(teams: []);
 
         // Act
-        cut.WaitForAssertion(() =>
-        {
-            cut.Find("button.btn-primary").Click();
-        });
+        cut.Find("button.btn-primary").Click();
 
         // Assert
-        cut.WaitForAssertion(() =>
-        {
-            cut.Find("form").ShouldNotBeNull();
-            cut.Find("#teamName").ShouldNotBeNull();
-            cut.Find("#graduationYear").ShouldNotBeNull();
-        });
+        cut.Find("form").ShouldNotBeNull();
+        cut.Find("#teamName").ShouldNotBeNull();
+        cut.Find("#graduationYear").ShouldNotBeNull();
     }
 
     [Fact]
@@ -172,16 +116,10 @@ public sealed class TeamsGridTests : BunitContext
         var cut = RenderGrid(teams: []);
 
         // Act
-        cut.WaitForAssertion(() =>
-        {
-            cut.Find("button.btn-primary").Click();
-        });
+        cut.Find("button.btn-primary").Click();
 
         // Assert
-        cut.WaitForAssertion(() =>
-        {
-            cut.FindAll(".card-header button.btn-primary").ShouldBeEmpty();
-        });
+        cut.FindAll(".card-header button.btn-primary").ShouldBeEmpty();
     }
 
     [Fact]
@@ -189,24 +127,14 @@ public sealed class TeamsGridTests : BunitContext
     {
         // Arrange
         var cut = RenderGrid(teams: []);
-
-        cut.WaitForAssertion(() =>
-        {
-            cut.Find("button.btn-primary").Click();
-        });
+        cut.Find("button.btn-primary").Click();
 
         // Act
-        cut.WaitForAssertion(() =>
-        {
-            cut.Find("button.btn-outline-secondary").Click();
-        });
+        cut.Find("button.btn-outline-secondary").Click();
 
         // Assert
-        cut.WaitForAssertion(() =>
-        {
-            cut.FindAll("form").ShouldBeEmpty();
-            cut.Find("button.btn-primary").TextContent.ShouldContain("New Team");
-        });
+        cut.FindAll("form").ShouldBeEmpty();
+        cut.Find("button.btn-primary").TextContent.ShouldContain("New Team");
     }
 
     #endregion
@@ -223,10 +151,7 @@ public sealed class TeamsGridTests : BunitContext
             .CreateTeamAsync(100, Arg.Any<CreateTeamDto>(), Arg.Any<CancellationToken>())
             .Returns(new ServiceResult<Success>(new Success()));
 
-        cut.WaitForAssertion(() =>
-        {
-            cut.Find("button.btn-primary").Click();
-        });
+        cut.Find("button.btn-primary").Click();
 
         // Act
         var teamNameInput = cut.Find("#teamName");
@@ -245,52 +170,7 @@ public sealed class TeamsGridTests : BunitContext
     }
 
     [Fact]
-    public async Task WhenCreateSucceeds_ShouldHideFormAndReloadTeams()
-    {
-        // Arrange
-        var initialTeams = CreateTestTeams(1);
-        var cut = RenderGrid(clubId: 100, teams: initialTeams);
-
-        _mockTeamsService
-            .CreateTeamAsync(100, Arg.Any<CreateTeamDto>(), Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<Success>(new Success()));
-
-        var updatedTeams = new List<TeamDto>
-        {
-            new(1, "Team 1", DateTime.Today.Year + 1),
-            new(2, "U12 Red", DateTime.Today.Year + 5)
-        };
-
-        cut.WaitForAssertion(() =>
-        {
-            cut.Find("button.btn-primary").Click();
-        });
-
-        // Act
-        await cut.Find("#teamName").ChangeAsync(new() { Value = "U12 Red" });
-        await cut.Find("#graduationYear").ChangeAsync(new() { Value = (DateTime.Today.Year + 5).ToString() });
-
-        // Setup to return updated teams after create
-        _mockTeamsService
-            .GetTeamsAsync(100, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResult<List<TeamDto>>(updatedTeams));
-
-        await cut.Find("form").SubmitAsync();
-
-        // Assert
-        cut.WaitForAssertion(() =>
-        {
-            cut.FindAll("form").ShouldBeEmpty();
-            cut.Find("button.btn-primary").TextContent.ShouldContain("New Team");
-        });
-
-        // Verify GetTeamsAsync was called again to reload
-        await _mockTeamsService.Received(2)
-            .GetTeamsAsync(100, Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task WhenCreateFails_ShouldDisplayError()
+    public async Task WhenCreateReturnsForbidden_ShouldDisplayError()
     {
         // Arrange
         var cut = RenderGrid(clubId: 100, teams: []);
@@ -299,10 +179,7 @@ public sealed class TeamsGridTests : BunitContext
             .CreateTeamAsync(100, Arg.Any<CreateTeamDto>(), Arg.Any<CancellationToken>())
             .Returns(new ServiceResult<Success>(ServiceProblem.Forbidden()));
 
-        cut.WaitForAssertion(() =>
-        {
-            cut.Find("button.btn-primary").Click();
-        });
+        cut.Find("button.btn-primary").Click();
 
         // Act
         await cut.Find("#teamName").ChangeAsync(new() { Value = "U12 Red" });
@@ -327,10 +204,7 @@ public sealed class TeamsGridTests : BunitContext
             .CreateTeamAsync(100, Arg.Any<CreateTeamDto>(), Arg.Any<CancellationToken>())
             .Returns(new ServiceResult<Success>(ServiceProblem.Conflict()));
 
-        cut.WaitForAssertion(() =>
-        {
-            cut.Find("button.btn-primary").Click();
-        });
+        cut.Find("button.btn-primary").Click();
 
         // Act
         await cut.Find("#teamName").ChangeAsync(new() { Value = "U12 Red" });
@@ -355,10 +229,7 @@ public sealed class TeamsGridTests : BunitContext
             .CreateTeamAsync(100, Arg.Any<CreateTeamDto>(), Arg.Any<CancellationToken>())
             .Returns(new ServiceResult<Success>(ServiceProblem.ServerError()));
 
-        cut.WaitForAssertion(() =>
-        {
-            cut.Find("button.btn-primary").Click();
-        });
+        cut.Find("button.btn-primary").Click();
 
         // Act
         await cut.Find("#teamName").ChangeAsync(new() { Value = "U12 Red" });
@@ -388,10 +259,7 @@ public sealed class TeamsGridTests : BunitContext
             .CreateTeamAsync(100, Arg.Any<CreateTeamDto>(), Arg.Any<CancellationToken>())
             .Returns(tcs.Task);
 
-        cut.WaitForAssertion(() =>
-        {
-            cut.Find("button.btn-primary").Click();
-        });
+        cut.Find("button.btn-primary").Click();
 
         await cut.Find("#teamName").ChangeAsync(new() { Value = "U12 Red" });
         await cut.Find("#graduationYear").ChangeAsync(new() { Value = (DateTime.Today.Year + 5).ToString() });
@@ -425,10 +293,7 @@ public sealed class TeamsGridTests : BunitContext
             .CreateTeamAsync(100, Arg.Any<CreateTeamDto>(), Arg.Any<CancellationToken>())
             .Returns(tcs.Task);
 
-        cut.WaitForAssertion(() =>
-        {
-            cut.Find("button.btn-primary").Click();
-        });
+        cut.Find("button.btn-primary").Click();
 
         await cut.Find("#teamName").ChangeAsync(new() { Value = "U12 Red" });
         await cut.Find("#graduationYear").ChangeAsync(new() { Value = (DateTime.Today.Year + 5).ToString() });
@@ -459,17 +324,30 @@ public sealed class TeamsGridTests : BunitContext
         var cut = RenderGrid(teams: []);
 
         // Act
-        cut.WaitForAssertion(() =>
-        {
-            cut.Find("button.btn-primary").Click();
-        });
+        cut.Find("button.btn-primary").Click();
 
         // Assert
-        cut.WaitForAssertion(() =>
-        {
-            var graduationYearInput = cut.Find("#graduationYear");
-            graduationYearInput.GetAttribute("value").ShouldBe(DateTime.Today.Year.ToString());
-        });
+        var graduationYearInput = cut.Find("#graduationYear");
+        graduationYearInput.GetAttribute("value").ShouldBe(DateTime.Today.Year.ToString());
+    }
+
+    #endregion
+
+    #region Multiple Teams Tests
+
+    [Fact]
+    public void WhenMultipleTeams_ShouldDisplayAll()
+    {
+        // Arrange
+        var teams = CreateTestTeams(3);
+
+        // Act
+        var cut = RenderGrid(teams: teams);
+
+        // Assert
+        cut.Markup.ShouldContain("Team 1");
+        cut.Markup.ShouldContain("Team 2");
+        cut.Markup.ShouldContain("Team 3");
     }
 
     #endregion

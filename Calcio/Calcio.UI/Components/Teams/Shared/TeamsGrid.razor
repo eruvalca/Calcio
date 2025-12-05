@@ -30,8 +30,8 @@
                     </div>
                     <div class="col-6 col-md-3">
                         <label for="graduationYear" class="form-label small mb-1">Graduation Year</label>
-                        <InputNumber @bind-Value="CreateInput.GraduationYear" id="graduationYear" class="form-control form-control-sm"
-                            min="@CurrentYear" max="@MaxYear" />
+                        <InputNumber @bind-Value="CreateInput.GraduationYear" id="graduationYear"
+                            class="form-control form-control-sm" min="@CurrentYear" max="@MaxYear" />
                         <ValidationMessage For="() => CreateInput.GraduationYear" class="text-danger small" />
                     </div>
                     <div class="col-6 col-md-4 d-flex gap-2">
@@ -52,19 +52,7 @@
         </div>
     }
     <div class="card-body">
-        @if (IsLoading)
-        {
-            <div class="d-flex justify-content-center">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-        }
-        else if (!string.IsNullOrEmpty(ErrorMessage))
-        {
-            <div class="alert alert-danger" role="alert">@ErrorMessage</div>
-        }
-        else if (Teams.Count == 0)
+        @if (Teams.Count == 0)
         {
             <p class="text-muted mb-0">No teams found.</p>
         }

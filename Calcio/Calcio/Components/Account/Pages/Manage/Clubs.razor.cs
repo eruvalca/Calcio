@@ -5,6 +5,7 @@ using Calcio.Shared.DTOs.ClubJoinRequests;
 using Calcio.Shared.DTOs.Clubs;
 using Calcio.Shared.DTOs.Players;
 using Calcio.Shared.DTOs.Seasons;
+using Calcio.Shared.DTOs.Teams;
 using Calcio.Shared.Enums;
 using Calcio.Shared.Models.Entities;
 using Calcio.Shared.Services.CalcioUsers;
@@ -12,6 +13,7 @@ using Calcio.Shared.Services.ClubJoinRequests;
 using Calcio.Shared.Services.Clubs;
 using Calcio.Shared.Services.Players;
 using Calcio.Shared.Services.Seasons;
+using Calcio.Shared.Services.Teams;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -25,6 +27,7 @@ public partial class Clubs(
     ICalcioUsersService calcioUsersService,
     IPlayersService playersService,
     ISeasonsService seasonsService,
+    ITeamsService teamsService,
     UserManager<CalcioUserEntity> userManager,
     SignInManager<CalcioUserEntity> signInManager,
     IdentityRedirectManager redirectManager)
@@ -48,6 +51,7 @@ public partial class Clubs(
     private List<ClubMemberDto> ClubMembers { get; set; } = [];
     private List<ClubPlayerDto> ClubPlayers { get; set; } = [];
     private List<SeasonDto> ClubSeasons { get; set; } = [];
+    private List<TeamDto> ClubTeams { get; set; } = [];
     private bool IsClubAdmin { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -98,6 +102,11 @@ public partial class Clubs(
             seasonsResult.Switch(
                 seasons => ClubSeasons = seasons,
                 problem => ClubSeasons = []);
+
+            var teamsResult = await teamsService.GetTeamsAsync(UserClubs[0].Id, CancellationToken);
+            teamsResult.Switch(
+                teams => ClubTeams = teams,
+                problem => ClubTeams = []);
         }
     }
 

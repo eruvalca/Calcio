@@ -11,16 +11,15 @@ using Microsoft.AspNetCore.Components;
 namespace Calcio.UI.Components.Teams.Shared;
 
 [Authorize(Roles = "ClubAdmin")]
-public partial class TeamsGrid(ITeamsService teamService)
+public partial class TeamsGrid(
+    ITeamsService teamService,
+    NavigationManager navigationManager)
 {
     [Parameter]
     public long ClubId { get; set; }
 
-    private List<TeamDto> Teams { get; set; } = [];
-
-    private bool IsLoading { get; set; } = true;
-
-    private string? ErrorMessage { get; set; }
+    [Parameter]
+    public List<TeamDto> Teams { get; set; } = [];
 
     private bool ShowCreateForm { get; set; }
 
@@ -34,33 +33,6 @@ public partial class TeamsGrid(ITeamsService teamService)
 
     private static int MaxYear => DateTime.Today.Year + 25;
 
-    protected override async Task OnInitializedAsync()
-        => await LoadTeamsAsync();
-
-    private async Task LoadTeamsAsync()
-    {
-        IsLoading = true;
-        ErrorMessage = null;
-
-        var result = await teamService.GetTeamsAsync(ClubId, CancellationToken);
-
-        result.Switch(
-            teams =>
-            {
-                Teams = teams;
-                IsLoading = false;
-            },
-            problem =>
-            {
-                ErrorMessage = problem.Kind switch
-                {
-                    ServiceProblemKind.Forbidden => "You are not authorized to view the teams requested.",
-                    _ => problem.Detail ?? "An unexpected error occurred while loading teams."
-                };
-                IsLoading = false;
-            });
-    }
-
     private void ToggleCreateForm()
     {
         ShowCreateForm = !ShowCreateForm;
@@ -70,6 +42,11 @@ public partial class TeamsGrid(ITeamsService teamService)
 
     private async Task HandleCreateTeam()
     {
+        if (IsCreating)
+        {
+            return;
+        }
+
         IsCreating = true;
         CreateErrorMessage = null;
 
@@ -81,6 +58,8 @@ public partial class TeamsGrid(ITeamsService teamService)
             {
                 ShowCreateForm = false;
                 CreateInput = new CreateTeamInputModel();
+                IsCreating = false;
+                navigationManager.Refresh();
             },
             problem =>
             {
@@ -90,14 +69,8 @@ public partial class TeamsGrid(ITeamsService teamService)
                     ServiceProblemKind.Conflict => "A team with this name already exists.",
                     _ => problem.Detail ?? "An unexpected error occurred while creating the team."
                 };
+                IsCreating = false;
             });
-
-        IsCreating = false;
-
-        if (result.IsSuccess)
-        {
-            await LoadTeamsAsync();
-        }
     }
 
     private sealed class CreateTeamInputModel

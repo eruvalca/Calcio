@@ -48,7 +48,7 @@
             @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
 
         <h5>Manage Teams</h5>
-        <TeamsGrid ClubId="UserClubs[0].Id" @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
+        <TeamsGrid ClubId="UserClubs[0].Id" Teams="ClubTeams" @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
     }
 }
 else
