@@ -8,7 +8,7 @@ using Calcio.Shared.Validation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 
-namespace Calcio.UI.Components.Clubs.Shared;
+namespace Calcio.UI.Components.Seasons.Shared;
 
 [Authorize(Roles = "ClubAdmin")]
 public partial class SeasonsGrid(ISeasonsService seasonService)

@@ -4,7 +4,7 @@ using Calcio.Shared.DTOs.ClubJoinRequests;
 using Calcio.Shared.Enums;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.ClubJoinRequests;
-using Calcio.UI.Components.Clubs.Shared;
+using Calcio.UI.Components.CalcioUsers.Shared;
 
 using Microsoft.Extensions.DependencyInjection;
 

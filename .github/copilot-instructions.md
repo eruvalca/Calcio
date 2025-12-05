@@ -67,6 +67,7 @@
 - `ReadOnlyDbContext` sets `QueryTrackingBehavior.NoTracking` and throws on `SaveChanges*`. Use it for query pipelines, read models, and background projections where writes are disallowed.
 - `ReadWriteDbContext` inherits the same base behavior but enables saving. Register it for mutation handlers, EF migrations, and transactional work. Keep read-heavy operations in `ReadOnlyDbContext` to avoid accidental tracking.
 - Use `IDbContextFactory<T>` with `CreateDbContextAsync` instead of injecting `DbContext` directly; ensures proper scoping and allows `await using` disposal.
+- **Never use DbContext directly in Blazor components or pages.** All data access must go through service interfaces (e.g., `IClubsService`, `IPlayersService`). This ensures separation of concerns, testability, and consistent behavior between server and client rendering modes.
 
 ### Global Query Filters & Tenancy
 

@@ -1,29 +1,27 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-using Calcio.Data.Contexts;
 using Calcio.Shared.DTOs.CalcioUsers;
 using Calcio.Shared.DTOs.ClubJoinRequests;
 using Calcio.Shared.DTOs.Clubs;
 using Calcio.Shared.Enums;
-using Calcio.Shared.Extensions.ClubJoinRequests;
-using Calcio.Shared.Extensions.Clubs;
 using Calcio.Shared.Models.Entities;
 using Calcio.Shared.Services.CalcioUsers;
+using Calcio.Shared.Services.ClubJoinRequests;
+using Calcio.Shared.Services.Clubs;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace Calcio.Components.Account.Pages.Manage;
 
-public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContextFactory,
-    IDbContextFactory<ReadWriteDbContext> readWriteDbContextFactory,
+public partial class Clubs(
+    IClubsService clubsService,
+    IClubJoinRequestsService clubJoinRequestsService,
+    ICalcioUsersService calcioUsersService,
     UserManager<CalcioUserEntity> userManager,
     SignInManager<CalcioUserEntity> signInManager,
-    IdentityRedirectManager redirectManager,
-    ICalcioUsersService calcioUsersService,
-    ILogger<Clubs> logger)
+    IdentityRedirectManager redirectManager)
 {
     private static readonly string[] UsStateAbbreviations =
     [
@@ -37,7 +35,7 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
     private InputModel Input { get; set; } = default!;
 
     private long UserId { get; set; } = default!;
-    private List<ClubEntity> UserClubs { get; set; } = [];
+    private List<BaseClubDto> UserClubs { get; set; } = [];
     private List<BaseClubDto> AllClubs { get; set; } = [];
     private ClubJoinRequestDto? CurrentJoinRequest { get; set; }
     private List<ClubJoinRequestWithUserDto> ClubJoinRequests { get; set; } = [];
@@ -54,39 +52,34 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
 
         IsClubAdmin = HttpContext.User.IsInRole("ClubAdmin");
 
-        await using var readOnlyDbContext = await readOnlyDbContextFactory.CreateDbContextAsync();
-        UserClubs = await readOnlyDbContext.Clubs
-            .ToListAsync(CancellationToken);
+        var userClubsResult = await clubsService.GetUserClubsAsync(CancellationToken);
+        userClubsResult.Switch(
+            clubs => UserClubs = clubs,
+            problem => UserClubs = []);
 
         if (UserClubs.Count == 0)
         {
-            CurrentJoinRequest = await readOnlyDbContext.ClubJoinRequests
-                .Where(r => r.RequestingUserId == UserId &&
-                    (r.Status == RequestStatus.Pending || r.Status == RequestStatus.Rejected))
-                .Select(r => r.ToClubJoinRequestDto())
-                .FirstOrDefaultAsync(CancellationToken);
+            var joinRequestResult = await clubJoinRequestsService.GetRequestForCurrentUserAsync(CancellationToken);
+            joinRequestResult.Switch(
+                request => CurrentJoinRequest = request,
+                problem => CurrentJoinRequest = null);
 
-            AllClubs = await readOnlyDbContext.Clubs
-                .IgnoreQueryFilters()
-                .OrderBy(c => c.State)
-                .ThenBy(c => c.City)
-                .ThenBy(c => c.Name)
-                .Select(c => c.ToClubDto())
-                .ToListAsync(CancellationToken);
+            var allClubsResult = await clubsService.GetAllClubsForBrowsingAsync(CancellationToken);
+            allClubsResult.Switch(
+                clubs => AllClubs = clubs,
+                problem => AllClubs = []);
         }
         else if (IsClubAdmin)
         {
-            ClubJoinRequests = await readOnlyDbContext.ClubJoinRequests
-                .Include(r => r.RequestingUser)
-                .Where(r => r.ClubId == UserClubs[0].ClubId && r.Status == RequestStatus.Pending)
-                .OrderBy(r => r.CreatedAt)
-                .Select(r => r.ToClubJoinRequestWithUserDto())
-                .ToListAsync(CancellationToken);
+            var pendingRequestsResult = await clubJoinRequestsService.GetPendingRequestsForClubAsync(UserClubs[0].Id, CancellationToken);
+            pendingRequestsResult.Switch(
+                requests => ClubJoinRequests = requests,
+                problem => ClubJoinRequests = []);
 
-            var membersResult = await calcioUsersService.GetClubMembersAsync(UserClubs[0].ClubId, CancellationToken);
+            var membersResult = await calcioUsersService.GetClubMembersAsync(UserClubs[0].Id, CancellationToken);
             membersResult.Switch(
                 members => ClubMembers = members,
-                _ => ClubMembers = []);
+                problem => ClubMembers = []);
         }
     }
 
@@ -97,50 +90,27 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
             return;
         }
 
-        await using var readWriteDbContext = await readWriteDbContextFactory.CreateDbContextAsync();
+        var createDto = new CreateClubDto(Input.Name, Input.City, Input.State);
+        var result = await clubsService.CreateClubAsync(createDto, CancellationToken);
 
-        var currentUser = await readWriteDbContext.Users.FirstOrDefaultAsync(user => user.Id == UserId, CancellationToken)
-            ?? throw new InvalidOperationException("Current user cannot be null.");
+        await result.Match(
+            async club =>
+            {
+                // Refresh the sign-in to update the user's roles/claims
+                var user = await userManager.FindByIdAsync(UserId.ToString());
+                if (user is not null)
+                {
+                    await signInManager.RefreshSignInAsync(user);
+                }
 
-        // Delete any existing join request (rejected) when creating own club
-        var existingRequest = await readWriteDbContext.ClubJoinRequests
-            .FirstOrDefaultAsync(r => r.RequestingUserId == UserId, CancellationToken);
-
-        if (existingRequest is not null)
-        {
-            readWriteDbContext.Remove(existingRequest);
-        }
-
-        var club = new ClubEntity
-        {
-            Name = Input.Name,
-            City = Input.City,
-            State = Input.State,
-            CreatedById = currentUser.Id,
-            CalcioUsers = [currentUser]
-        };
-
-        readWriteDbContext.Add(club);
-        await readWriteDbContext.SaveChangesAsync(CancellationToken);
-
-        // Get a fresh user instance from UserManager to avoid tracking conflicts
-        var userForRole = await userManager.FindByIdAsync(UserId.ToString())
-            ?? throw new InvalidOperationException("Current user cannot be null.");
-
-        var roleResult = await userManager.AddToRoleAsync(userForRole, "ClubAdmin");
-        if (!roleResult.Succeeded)
-        {
-            var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
-            LogClubAdminRoleFailed(logger, currentUser.Id, errors);
-        }
-        else
-        {
-            await signInManager.RefreshSignInAsync(userForRole);
-        }
-
-        LogClubCreated(logger, club.Name);
-
-        redirectManager.RedirectToWithStatus("Account/Manage/Clubs", $"Club '{club.Name}' created.", HttpContext);
+                redirectManager.RedirectToWithStatus("Account/Manage/Clubs", $"Club '{club.Name}' created.", HttpContext);
+            },
+            problem =>
+            {
+                // Handle error - for now, just redirect without success message
+                redirectManager.RedirectTo("Account/Manage/Clubs");
+                return Task.CompletedTask;
+            });
     }
 
     private sealed class InputModel
@@ -163,10 +133,4 @@ public partial class Clubs(IDbContextFactory<ReadOnlyDbContext> readOnlyDbContex
     {
         public string ClubSearch { get; set; } = string.Empty;
     }
-
-    [LoggerMessage(Level = LogLevel.Information, Message = "Club created: {ClubName}")]
-    private static partial void LogClubCreated(ILogger logger, string ClubName);
-
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to add ClubAdmin role to user {UserId}: {Errors}")]
-    private static partial void LogClubAdminRoleFailed(ILogger logger, long UserId, string Errors);
 }

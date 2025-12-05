@@ -5,18 +5,21 @@ using Calcio.Data.Contexts.Base;
 using Calcio.Data.Interceptors;
 using Calcio.Endpoints.CalcioUsers;
 using Calcio.Endpoints.ClubJoinRequests;
+using Calcio.Endpoints.Clubs;
 using Calcio.Endpoints.Players;
 using Calcio.Endpoints.Seasons;
 using Calcio.Endpoints.Teams;
 using Calcio.ServiceDefaults;
 using Calcio.Services.CalcioUsers;
 using Calcio.Services.ClubJoinRequests;
+using Calcio.Services.Clubs;
 using Calcio.Services.Players;
 using Calcio.Services.Seasons;
 using Calcio.Services.Teams;
 using Calcio.Shared.Models.Entities;
 using Calcio.Shared.Services.CalcioUsers;
 using Calcio.Shared.Services.ClubJoinRequests;
+using Calcio.Shared.Services.Clubs;
 using Calcio.Shared.Services.Players;
 using Calcio.Shared.Services.Seasons;
 using Calcio.Shared.Services.Teams;
@@ -119,6 +122,7 @@ builder.Services.AddSingleton<IEmailSender<CalcioUserEntity>, IdentityNoOpEmailS
 builder.Services.AddScoped<ThemeService>();
 
 builder.Services.AddScoped<IClubJoinRequestsService, ClubJoinRequestsService>();
+builder.Services.AddScoped<IClubsService, ClubsService>();
 builder.Services.AddScoped<ICalcioUsersService, CalcioUsersService>();
 builder.Services.AddScoped<IPlayersService, PlayersService>();
 builder.Services.AddScoped<ISeasonsService, SeasonsService>();
@@ -187,6 +191,7 @@ app.MapRazorComponents<App>()
 app.MapAdditionalIdentityEndpoints();
 
 app.MapClubJoinRequestsEndpoints();
+app.MapClubsEndpoints();
 app.MapCalcioUsersEndpoints();
 app.MapPlayersEndpoints();
 app.MapSeasonsEndpoints();
