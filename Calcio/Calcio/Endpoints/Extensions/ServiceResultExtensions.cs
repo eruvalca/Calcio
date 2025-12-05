@@ -32,7 +32,7 @@ public static class ServiceResultExtensions
         public Results<THttpSuccess, ProblemHttpResult> ToHttpResult<THttpSuccess>(THttpSuccess successResult)
             where THttpSuccess : IResult
             => result.Match<Results<THttpSuccess, ProblemHttpResult>>(
-                _ => successResult,
+                success => successResult,
                 problem => TypedResults.Problem(statusCode: problem.StatusCode, detail: problem.Detail));
     }
 }

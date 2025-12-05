@@ -77,7 +77,7 @@ public partial class TeamsGrid(ITeamsService teamService)
         var result = await teamService.CreateTeamAsync(ClubId, dto, CancellationToken);
 
         result.Switch(
-            _ =>
+            success =>
             {
                 ShowCreateForm = false;
                 CreateInput = new CreateTeamInputModel();
