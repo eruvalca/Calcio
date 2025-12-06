@@ -1,4 +1,5 @@
 using Calcio.Shared.DTOs.Players;
+using Calcio.Shared.Extensions.Shared;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
@@ -16,7 +17,7 @@ public partial class ClubPlayersGrid
     private IEnumerable<ClubPlayerDto> FilteredPlayers
         => string.IsNullOrWhiteSpace(SearchTerm)
             ? Players
-            : Players.Where(player => player.FullName.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)
-                || player.FirstName.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)
-                || player.LastName.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
+            : Players.Where(player => player.FullName.ContainsIgnoreCase(SearchTerm)
+                || player.FirstName.ContainsIgnoreCase(SearchTerm)
+                || player.LastName.ContainsIgnoreCase(SearchTerm));
 }

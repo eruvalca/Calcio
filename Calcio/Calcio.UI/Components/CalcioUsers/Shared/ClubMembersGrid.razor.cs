@@ -1,4 +1,5 @@
 using Calcio.Shared.DTOs.CalcioUsers;
+using Calcio.Shared.Extensions.Shared;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.CalcioUsers;
 
@@ -27,8 +28,8 @@ public partial class ClubMembersGrid(ICalcioUsersService calcioUsersService)
     private IEnumerable<ClubMemberDto> FilteredMembers
         => string.IsNullOrWhiteSpace(SearchTerm)
             ? Members
-            : Members.Where(member => member.FullName.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)
-                || member.Email.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
+            : Members.Where(member => member.FullName.ContainsIgnoreCase(SearchTerm)
+                || member.Email.ContainsIgnoreCase(SearchTerm));
 
     private void ShowRemoveConfirmation(ClubMemberDto member)
     {

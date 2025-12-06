@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 using Calcio.Shared.DTOs.Teams;
+using Calcio.Shared.Extensions.Shared;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.Teams;
 using Calcio.Shared.Validation;
@@ -26,7 +27,7 @@ public partial class TeamsGrid(
     private IEnumerable<TeamDto> FilteredTeams
         => string.IsNullOrWhiteSpace(SearchTerm)
             ? Teams
-            : Teams.Where(team => team.Name.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
+            : Teams.Where(team => team.Name.ContainsIgnoreCase(SearchTerm));
 
     private bool ShowCreateForm { get; set; }
 

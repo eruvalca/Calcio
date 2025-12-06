@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 using Calcio.Shared.DTOs.Seasons;
+using Calcio.Shared.Extensions.Shared;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.Seasons;
 using Calcio.Shared.Validation;
@@ -26,7 +27,7 @@ public partial class SeasonsGrid(
     private IEnumerable<SeasonDto> FilteredSeasons
         => string.IsNullOrWhiteSpace(SearchTerm)
             ? Seasons
-            : Seasons.Where(season => season.Name.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
+            : Seasons.Where(season => season.Name.ContainsIgnoreCase(SearchTerm));
 
     private bool ShowCreateForm { get; set; }
 

@@ -1,6 +1,7 @@
 using Calcio.Shared.DTOs.ClubJoinRequests;
 using Calcio.Shared.DTOs.Clubs;
 using Calcio.Shared.Enums;
+using Calcio.Shared.Extensions.Shared;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.ClubJoinRequests;
 
@@ -33,9 +34,9 @@ public partial class FilterableClubsGrid(
     private IEnumerable<BaseClubDto> FilteredClubs
         => string.IsNullOrWhiteSpace(SearchTerm)
             ? Clubs
-            : Clubs.Where(club => club.Name.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)
-                || club.City.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)
-                || club.State.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
+            : Clubs.Where(club => club.Name.ContainsIgnoreCase(SearchTerm)
+                || club.City.ContainsIgnoreCase(SearchTerm)
+                || club.State.ContainsIgnoreCase(SearchTerm));
 
     private bool HasPendingRequest => CurrentJoinRequest?.Status == RequestStatus.Pending;
 
