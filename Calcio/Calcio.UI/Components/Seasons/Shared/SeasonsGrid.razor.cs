@@ -21,6 +21,13 @@ public partial class SeasonsGrid(
     [Parameter]
     public List<SeasonDto> Seasons { get; set; } = [];
 
+    private string SearchTerm { get; set; } = string.Empty;
+
+    private IEnumerable<SeasonDto> FilteredSeasons
+        => string.IsNullOrWhiteSpace(SearchTerm)
+            ? Seasons
+            : Seasons.Where(season => season.Name.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
+
     private bool ShowCreateForm { get; set; }
 
     private bool IsCreating { get; set; }
@@ -32,6 +39,14 @@ public partial class SeasonsGrid(
     private static DateOnly Today => DateOnly.FromDateTime(DateTime.Today);
 
     private static DateOnly Tomorrow => Today.AddDays(1);
+
+    private static bool IsSeasonActive(SeasonDto season)
+    {
+        var today = Today;
+        var isWithinStartDate = today >= season.StartDate;
+        var isWithinEndDate = season.EndDate is null || today <= season.EndDate;
+        return isWithinStartDate && isWithinEndDate;
+    }
 
     private void ToggleCreateForm()
     {

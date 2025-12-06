@@ -21,6 +21,13 @@ public partial class TeamsGrid(
     [Parameter]
     public List<TeamDto> Teams { get; set; } = [];
 
+    private string SearchTerm { get; set; } = string.Empty;
+
+    private IEnumerable<TeamDto> FilteredTeams
+        => string.IsNullOrWhiteSpace(SearchTerm)
+            ? Teams
+            : Teams.Where(team => team.Name.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
+
     private bool ShowCreateForm { get; set; }
 
     private bool IsCreating { get; set; }

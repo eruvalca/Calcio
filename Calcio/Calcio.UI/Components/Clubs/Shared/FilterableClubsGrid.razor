@@ -14,15 +14,14 @@
     <div class="card-body">
         <QuickGrid TGridItem="BaseClubDto" Items="FilteredClubs.AsQueryable()"
             class="table table-responsive table-borderless table-hover">
-            <PropertyColumn Title="Name" Property="c => c.Name" />
-            <PropertyColumn Title="City" Property="c => c.City" />
-            <PropertyColumn Title="State" Property="c => c.State" />
+            <PropertyColumn Title="Name" Property="c => c.Name" Sortable="true" IsDefaultSortColumn="true" />
+            <PropertyColumn Title="City" Property="c => c.City" Sortable="true" />
+            <PropertyColumn Title="State" Property="c => c.State" Sortable="true" />
             <TemplateColumn Title="Actions">
                 @if (IsPendingClub(context.Id))
                 {
                     <span class="badge bg-warning text-dark me-2">Pending</span>
-                    <button type="button" class="btn btn-sm btn-outline-danger"
-                            @onclick="ShowCancelConfirmation">
+                    <button type="button" class="btn btn-sm btn-outline-danger" @onclick="ShowCancelConfirmation">
                         Cancel Request
                     </button>
                 }
@@ -30,14 +29,14 @@
                 {
                     <span class="badge bg-danger me-2">Rejected</span>
                     <button type="button" class="btn btn-sm btn-outline-primary"
-                            @onclick="() => ShowJoinConfirmation(context.Id)">
+                        @onclick="() => ShowJoinConfirmation(context.Id)">
                         Request Again
                     </button>
                 }
                 else if (!HasPendingRequest)
                 {
                     <button type="button" class="btn btn-sm btn-outline-primary"
-                            @onclick="() => ShowJoinConfirmation(context.Id)">
+                        @onclick="() => ShowJoinConfirmation(context.Id)">
                         Request to Join
                     </button>
                 }
@@ -63,10 +62,12 @@
                         <div class="alert alert-danger" role="alert">@ErrorMessage</div>
                     }
                     <p>Are you sure you want to request to join <strong>@club?.Name</strong>?</p>
-                    <p class="text-muted small">A club administrator will need to approve your request before you can access the club.</p>
+                    <p class="text-muted small">A club administrator will need to approve your request before you can access
+                        the club.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CancelJoinConfirmation" disabled="@IsProcessing">Cancel</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CancelJoinConfirmation"
+                        disabled="@IsProcessing">Cancel</button>
                     <button type="button" class="btn btn-primary" @onclick="ConfirmJoinClub" disabled="@IsProcessing">
                         @if (IsProcessing)
                         {
@@ -84,8 +85,8 @@
 @if (ConfirmingCancelRequest)
 {
     var club = CurrentJoinRequest is not null
-        ? Clubs.FirstOrDefault(c => c.Id == CurrentJoinRequest.ClubId)
-        : null;
+    ? Clubs.FirstOrDefault(c => c.Id == CurrentJoinRequest.ClubId)
+    : null;
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -101,7 +102,8 @@
                     <p>Are you sure you want to cancel your request to join <strong>@club?.Name</strong>?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="DismissCancelConfirmation" disabled="@IsProcessing">Keep Request</button>
+                    <button type="button" class="btn btn-secondary" @onclick="DismissCancelConfirmation"
+                        disabled="@IsProcessing">Keep Request</button>
                     <button type="button" class="btn btn-danger" @onclick="ConfirmCancelRequest" disabled="@IsProcessing">
                         @if (IsProcessing)
                         {

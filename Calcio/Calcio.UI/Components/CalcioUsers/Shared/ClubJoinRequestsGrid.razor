@@ -14,8 +14,9 @@
         {
             <QuickGrid TGridItem="ClubJoinRequestWithUserDto" Items="JoinRequests.AsQueryable()"
                 class="table table-responsive table-borderless table-hover">
-                <PropertyColumn Title="Name" Property="r => r.RequestingUserFullName" />
-                <PropertyColumn Title="Email" Property="r => r.RequestingUserEmail" />
+                <PropertyColumn Title="Name" Property="r => r.RequestingUserFullName" Sortable="true"
+                    IsDefaultSortColumn="true" />
+                <PropertyColumn Title="Email" Property="r => r.RequestingUserEmail" Sortable="true" />
                 <TemplateColumn Title="Requested">
                     @context.RequestedAt.LocalDateTime.ToShortDateString()
                 </TemplateColumn>
@@ -52,7 +53,8 @@
                         <div class="alert alert-danger" role="alert">@ErrorMessage</div>
                     }
                     <p>Are you sure you want to approve the join request from
-                        <strong>@ConfirmingApproveRequest.RequestingUserFullName</strong>?</p>
+                        <strong>@ConfirmingApproveRequest.RequestingUserFullName</strong>?
+                    </p>
                     <p class="text-muted small">They will become a member of your club and have access to club resources.
                     </p>
                 </div>
@@ -88,7 +90,8 @@
                         <div class="alert alert-danger" role="alert">@ErrorMessage</div>
                     }
                     <p>Are you sure you want to reject the join request from
-                        <strong>@ConfirmingRejectRequest.RequestingUserFullName</strong>?</p>
+                        <strong>@ConfirmingRejectRequest.RequestingUserFullName</strong>?
+                    </p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="CancelRejectConfirmation"

@@ -12,6 +12,14 @@
             </button>
         }
     </div>
+    <div class="card-header border-top">
+        <form @onsubmit:preventDefault>
+            <div class="input-group" role="search">
+                <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="SeasonSearch"
+                    name="SeasonSearch" class="form-control" placeholder="Search by name" autocomplete="off" />
+            </div>
+        </form>
+    </div>
     @if (ShowCreateForm)
     {
         <div class="card-body border-bottom">
@@ -64,13 +72,11 @@
         }
         else
         {
-            <QuickGrid TGridItem="SeasonDto" Items="Seasons.AsQueryable()"
+            <QuickGrid TGridItem="SeasonDto" Items="FilteredSeasons.AsQueryable()"
                 class="table table-responsive table-borderless table-hover">
-                <PropertyColumn Title="Name" Property="s => s.Name" />
-                <TemplateColumn Title="Start Date">
-                    @context.StartDate.ToShortDateString()
-                </TemplateColumn>
-                <TemplateColumn Title="End Date">
+                <PropertyColumn Title="Name" Property="s => s.Name" Sortable="true" IsDefaultSortColumn="true" />
+                <PropertyColumn Title="Start Date" Property="s => s.StartDate" Format="d" Sortable="true" />
+                <TemplateColumn Title="End Date" SortBy="GridSort<SeasonDto>.ByAscending(s => s.EndDate)">
                     @(context.EndDate?.ToShortDateString() ?? "—")
                 </TemplateColumn>
                 <TemplateColumn Title="Status">
@@ -78,9 +84,13 @@
                     {
                         <span class="badge bg-secondary">Complete</span>
                     }
-                    else
+                    else if (IsSeasonActive(context))
                     {
                         <span class="badge bg-success">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark">Inactive</span>
                     }
                 </TemplateColumn>
             </QuickGrid>

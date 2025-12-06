@@ -130,6 +130,50 @@ public sealed class SeasonsGridTests : BunitContext
     }
 
     [Fact]
+    public void WhenSeasonHasNotStarted_ShouldDisplayInactiveBadge()
+    {
+        // Arrange
+        var seasons = new List<SeasonDto>
+        {
+            new(
+                SeasonId: 1,
+                Name: "Future Season",
+                StartDate: DateOnly.FromDateTime(DateTime.Today.AddDays(30)),
+                EndDate: DateOnly.FromDateTime(DateTime.Today.AddDays(120)),
+                IsComplete: false)
+        };
+
+        // Act
+        var cut = RenderGrid(seasons: seasons);
+
+        // Assert
+        var badge = cut.Find(".badge.bg-warning");
+        badge.TextContent.ShouldBe("Inactive");
+    }
+
+    [Fact]
+    public void WhenSeasonHasEnded_ShouldDisplayInactiveBadge()
+    {
+        // Arrange
+        var seasons = new List<SeasonDto>
+        {
+            new(
+                SeasonId: 1,
+                Name: "Past Season",
+                StartDate: DateOnly.FromDateTime(DateTime.Today.AddDays(-90)),
+                EndDate: DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
+                IsComplete: false)
+        };
+
+        // Act
+        var cut = RenderGrid(seasons: seasons);
+
+        // Assert
+        var badge = cut.Find(".badge.bg-warning");
+        badge.TextContent.ShouldBe("Inactive");
+    }
+
+    [Fact]
     public void WhenSeasonHasNoEndDate_ShouldDisplayDash()
     {
         // Arrange
@@ -164,10 +208,10 @@ public sealed class SeasonsGridTests : BunitContext
         cut.Find("button.btn-primary").Click();
 
         // Assert
-        var form = cut.Find("form");
+        var form = cut.Find(".card-body form");
         form.ShouldNotBeNull();
 
-        cut.FindAll("button.btn-primary").ShouldBeEmpty(); // New Season button should be hidden
+        cut.FindAll(".card-header button.btn-primary").ShouldBeEmpty(); // New Season button should be hidden
         cut.Find("#seasonName").ShouldNotBeNull();
         cut.Find("#startDate").ShouldNotBeNull();
         cut.Find("#endDate").ShouldNotBeNull();
@@ -184,8 +228,8 @@ public sealed class SeasonsGridTests : BunitContext
         cut.Find("button.btn-outline-secondary").Click();
 
         // Assert
-        cut.FindAll("form").ShouldBeEmpty();
-        cut.Find("button.btn-primary").ShouldNotBeNull(); // New Season button should be visible again
+        cut.FindAll(".card-body.border-bottom form").ShouldBeEmpty();
+        cut.Find(".card-header button.btn-primary").ShouldNotBeNull(); // New Season button should be visible again
     }
 
     [Fact]
@@ -205,7 +249,7 @@ public sealed class SeasonsGridTests : BunitContext
         cut.Find("#seasonName").Change("Spring 2025");
 
         // Act
-        await cut.Find("form").SubmitAsync();
+        await cut.Find(".card-body form").SubmitAsync();
 
         // Assert
         await _mockSeasonsService.Received(1)
@@ -226,7 +270,7 @@ public sealed class SeasonsGridTests : BunitContext
         cut.Find("#seasonName").Change("Spring 2025");
 
         // Act
-        await cut.Find("form").SubmitAsync();
+        await cut.Find(".card-body form").SubmitAsync();
 
         // Assert
         cut.WaitForAssertion(() =>
@@ -250,7 +294,7 @@ public sealed class SeasonsGridTests : BunitContext
         cut.Find("#seasonName").Change("Spring 2025");
 
         // Act
-        await cut.Find("form").SubmitAsync();
+        await cut.Find(".card-body form").SubmitAsync();
 
         // Assert
         cut.WaitForAssertion(() =>
@@ -274,7 +318,7 @@ public sealed class SeasonsGridTests : BunitContext
         cut.Find("#seasonName").Change("Spring 2025");
 
         // Act
-        await cut.Find("form").SubmitAsync();
+        await cut.Find(".card-body form").SubmitAsync();
 
         // Assert
         cut.WaitForAssertion(() =>
@@ -303,7 +347,7 @@ public sealed class SeasonsGridTests : BunitContext
         cut.Find("#seasonName").Change("Spring 2025");
 
         // Act
-        var submitTask = cut.Find("form").SubmitAsync();
+        var submitTask = cut.Find(".card-body form").SubmitAsync();
 
         // Assert
         cut.WaitForAssertion(() =>
@@ -335,7 +379,7 @@ public sealed class SeasonsGridTests : BunitContext
         cut.Find("#seasonName").Change("Spring 2025");
 
         // Act
-        var submitTask = cut.Find("form").SubmitAsync();
+        var submitTask = cut.Find(".card-body form").SubmitAsync();
 
         // Assert
         cut.WaitForAssertion(() =>
@@ -368,6 +412,127 @@ public sealed class SeasonsGridTests : BunitContext
         cut.Markup.ShouldContain("Season 1");
         cut.Markup.ShouldContain("Season 2");
         cut.Markup.ShouldContain("Season 3");
+    }
+
+    #endregion
+
+    #region Search/Filter Tests
+
+    [Fact]
+    public void WhenSearchTermIsEmpty_ShouldDisplayAllSeasons()
+    {
+        // Arrange
+        var seasons = CreateTestSeasons(3);
+
+        // Act
+        var cut = RenderGrid(seasons: seasons);
+
+        // Assert
+        var rows = cut.FindAll("tbody tr");
+        rows.Count.ShouldBe(3);
+    }
+
+    [Fact]
+    public void WhenSearchByName_ShouldFilterSeasons()
+    {
+        // Arrange
+        var seasons = CreateTestSeasons(3);
+        var cut = RenderGrid(seasons: seasons);
+
+        // Act
+        var searchInput = cut.Find("#SeasonSearch");
+        searchInput.Input("Season 1");
+
+        // Assert
+        cut.WaitForAssertion(() =>
+        {
+            var rows = cut.FindAll("tbody tr");
+            rows.Count.ShouldBe(1);
+            cut.Markup.ShouldContain("Season 1");
+            cut.Markup.ShouldNotContain("Season 2");
+            cut.Markup.ShouldNotContain("Season 3");
+        });
+    }
+
+    [Fact]
+    public void WhenSearchByPartialName_ShouldFilterSeasons()
+    {
+        // Arrange
+        var seasons = CreateTestSeasons(3);
+        var cut = RenderGrid(seasons: seasons);
+
+        // Act
+        var searchInput = cut.Find("#SeasonSearch");
+        searchInput.Input("Season");
+
+        // Assert
+        cut.WaitForAssertion(() =>
+        {
+            var rows = cut.FindAll("tbody tr");
+            rows.Count.ShouldBe(3); // All 3 seasons match "Season"
+        });
+    }
+
+    [Fact]
+    public void WhenSearchIsCaseInsensitive_ShouldFilterSeasons()
+    {
+        // Arrange
+        var seasons = CreateTestSeasons(2);
+        var cut = RenderGrid(seasons: seasons);
+
+        // Act
+        var searchInput = cut.Find("#SeasonSearch");
+        searchInput.Input("SEASON 1");
+
+        // Assert
+        cut.WaitForAssertion(() =>
+        {
+            var rows = cut.FindAll("tbody tr");
+            rows.Count.ShouldBe(1);
+            cut.Markup.ShouldContain("Season 1");
+        });
+    }
+
+    [Fact]
+    public void WhenSearchMatchesNoSeasons_ShouldDisplayEmptyGrid()
+    {
+        // Arrange
+        var seasons = CreateTestSeasons(2);
+        var cut = RenderGrid(seasons: seasons);
+
+        // Act
+        var searchInput = cut.Find("#SeasonSearch");
+        searchInput.Input("nonexistent");
+
+        // Assert
+        cut.WaitForAssertion(() =>
+        {
+            var rows = cut.FindAll("tbody tr");
+            rows.Count.ShouldBe(0);
+        });
+    }
+
+    [Fact]
+    public void WhenSearchCleared_ShouldDisplayAllSeasons()
+    {
+        // Arrange
+        var seasons = CreateTestSeasons(3);
+        var cut = RenderGrid(seasons: seasons);
+
+        var searchInput = cut.Find("#SeasonSearch");
+        searchInput.Input("Season 1");
+
+        cut.WaitForState(() => cut.FindAll("tbody tr").Count == 1);
+
+        // Act
+        searchInput.Input(string.Empty);
+
+        // Assert
+        cut.WaitForAssertion(() =>
+        {
+            var rows = cut.FindAll("tbody tr");
+            rows.Count.ShouldBe(3); // All seasons displayed again
+        });
     }
 
     #endregion

@@ -12,6 +12,14 @@
             </button>
         }
     </div>
+    <div class="card-header border-top">
+        <form @onsubmit:preventDefault>
+            <div class="input-group" role="search">
+                <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="TeamSearch"
+                    name="TeamSearch" class="form-control" placeholder="Search by name" autocomplete="off" />
+            </div>
+        </form>
+    </div>
     @if (ShowCreateForm)
     {
         <div class="card-body border-bottom">
@@ -58,10 +66,10 @@
         }
         else
         {
-            <QuickGrid TGridItem="TeamDto" Items="Teams.AsQueryable()"
+            <QuickGrid TGridItem="TeamDto" Items="FilteredTeams.AsQueryable()"
                 class="table table-responsive table-borderless table-hover">
-                <PropertyColumn Title="Name" Property="t => t.Name" />
-                <PropertyColumn Title="Graduation Year" Property="t => t.GraduationYear" />
+                <PropertyColumn Title="Name" Property="t => t.Name" Sortable="true" IsDefaultSortColumn="true" />
+                <PropertyColumn Title="Graduation Year" Property="t => t.GraduationYear" Sortable="true" />
             </QuickGrid>
         }
     </div>

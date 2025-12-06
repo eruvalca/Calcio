@@ -30,25 +30,22 @@
     @if (IsClubAdmin && ClubJoinRequests.Count > 0)
     {
         <h5>Manage Join Requests</h5>
-        <ClubJoinRequestsGrid ClubId="UserClubs[0].Id" JoinRequests="ClubJoinRequests"
-            @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
+        <ClubJoinRequestsGrid ClubId="UserClubs[0].Id" JoinRequests="ClubJoinRequests" @rendermode="InteractiveAuto" />
     }
 
     @if (IsClubAdmin)
     {
         <h5>Manage Club Members</h5>
-        <ClubMembersGrid ClubId="UserClubs[0].Id" Members="ClubMembers"
-            @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
+        <ClubMembersGrid ClubId="UserClubs[0].Id" Members="ClubMembers" @rendermode="InteractiveAuto" />
 
         <h5>Manage Club Players</h5>
-        <ClubPlayersGrid Players="ClubPlayers" @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
+        <ClubPlayersGrid Players="ClubPlayers" @rendermode="InteractiveAuto" />
 
         <h5>Manage Seasons</h5>
-        <SeasonsGrid ClubId="UserClubs[0].Id" Seasons="ClubSeasons"
-            @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
+        <SeasonsGrid ClubId="UserClubs[0].Id" Seasons="ClubSeasons" @rendermode="InteractiveAuto" />
 
         <h5>Manage Teams</h5>
-        <TeamsGrid ClubId="UserClubs[0].Id" Teams="ClubTeams" @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
+        <TeamsGrid ClubId="UserClubs[0].Id" Teams="ClubTeams" @rendermode="InteractiveAuto" />
     }
 }
 else
@@ -57,8 +54,7 @@ else
     {
         <h5>Find and join an existing club</h5>
 
-        <FilterableClubsGrid Clubs="AllClubs" CurrentJoinRequest="CurrentJoinRequest"
-            @rendermode="new InteractiveAutoRenderMode(prerender: false)" />
+        <FilterableClubsGrid Clubs="AllClubs" CurrentJoinRequest="CurrentJoinRequest" @rendermode="InteractiveAuto" />
     }
 
     @if (CurrentJoinRequest?.Status != RequestStatus.Pending)

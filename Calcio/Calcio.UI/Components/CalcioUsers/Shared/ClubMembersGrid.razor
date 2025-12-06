@@ -19,8 +19,8 @@
         {
             <QuickGrid TGridItem="ClubMemberDto" Items="FilteredMembers.AsQueryable()"
                 class="table table-responsive table-borderless table-hover">
-                <PropertyColumn Title="Name" Property="m => m.FullName" />
-                <PropertyColumn Title="Email" Property="m => m.Email" />
+                <PropertyColumn Title="Name" Property="m => m.FullName" Sortable="true" IsDefaultSortColumn="true" />
+                <PropertyColumn Title="Email" Property="m => m.Email" Sortable="true" />
                 <TemplateColumn Title="Role">
                     @if (context.IsClubAdmin)
                     {

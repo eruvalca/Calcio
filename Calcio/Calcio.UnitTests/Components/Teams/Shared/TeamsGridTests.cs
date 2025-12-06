@@ -104,7 +104,7 @@ public sealed class TeamsGridTests : BunitContext
         cut.Find("button.btn-primary").Click();
 
         // Assert
-        cut.Find("form").ShouldNotBeNull();
+        cut.Find(".card-body form").ShouldNotBeNull();
         cut.Find("#teamName").ShouldNotBeNull();
         cut.Find("#graduationYear").ShouldNotBeNull();
     }
@@ -133,8 +133,8 @@ public sealed class TeamsGridTests : BunitContext
         cut.Find("button.btn-outline-secondary").Click();
 
         // Assert
-        cut.FindAll("form").ShouldBeEmpty();
-        cut.Find("button.btn-primary").TextContent.ShouldContain("New Team");
+        cut.FindAll(".card-body.border-bottom form").ShouldBeEmpty();
+        cut.Find(".card-header button.btn-primary").TextContent.ShouldContain("New Team");
     }
 
     #endregion
@@ -160,7 +160,7 @@ public sealed class TeamsGridTests : BunitContext
         await teamNameInput.ChangeAsync(new() { Value = "U12 Red" });
         await graduationYearInput.ChangeAsync(new() { Value = (DateTime.Today.Year + 5).ToString() });
 
-        await cut.Find("form").SubmitAsync();
+        await cut.Find(".card-body form").SubmitAsync();
 
         // Assert
         await _mockTeamsService.Received(1)
@@ -184,7 +184,7 @@ public sealed class TeamsGridTests : BunitContext
         // Act
         await cut.Find("#teamName").ChangeAsync(new() { Value = "U12 Red" });
         await cut.Find("#graduationYear").ChangeAsync(new() { Value = (DateTime.Today.Year + 5).ToString() });
-        await cut.Find("form").SubmitAsync();
+        await cut.Find(".card-body form").SubmitAsync();
 
         // Assert
         cut.WaitForAssertion(() =>
@@ -209,7 +209,7 @@ public sealed class TeamsGridTests : BunitContext
         // Act
         await cut.Find("#teamName").ChangeAsync(new() { Value = "U12 Red" });
         await cut.Find("#graduationYear").ChangeAsync(new() { Value = (DateTime.Today.Year + 5).ToString() });
-        await cut.Find("form").SubmitAsync();
+        await cut.Find(".card-body form").SubmitAsync();
 
         // Assert
         cut.WaitForAssertion(() =>
@@ -234,7 +234,7 @@ public sealed class TeamsGridTests : BunitContext
         // Act
         await cut.Find("#teamName").ChangeAsync(new() { Value = "U12 Red" });
         await cut.Find("#graduationYear").ChangeAsync(new() { Value = (DateTime.Today.Year + 5).ToString() });
-        await cut.Find("form").SubmitAsync();
+        await cut.Find(".card-body form").SubmitAsync();
 
         // Assert
         cut.WaitForAssertion(() =>
@@ -265,7 +265,7 @@ public sealed class TeamsGridTests : BunitContext
         await cut.Find("#graduationYear").ChangeAsync(new() { Value = (DateTime.Today.Year + 5).ToString() });
 
         // Act
-        var submitTask = cut.Find("form").SubmitAsync();
+        var submitTask = cut.Find(".card-body form").SubmitAsync();
 
         // Assert
         cut.WaitForAssertion(() =>
@@ -299,7 +299,7 @@ public sealed class TeamsGridTests : BunitContext
         await cut.Find("#graduationYear").ChangeAsync(new() { Value = (DateTime.Today.Year + 5).ToString() });
 
         // Act
-        var submitTask = cut.Find("form").SubmitAsync();
+        var submitTask = cut.Find(".card-body form").SubmitAsync();
 
         // Assert
         cut.WaitForAssertion(() =>
@@ -348,6 +348,127 @@ public sealed class TeamsGridTests : BunitContext
         cut.Markup.ShouldContain("Team 1");
         cut.Markup.ShouldContain("Team 2");
         cut.Markup.ShouldContain("Team 3");
+    }
+
+    #endregion
+
+    #region Search/Filter Tests
+
+    [Fact]
+    public void WhenSearchTermIsEmpty_ShouldDisplayAllTeams()
+    {
+        // Arrange
+        var teams = CreateTestTeams(3);
+
+        // Act
+        var cut = RenderGrid(teams: teams);
+
+        // Assert
+        var rows = cut.FindAll("tbody tr");
+        rows.Count.ShouldBe(3);
+    }
+
+    [Fact]
+    public void WhenSearchByName_ShouldFilterTeams()
+    {
+        // Arrange
+        var teams = CreateTestTeams(3);
+        var cut = RenderGrid(teams: teams);
+
+        // Act
+        var searchInput = cut.Find("#TeamSearch");
+        searchInput.Input("Team 1");
+
+        // Assert
+        cut.WaitForAssertion(() =>
+        {
+            var rows = cut.FindAll("tbody tr");
+            rows.Count.ShouldBe(1);
+            cut.Markup.ShouldContain("Team 1");
+            cut.Markup.ShouldNotContain("Team 2");
+            cut.Markup.ShouldNotContain("Team 3");
+        });
+    }
+
+    [Fact]
+    public void WhenSearchByPartialName_ShouldFilterTeams()
+    {
+        // Arrange
+        var teams = CreateTestTeams(3);
+        var cut = RenderGrid(teams: teams);
+
+        // Act
+        var searchInput = cut.Find("#TeamSearch");
+        searchInput.Input("Team");
+
+        // Assert
+        cut.WaitForAssertion(() =>
+        {
+            var rows = cut.FindAll("tbody tr");
+            rows.Count.ShouldBe(3); // All 3 teams match "Team"
+        });
+    }
+
+    [Fact]
+    public void WhenSearchIsCaseInsensitive_ShouldFilterTeams()
+    {
+        // Arrange
+        var teams = CreateTestTeams(2);
+        var cut = RenderGrid(teams: teams);
+
+        // Act
+        var searchInput = cut.Find("#TeamSearch");
+        searchInput.Input("TEAM 1");
+
+        // Assert
+        cut.WaitForAssertion(() =>
+        {
+            var rows = cut.FindAll("tbody tr");
+            rows.Count.ShouldBe(1);
+            cut.Markup.ShouldContain("Team 1");
+        });
+    }
+
+    [Fact]
+    public void WhenSearchMatchesNoTeams_ShouldDisplayEmptyGrid()
+    {
+        // Arrange
+        var teams = CreateTestTeams(2);
+        var cut = RenderGrid(teams: teams);
+
+        // Act
+        var searchInput = cut.Find("#TeamSearch");
+        searchInput.Input("nonexistent");
+
+        // Assert
+        cut.WaitForAssertion(() =>
+        {
+            var rows = cut.FindAll("tbody tr");
+            rows.Count.ShouldBe(0);
+        });
+    }
+
+    [Fact]
+    public void WhenSearchCleared_ShouldDisplayAllTeams()
+    {
+        // Arrange
+        var teams = CreateTestTeams(3);
+        var cut = RenderGrid(teams: teams);
+
+        var searchInput = cut.Find("#TeamSearch");
+        searchInput.Input("Team 1");
+
+        cut.WaitForState(() => cut.FindAll("tbody tr").Count == 1);
+
+        // Act
+        searchInput.Input(string.Empty);
+
+        // Assert
+        cut.WaitForAssertion(() =>
+        {
+            var rows = cut.FindAll("tbody tr");
+            rows.Count.ShouldBe(3); // All teams displayed again
+        });
     }
 
     #endregion
