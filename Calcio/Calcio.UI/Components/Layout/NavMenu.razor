@@ -30,8 +30,8 @@
                 @* Theme picker for mobile - shown as nav item *@
                 <li class="nav-item d-sm-none">
                     <div class="dropdown dropup">
-                        <button class="nav-link dropdown-toggle" type="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
                             @GetThemeLabel() Theme
                         </button>
                         <ul class="dropdown-menu py-1 small">
@@ -39,8 +39,9 @@
                                     @onclick="() => ChangeTheme(ThemePreference.Light)">☀️ Light</button></li>
                             <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.Dark))" type="button"
                                     @onclick="() => ChangeTheme(ThemePreference.Dark)">🌙 Dark</button></li>
-                            <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.System))" type="button"
-                                    @onclick="() => ChangeTheme(ThemePreference.System)">🌗 Auto</button></li>
+                            <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.System))"
+                                    type="button" @onclick="() => ChangeTheme(ThemePreference.System)">🌗 Auto</button>
+                            </li>
                         </ul>
                     </div>
                 </li>
@@ -59,15 +60,16 @@
                                     @onclick="() => ChangeTheme(ThemePreference.Light)">☀️ Light</button></li>
                             <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.Dark))" type="button"
                                     @onclick="() => ChangeTheme(ThemePreference.Dark)">🌙 Dark</button></li>
-                            <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.System))" type="button"
-                                    @onclick="() => ChangeTheme(ThemePreference.System)">🌗 Auto</button></li>
+                            <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.System))"
+                                    type="button" @onclick="() => ChangeTheme(ThemePreference.System)">🌗 Auto</button>
+                            </li>
                         </ul>
                     </div>
                 </div>
                 @* Auth section - visible on all screen sizes *@
                 <AuthorizeView>
                     <Authorized>
-                        <ul class="navbar-nav flex-row">
+                        <ul class="navbar-nav flex-column flex-sm-row">
                             <li class="nav-item">
                                 <NavLink class="nav-link" href="Account/Manage">
                                     <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span>

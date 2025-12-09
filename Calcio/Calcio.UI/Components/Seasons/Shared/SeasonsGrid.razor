@@ -3,22 +3,26 @@
 @using Microsoft.AspNetCore.Components.QuickGrid
 
 <div class="card shadow mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h6 class="mb-0">Seasons</h6>
-        @if (!ShowCreateForm)
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+        <form @onsubmit:preventDefault class="flex-grow-1">
+            <div class="input-group" role="search">
+                <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="SeasonSearch"
+                    name="SeasonSearch" class="form-control" placeholder="Search by name, start date, or end date"
+                    autocomplete="off" />
+            </div>
+        </form>
+        @if (ShowCreateForm)
         {
-            <button type="button" class="btn btn-sm btn-primary" @onclick="ToggleCreateForm">
+            <button type="button" class="btn btn-outline-secondary" @onclick="ToggleCreateForm" disabled="@IsCreating">
+                Cancel
+            </button>
+        }
+        else
+        {
+            <button type="button" class="btn btn-primary" @onclick="ToggleCreateForm">
                 <i class="bi bi-plus-lg me-1"></i>New Season
             </button>
         }
-    </div>
-    <div class="card-header border-top">
-        <form @onsubmit:preventDefault>
-            <div class="input-group" role="search">
-                <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="SeasonSearch"
-                    name="SeasonSearch" class="form-control" placeholder="Search by name" autocomplete="off" />
-            </div>
-        </form>
     </div>
     @if (ShowCreateForm)
     {
@@ -48,17 +52,13 @@
                             min="@Tomorrow" />
                         <ValidationMessage For="() => CreateInput.EndDate" class="text-danger small" />
                     </div>
-                    <div class="col-12 col-md-4 d-flex gap-2">
-                        <button type="submit" class="btn btn-sm btn-success flex-grow-1" disabled="@IsCreating">
+                    <div class="col-12 col-md-4">
+                        <button type="submit" class="btn btn-sm btn-success w-100" disabled="@IsCreating">
                             @if (IsCreating)
                             {
                                 <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
                             }
                             Create
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="ToggleCreateForm"
-                            disabled="@IsCreating">
-                            Cancel
                         </button>
                     </div>
                 </div>

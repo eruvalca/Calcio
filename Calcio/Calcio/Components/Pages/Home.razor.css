@@ -1,0 +1,28 @@
+.full-width-section {
+    margin-left: calc(-0.5 * var(--bs-gutter-x, 1.5rem));
+    margin-right: calc(-0.5 * var(--bs-gutter-x, 1.5rem));
+    padding-left: calc(0.5 * var(--bs-gutter-x, 1.5rem));
+    padding-right: calc(0.5 * var(--bs-gutter-x, 1.5rem));
+}
+
+.hero-section {
+    background-color: #101010;
+}
+
+.cta-section {
+    background-color: #2a4ee0;
+}
+
+.brand-color {
+    color: #2a4ee0;
+}
+
+.btn-brand {
+    background-color: #2a4ee0;
+    border-color: #2a4ee0;
+}
+
+.btn-brand:hover {
+    background-color: #2240b8;
+    border-color: #2240b8;
+}

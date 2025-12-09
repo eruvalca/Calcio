@@ -27,7 +27,8 @@ public partial class TeamsGrid(
     private IEnumerable<TeamDto> FilteredTeams
         => string.IsNullOrWhiteSpace(SearchTerm)
             ? Teams
-            : Teams.Where(team => team.Name.ContainsIgnoreCase(SearchTerm));
+            : Teams.Where(team => team.Name.ContainsIgnoreCase(SearchTerm)
+                || team.GraduationYear.ToString().Contains(SearchTerm));
 
     private bool ShowCreateForm { get; set; }
 

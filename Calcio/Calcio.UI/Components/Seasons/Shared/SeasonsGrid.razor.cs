@@ -27,7 +27,9 @@ public partial class SeasonsGrid(
     private IEnumerable<SeasonDto> FilteredSeasons
         => string.IsNullOrWhiteSpace(SearchTerm)
             ? Seasons
-            : Seasons.Where(season => season.Name.ContainsIgnoreCase(SearchTerm));
+            : Seasons.Where(season => season.Name.ContainsIgnoreCase(SearchTerm)
+                || season.StartDate.ToString().Contains(SearchTerm)
+                || (season.EndDate?.ToString().Contains(SearchTerm) ?? false));
 
     private bool ShowCreateForm { get; set; }
 
