@@ -1,0 +1,75 @@
+@using Cropper.Blazor.Components
+@using Cropper.Blazor.Models
+@using Cropper.Blazor.Extensions
+
+@rendermode RenderMode.InteractiveAuto
+
+@if (IsVisible)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+<div class="modal fade @(IsVisible ? "show d-block" : "d-none")" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Crop Image</h5>
+                <button type="button" class="btn-close" @onclick="Cancel" disabled="@IsProcessing"></button>
+            </div>
+            <div class="modal-body">
+                @if (!string.IsNullOrEmpty(ImageSrc))
+                {
+                    <div style="max-height: 400px; width: 100%;" class="mb-3">
+                        <CropperComponent @ref="CropperComponentRef" Src="@ImageSrc" Options="CropperOptions"
+                            style="max-height: 400px; max-width: 100%;" />
+                    </div>
+
+                    <div class="d-flex justify-content-center gap-2 mb-3">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="ZoomIn"
+                            disabled="@IsProcessing" title="Zoom In">
+                            <i class="bi bi-zoom-in"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="ZoomOut"
+                            disabled="@IsProcessing" title="Zoom Out">
+                            <i class="bi bi-zoom-out"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="RotateLeft"
+                            disabled="@IsProcessing" title="Rotate Left">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="RotateRight"
+                            disabled="@IsProcessing" title="Rotate Right">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="Reset"
+                            disabled="@IsProcessing" title="Reset">
+                            <i class="bi bi-arrow-repeat"></i>
+                        </button>
+                    </div>
+
+                    <p class="text-muted small text-center mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Drag to move, scroll to zoom, or use the buttons above.
+                    </p>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" @onclick="Cancel" disabled="@IsProcessing">
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-primary" @onclick="ApplyCrop" disabled="@IsProcessing">
+                    @if (IsProcessing)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        <span>Processing...</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-check-lg me-1"></i>
+                        <span>Apply</span>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

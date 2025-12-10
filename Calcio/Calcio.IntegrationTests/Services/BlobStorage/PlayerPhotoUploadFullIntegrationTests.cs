@@ -305,8 +305,11 @@ public class PlayerPhotoUploadFullIntegrationTests(BlobStorageApplicationFactory
         getResult.Value.IsT0.ShouldBeTrue();
 
         var photoDto = getResult.Value.AsT0;
-        photoDto.OriginalUrl.ShouldContain("sas");
+        // SAS URLs contain signature (sig=), version (sv=), expiry (se=), and permissions (sp=) parameters
         photoDto.OriginalUrl.ShouldContain("sig=");
+        photoDto.OriginalUrl.ShouldContain("sv=");
+        photoDto.OriginalUrl.ShouldContain("se=");
+        photoDto.OriginalUrl.ShouldContain("sp=");
 
         // Verify the SAS URL can actually download the blob
         using var httpClient = new HttpClient();

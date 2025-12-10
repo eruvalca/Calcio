@@ -12,6 +12,8 @@ using Calcio.Shared.Services.Seasons;
 using Calcio.Shared.Services.Teams;
 using Calcio.UI.Services.Theme;
 
+using Cropper.Blazor.Extensions;
+
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -19,6 +21,8 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthenticationStateDeserialization();
+
+builder.Services.AddCropper();
 
 builder.Services.AddHttpClient<IClubJoinRequestsService, ClubJoinRequestsService>(client =>
     client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));

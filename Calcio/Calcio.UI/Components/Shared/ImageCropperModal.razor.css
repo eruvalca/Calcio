@@ -1,0 +1,5 @@
+/* Make the crop area circular */
+::deep .cropper-view-box,
+::deep .cropper-face {
+    border-radius: 50%;
+}

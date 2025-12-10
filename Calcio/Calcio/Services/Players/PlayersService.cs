@@ -213,7 +213,14 @@ public partial class PlayersService(
             {
                 await using var dbContext = await readOnlyDbContextFactory.CreateDbContextAsync(ct);
 
+                // Use IgnoreQueryFilters because:
+                // 1. We explicitly filter by playerId AND clubId, which provides sufficient access control
+                // 2. The DbContext created via factory inside this cache delegate may not have
+                //    the correct CurrentUserIdForFilters set (HttpContext may not be available
+                //    in the async context when HybridCache executes the factory delegate)
+                // 3. The calling code should verify club membership before calling this method
                 var photo = await dbContext.PlayerPhotos
+                    .IgnoreQueryFilters()
                     .Where(p => p.PlayerId == playerId && p.ClubId == clubId)
                     .FirstOrDefaultAsync(ct);
 

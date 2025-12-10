@@ -27,6 +27,8 @@ using Calcio.Shared.Services.Seasons;
 using Calcio.Shared.Services.Teams;
 using Calcio.UI.Services.Theme;
 
+using Cropper.Blazor.Extensions;
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -122,6 +124,7 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddSingleton<IEmailSender<CalcioUserEntity>, IdentityNoOpEmailSender>();
 
+builder.Services.AddCropper();
 builder.Services.AddScoped<ThemeService>();
 
 builder.Services.AddScoped<IClubJoinRequestsService, ClubJoinRequestsService>();

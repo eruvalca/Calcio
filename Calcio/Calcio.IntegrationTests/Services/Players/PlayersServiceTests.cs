@@ -1,6 +1,7 @@
 using Calcio.Data.Contexts;
 using Calcio.IntegrationTests.Data.Contexts;
 using Calcio.Services.Players;
+using Calcio.Shared.Models.Entities;
 using Calcio.Shared.Services.BlobStorage;
 
 using Microsoft.AspNetCore.Http;
@@ -314,7 +315,31 @@ public class PlayersServiceTests(CustomApplicationFactory factory) : BaseDbConte
         var service = CreateService(scope.ServiceProvider);
 
         var club = await dbContext.Clubs.FirstAsync(cancellationToken);
-        var player = await dbContext.Players.FirstAsync(p => p.ClubId == club.ClubId, cancellationToken);
+
+        // Find a player that has no photos (other tests in this class may upload photos)
+        var player = await dbContext.Players
+            .Where(p => p.ClubId == club.ClubId && !p.Photos.Any())
+            .FirstOrDefaultAsync(cancellationToken);
+
+        // If all players have photos (due to test pollution), skip test assertion
+        // This can happen when tests run in different order
+        if (player is null)
+        {
+            // Create a new player without a photo for this test
+            var writeDbContext = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
+            player = new PlayerEntity
+            {
+                FirstName = "NoPhoto",
+                LastName = "TestPlayer",
+                DateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-15)),
+                GraduationYear = DateTime.Today.Year + 3,
+                ClubId = club.ClubId,
+                Club = club,
+                CreatedById = UserAId
+            };
+            writeDbContext.Players.Add(player);
+            await writeDbContext.SaveChangesAsync(cancellationToken);
+        }
 
         // Act
         var result = await service.GetPlayerPhotoAsync(club.ClubId, player.PlayerId, cancellationToken);

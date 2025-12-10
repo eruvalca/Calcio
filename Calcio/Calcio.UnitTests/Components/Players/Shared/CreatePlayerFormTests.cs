@@ -6,6 +6,8 @@ using Calcio.Shared.Results;
 using Calcio.Shared.Services.Players;
 using Calcio.UI.Components.Players.Shared;
 
+using Cropper.Blazor.Extensions;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,7 +24,7 @@ namespace Calcio.UnitTests.Components.Players.Shared;
 /// 
 /// This component handles:
 /// - Form submission for creating new players
-/// - Optional photo upload with progress
+/// - Optional photo upload with cropping
 /// - Validation of player data
 /// - Error and success message display
 /// </summary>
@@ -38,6 +40,9 @@ public sealed class CreatePlayerFormTests : BunitContext
         // Register mock service BEFORE authorization is set up (which triggers service resolution)
         _mockPlayersService = Substitute.For<IPlayersService>();
         Services.AddSingleton(_mockPlayersService);
+
+        // Register Cropper.Blazor services for ImageCropperModal
+        Services.AddCropper();
 
         // Set up authorization after services are registered
         _authContext = AddAuthorization();
@@ -393,6 +398,61 @@ public sealed class CreatePlayerFormTests : BunitContext
         var options = genderSelect.QuerySelectorAll("option");
 
         options.Length.ShouldBeGreaterThanOrEqualTo(3); // Default + Male + Female (at minimum)
+    }
+
+    #endregion
+
+    #region Image Cropper Modal Tests
+
+    [Fact]
+    public void WhenRendered_ShouldIncludeImageCropperModal()
+    {
+        // Act
+        var cut = RenderForm();
+
+        // Assert - The ImageCropperModal should be present in the component
+        // It starts hidden (IsVisible = false)
+        var modal = cut.Find(".modal");
+        modal.ShouldNotBeNull();
+        modal.ClassList.ShouldNotContain("show"); // Modal should start hidden
+    }
+
+    [Fact]
+    public void WhenRendered_PhotoInputShouldAcceptImageTypes()
+    {
+        // Act
+        var cut = RenderForm();
+
+        // Assert
+        var photoInput = cut.Find("#photo");
+        var acceptAttr = photoInput.GetAttribute("accept");
+        acceptAttr.ShouldNotBeNull();
+        acceptAttr.ShouldContain("image/jpeg");
+        acceptAttr.ShouldContain("image/png");
+        acceptAttr.ShouldContain("image/gif");
+        acceptAttr.ShouldContain("image/webp");
+    }
+
+    [Fact]
+    public void WhenNoCroppedPhoto_ShouldNotShowPhotoPreview()
+    {
+        // Act
+        var cut = RenderForm();
+
+        // Assert
+        var photoPreviewImages = cut.FindAll("img.photo-preview");
+        photoPreviewImages.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void WhenNoCroppedPhoto_ShouldNotShowCroppedBadge()
+    {
+        // Act
+        var cut = RenderForm();
+
+        // Assert
+        var croppedBadges = cut.FindAll(".badge.bg-success");
+        croppedBadges.ShouldBeEmpty();
     }
 
     #endregion

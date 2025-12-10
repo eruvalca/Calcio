@@ -3,6 +3,7 @@
 @using Calcio.Shared.Results
 @using Calcio.Shared.Services.Players
 @using Calcio.Shared.Validation
+@using Calcio.UI.Components.Shared
 @using Microsoft.AspNetCore.Components.Forms
 
 @rendermode RenderMode.InteractiveAuto
@@ -18,6 +19,13 @@
 {
     <div class="alert alert-success" role="alert">
         <i class="bi bi-check-circle me-2"></i>@SuccessMessage
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(CroppedPhotoDataUrl))
+{
+    <div class="text-center mb-4">
+        <img src="@CroppedPhotoDataUrl" alt="Photo preview" class="photo-preview rounded-circle object-fit-cover border" />
     </div>
 }
 
@@ -79,15 +87,14 @@
     <div class="mb-3">
         <label for="photo" class="form-label">Player Photo (Optional)</label>
         <InputFile OnChange="OnPhotoSelected" id="photo" class="form-control"
-            accept="image/jpeg,image/png,image/gif,image/webp" disabled="@IsSubmitting" />
+            accept="image/jpeg,image/png,image/gif,image/webp" disabled="@(IsSubmitting || ShowCropperModal)" />
         <div class="form-text">Max file size: 10 MB. Supported formats: JPEG, PNG, GIF, WebP.</div>
-        @if (SelectedPhoto is not null)
+        @if (!string.IsNullOrEmpty(CroppedPhotoDataUrl))
         {
             <div class="mt-2 d-flex align-items-center gap-2">
-                <span class="badge bg-secondary">@SelectedPhoto.Name</span>
-                <span class="text-muted small">(@FormatFileSize(SelectedPhoto.Size))</span>
+                <span class="badge bg-success"><i class="bi bi-check me-1"></i>Photo cropped</span>
                 <button type="button" class="btn btn-sm btn-outline-danger" @onclick="ClearPhoto" disabled="@IsSubmitting">
-                    <i class="bi bi-x"></i>
+                    <i class="bi bi-x"></i> Remove
                 </button>
             </div>
         }
@@ -136,3 +143,6 @@
         </button>
     </div>
 </EditForm>
+
+<ImageCropperModal @bind-IsVisible="ShowCropperModal" ImageSrc="@OriginalPhotoDataUrl" OnCropApplied="OnCropApplied"
+    OnCancelled="OnCropCancelled" />

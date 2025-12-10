@@ -20,9 +20,6 @@ var postgresDb = postgres.AddDatabase("calcioDb");
 var blobStorage = builder.AddAzureStorage("storage")
     .RunAsEmulator(emulator => emulator
         .WithContainerName("azurite")
-        .WithBlobPort(27000)
-        .WithQueuePort(27001)
-        .WithTablePort(27002)
         .WithLifetime(ContainerLifetime.Persistent)
         .WithDataVolume())
     .AddBlobs("blobs");

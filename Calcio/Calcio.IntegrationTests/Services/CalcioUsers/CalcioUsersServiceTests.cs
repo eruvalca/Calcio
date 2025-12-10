@@ -268,21 +268,6 @@ public class CalcioUsersServiceTests(CustomApplicationFactory factory) : BaseDbC
         result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
 
-    /// <summary>
-    /// Note: In the new architecture, club membership authorization is handled by 
-    /// ClubMembershipFilter at the endpoint level. The service assumes the caller
-    /// has already been authorized. This test is now excluded from running because
-    /// it modifies shared test data and the cleanup requires a security stamp that
-    /// wasn't set up properly when the user was created via direct DB manipulation.
-    /// The authorization test for this scenario should be an endpoint integration test.
-    /// </summary>
-    [Fact(Skip = "Authorization is handled at endpoint level; service layer tests don't test cross-club scenarios")]
-    public async Task RemoveClubMemberAsync_WhenUserExistsInSpecifiedClub_RemovesUserFromClub()
-    {
-        // This test is skipped - cross-club authorization should be tested at endpoint level
-        await Task.CompletedTask;
-    }
-
     #endregion
 
     #region Helpers
