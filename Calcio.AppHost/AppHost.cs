@@ -17,8 +17,19 @@ var postgres = builder.AddPostgres("postgres", pgUser, pgPassword)
 
 var postgresDb = postgres.AddDatabase("calcioDb");
 
+var blobStorage = builder.AddAzureStorage("storage")
+    .RunAsEmulator(emulator => emulator
+        .WithBlobPort(27000)
+        .WithQueuePort(27001)
+        .WithTablePort(27002)
+        .WithLifetime(ContainerLifetime.Persistent)
+        .WithDataVolume())
+    .AddBlobs("blobs");
+
 builder.AddProject<Projects.Calcio>("calcio")
     .WithReference(postgresDb, connectionName: "DefaultConnection")
+    .WithReference(blobStorage)
+    .WaitFor(blobStorage)
     .WaitFor(postgres)
     .WaitFor(postgresDb);
 

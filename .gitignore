@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Azurite storage emulator
+__azurite_db_*.json
+__blobstorage__/

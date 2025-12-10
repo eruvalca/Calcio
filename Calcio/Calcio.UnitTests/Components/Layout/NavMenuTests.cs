@@ -63,7 +63,7 @@ public sealed class NavMenuTests : BunitContext
         }
     }
 
-    private void SetupUnauthenticatedUser()
+    private static void SetupUnauthenticatedUser()
     {
         // Default state after AddAuthorization() is unauthenticated
         // No additional setup needed, but we can explicitly set it

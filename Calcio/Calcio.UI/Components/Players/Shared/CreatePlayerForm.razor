@@ -1,0 +1,138 @@
+@using Calcio.Shared.DTOs.Players
+@using Calcio.Shared.Enums
+@using Calcio.Shared.Results
+@using Calcio.Shared.Services.Players
+@using Calcio.Shared.Validation
+@using Microsoft.AspNetCore.Components.Forms
+
+@rendermode RenderMode.InteractiveAuto
+
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>@ErrorMessage
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(SuccessMessage))
+{
+    <div class="alert alert-success" role="alert">
+        <i class="bi bi-check-circle me-2"></i>@SuccessMessage
+    </div>
+}
+
+<EditForm Model="Input" OnValidSubmit="HandleSubmit" FormName="createPlayerForm">
+    <DataAnnotationsValidator />
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="firstName" class="form-label">First Name <span class="text-danger">*</span></label>
+            <InputText @bind-Value="Input.FirstName" id="firstName" class="form-control" placeholder="John" />
+            <ValidationMessage For="() => Input.FirstName" class="text-danger small" />
+        </div>
+        <div class="col-md-6">
+            <label for="lastName" class="form-label">Last Name <span class="text-danger">*</span></label>
+            <InputText @bind-Value="Input.LastName" id="lastName" class="form-control" placeholder="Doe" />
+            <ValidationMessage For="() => Input.LastName" class="text-danger small" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="dateOfBirth" class="form-label">Date of Birth <span class="text-danger">*</span></label>
+            <InputDate @bind-Value="Input.DateOfBirth" id="dateOfBirth" class="form-control" />
+            <ValidationMessage For="() => Input.DateOfBirth" class="text-danger small" />
+        </div>
+        <div class="col-md-6">
+            <label for="graduationYear" class="form-label">Graduation Year <span class="text-danger">*</span></label>
+            <InputNumber @bind-Value="Input.GraduationYear" id="graduationYear" class="form-control" min="@CurrentYear"
+                max="@MaxYear" />
+            <ValidationMessage For="() => Input.GraduationYear" class="text-danger small" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label for="gender" class="form-label">Gender</label>
+            <InputSelect @bind-Value="Input.Gender" id="gender" class="form-select">
+                <option value="">-- Select --</option>
+                @foreach (var gender in Enum.GetValues<Gender>())
+                {
+                    <option value="@gender">@gender</option>
+                }
+            </InputSelect>
+        </div>
+        <div class="col-md-4">
+            <label for="jerseyNumber" class="form-label">Jersey Number</label>
+            <InputNumber @bind-Value="Input.JerseyNumber" id="jerseyNumber" class="form-control" min="0" max="999" />
+            <ValidationMessage For="() => Input.JerseyNumber" class="text-danger small" />
+        </div>
+        <div class="col-md-4">
+            <label for="tryoutNumber" class="form-label">Tryout Number</label>
+            <InputNumber @bind-Value="Input.TryoutNumber" id="tryoutNumber" class="form-control" min="0" max="9999" />
+            <ValidationMessage For="() => Input.TryoutNumber" class="text-danger small" />
+        </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <div class="mb-3">
+        <label for="photo" class="form-label">Player Photo (Optional)</label>
+        <InputFile OnChange="OnPhotoSelected" id="photo" class="form-control"
+            accept="image/jpeg,image/png,image/gif,image/webp" disabled="@IsSubmitting" />
+        <div class="form-text">Max file size: 10 MB. Supported formats: JPEG, PNG, GIF, WebP.</div>
+        @if (SelectedPhoto is not null)
+        {
+            <div class="mt-2 d-flex align-items-center gap-2">
+                <span class="badge bg-secondary">@SelectedPhoto.Name</span>
+                <span class="text-muted small">(@FormatFileSize(SelectedPhoto.Size))</span>
+                <button type="button" class="btn btn-sm btn-outline-danger" @onclick="ClearPhoto" disabled="@IsSubmitting">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        }
+    </div>
+
+    @if (IsUploadingPhoto)
+    {
+        <div class="mb-3">
+            <label class="form-label">Uploading Photo...</label>
+            <div class="progress" role="progressbar" aria-valuenow="@UploadProgressPercent" aria-valuemin="0"
+                aria-valuemax="100">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: @UploadProgressPercent%">
+                    @UploadProgressPercent.ToString("F0")%
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="d-flex gap-2 justify-content-end">
+        @if (IsSubmitting)
+        {
+            <span class="btn btn-outline-secondary disabled">Cancel</span>
+        }
+        else
+        {
+            <a href="@CancelUrl" class="btn btn-outline-secondary">Cancel</a>
+        }
+        <button type="submit" class="btn btn-primary" disabled="@IsSubmitting">
+            @if (IsSubmitting)
+            {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                @if (IsUploadingPhoto)
+                {
+                    <span>Uploading Photo...</span>
+                }
+                else
+                {
+                    <span>Creating Player...</span>
+                }
+            }
+            else
+            {
+                <i class="bi bi-plus-lg me-1"></i>
+                <span>Create Player</span>
+            }
+        </button>
+    </div>
+</EditForm>

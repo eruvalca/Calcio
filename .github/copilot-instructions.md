@@ -142,6 +142,16 @@
 
 ## Blazor Components
 
+### Page vs Component Placement
+
+- **Pages** (components with `@page` directive) should live in the server project (`Calcio/Components/Pages/`) organized by feature.
+- **Interactive components** (forms, grids, etc. that require `@rendermode InteractiveAuto`) should live in the UI project (`Calcio.UI/Components/{Feature}/Shared/`).
+- Pages in the server project should be static shells that provide layout, breadcrumbs, `PageTitle`, and host interactive components from `Calcio.UI`.
+- Only place a page in `Calcio.UI` if the entire page root requires interactivity and cannot be split.
+- This pattern enables server-side rendering for page structure while deferring interactivity to specific components.
+
+### Component Guidelines
+
 - All blazor components inherit from `CancellableComponentBase` to support cancellation tokens. This is set with `@inherits` directives in `_Imports.razor` files.
 - Most blazor components should have a code-behind `.razor.cs` file for C# code. With the exception of standard blazor application files (e.g. `App.razor`, `Routes.razor`, `_Imports.razor`), all `.razor` files should have a corresponding `.razor.cs` file.
 - Always use primary constructors in code-behind files to inject dependencies.

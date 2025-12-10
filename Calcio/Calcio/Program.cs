@@ -10,6 +10,7 @@ using Calcio.Endpoints.Players;
 using Calcio.Endpoints.Seasons;
 using Calcio.Endpoints.Teams;
 using Calcio.ServiceDefaults;
+using Calcio.Services.BlobStorage;
 using Calcio.Services.CalcioUsers;
 using Calcio.Services.ClubJoinRequests;
 using Calcio.Services.Clubs;
@@ -17,6 +18,7 @@ using Calcio.Services.Players;
 using Calcio.Services.Seasons;
 using Calcio.Services.Teams;
 using Calcio.Shared.Models.Entities;
+using Calcio.Shared.Services.BlobStorage;
 using Calcio.Shared.Services.CalcioUsers;
 using Calcio.Shared.Services.ClubJoinRequests;
 using Calcio.Shared.Services.Clubs;
@@ -30,6 +32,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.OpenApi;
 
 using Scalar.AspNetCore;
@@ -127,6 +130,18 @@ builder.Services.AddScoped<ICalcioUsersService, CalcioUsersService>();
 builder.Services.AddScoped<IPlayersService, PlayersService>();
 builder.Services.AddScoped<ISeasonsService, SeasonsService>();
 builder.Services.AddScoped<ITeamsService, TeamsService>();
+builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
+
+builder.AddAzureBlobServiceClient("blobs");
+
+builder.Services.AddHybridCache(options =>
+{
+    options.DefaultEntryOptions = new HybridCacheEntryOptions
+    {
+        Expiration = TimeSpan.FromMinutes(55),
+        LocalCacheExpiration = TimeSpan.FromMinutes(55)
+    };
+});
 
 builder.Services.AddOpenApi(options => options.AddDocumentTransformer<CookieSecuritySchemeTransformer>());
 

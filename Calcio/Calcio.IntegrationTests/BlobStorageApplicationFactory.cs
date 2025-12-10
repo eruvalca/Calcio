@@ -1,6 +1,7 @@
 using Calcio.Data.Contexts;
 using Calcio.Data.Contexts.Base;
 using Calcio.Data.Interceptors;
+using Calcio.Services.BlobStorage;
 using Calcio.Shared.Services.BlobStorage;
 
 using Microsoft.AspNetCore.Hosting;
@@ -8,14 +9,18 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
-using NSubstitute;
-
+using Testcontainers.Azurite;
 using Testcontainers.PostgreSql;
 
 namespace Calcio.IntegrationTests;
 
-public class CustomApplicationFactory : WebApplicationFactory<ICalcioMarker>, IAsyncLifetime
+/// <summary>
+/// Application factory for full integration tests that use actual Azure Blob Storage emulator (Azurite).
+/// Use this factory when testing actual blob upload/download operations.
+/// </summary>
+public class BlobStorageApplicationFactory : WebApplicationFactory<ICalcioMarker>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _databaseContainer = new PostgreSqlBuilder()
         .WithImage("postgres:17.7")
@@ -24,9 +29,14 @@ public class CustomApplicationFactory : WebApplicationFactory<ICalcioMarker>, IA
         .WithDatabase("calcioDb")
         .Build();
 
+    private readonly AzuriteContainer _azuriteContainer = new AzuriteBuilder()
+        .WithImage("mcr.microsoft.com/azure-storage/azurite:3.35.0")
+        .Build();
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
         => builder.ConfigureTestServices(x =>
         {
+            // Database setup (same as CustomApplicationFactory)
             x.Remove(x.Single(a => typeof(DbContextOptions<BaseDbContext>) == a.ServiceType));
             x.AddDbContext<BaseDbContext>((sp, a) =>
             {
@@ -45,34 +55,31 @@ public class CustomApplicationFactory : WebApplicationFactory<ICalcioMarker>, IA
             x.AddDbContext<ReadOnlyDbContext>((sp, a)
                 => a.UseNpgsql(_databaseContainer.GetConnectionString()), ServiceLifetime.Scoped);
 
-            // Register mock blob storage service for tests
-            var blobStorageService = Substitute.For<IBlobStorageService>();
+            // Replace blob storage with real Azurite-backed implementation
+            x.RemoveAll<IBlobStorageService>();
 
-            // Configure default return values
-            blobStorageService.GetSasUrl(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<TimeSpan>())
-                .Returns(callInfo => new Uri($"https://test.blob.core.windows.net/{callInfo.ArgAt<string>(0)}/{callInfo.ArgAt<string>(1)}?sas=token"));
+            var connectionString = _azuriteContainer.GetConnectionString();
+            var blobServiceClient = new Azure.Storage.Blobs.BlobServiceClient(connectionString);
 
-            blobStorageService.DeleteAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(true);
-
-            blobStorageService.ExistsAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(true);
-
-            blobStorageService.UploadAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(callInfo => new Uri($"https://test.blob.core.windows.net/{callInfo.ArgAt<string>(0)}/{callInfo.ArgAt<string>(1)}"));
-
-            blobStorageService.DeleteByPrefixAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(0);
-
-            x.AddSingleton(blobStorageService);
+            x.AddSingleton(blobServiceClient);
+            x.AddSingleton<IBlobStorageService, BlobStorageService>();
 
             // Register HybridCache for tests
             x.AddHybridCache();
         });
 
-    public async Task InitializeAsync() => await _databaseContainer.StartAsync();
+    public async Task InitializeAsync()
+        => await Task.WhenAll(
+            _databaseContainer.StartAsync(),
+            _azuriteContainer.StartAsync());
 
-    public new async Task DisposeAsync() => await _databaseContainer.StopAsync();
+    public new async Task DisposeAsync()
+        => await Task.WhenAll(
+            _databaseContainer.StopAsync(),
+            _azuriteContainer.StopAsync());
 
-    async ValueTask IAsyncLifetime.InitializeAsync() => await _databaseContainer.StartAsync();
+    async ValueTask IAsyncLifetime.InitializeAsync()
+        => await Task.WhenAll(
+            _databaseContainer.StartAsync(),
+            _azuriteContainer.StartAsync());
 }
