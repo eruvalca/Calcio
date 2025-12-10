@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace Calcio.Components.Pages.Players;
+namespace Calcio.Components.Players.Pages;
 
 public partial class CreatePlayer
 {
