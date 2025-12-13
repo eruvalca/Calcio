@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Identity;
-
 namespace Calcio.Shared.Models.Entities;
 
 public class CalcioUserEntity : IdentityUser<long>
@@ -11,4 +9,5 @@ public class CalcioUserEntity : IdentityUser<long>
     public long? ClubId { get; set; }
     public ClubEntity? Club { get; set; }
     public ClubJoinRequestEntity? SentJoinRequest { get; set; }
+    public ICollection<CalcioUserPhotoEntity> Photos { get; set; } = [];
 }
