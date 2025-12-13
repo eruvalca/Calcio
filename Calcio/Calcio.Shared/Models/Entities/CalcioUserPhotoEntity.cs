@@ -1,3 +1,5 @@
+using Calcio.Shared.Models.Entities.Base;
+
 namespace Calcio.Shared.Models.Entities;
 
 public class CalcioUserPhotoEntity : BaseEntity
