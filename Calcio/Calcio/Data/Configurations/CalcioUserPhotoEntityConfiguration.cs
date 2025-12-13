@@ -1,3 +1,8 @@
+using Calcio.Shared.Models.Entities;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
 namespace Calcio.Data.Configurations;
 
 public sealed class CalcioUserPhotoEntityConfiguration : IEntityTypeConfiguration<CalcioUserPhotoEntity>

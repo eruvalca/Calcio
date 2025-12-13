@@ -1,6 +1,12 @@
 using System.Linq.Expressions;
 using System.Security.Claims;
 
+using Calcio.Shared.Models.Entities;
+
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
 namespace Calcio.Data.Contexts.Base;
 
 public class BaseDbContext : IdentityDbContext<CalcioUserEntity, IdentityRole<long>, long>

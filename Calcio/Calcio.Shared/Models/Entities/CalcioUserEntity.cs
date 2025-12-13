@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Identity;
+
 namespace Calcio.Shared.Models.Entities;
 
 public class CalcioUserEntity : IdentityUser<long>
