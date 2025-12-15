@@ -20,4 +20,9 @@ public interface IClubsService
     /// Creates a new club with the current user as the owner and ClubAdmin.
     /// </summary>
     Task<ServiceResult<ClubCreatedDto>> CreateClubAsync(CreateClubDto dto, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gets a specific club by ID that the current user belongs to.
+    /// </summary>
+    Task<ServiceResult<BaseClubDto>> GetClubByIdAsync(long clubId, CancellationToken cancellationToken);
 }

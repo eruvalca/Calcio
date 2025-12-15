@@ -1,4 +1,5 @@
 using Calcio.Shared.DTOs.ClubJoinRequests;
+using Calcio.Shared.Enums;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.ClubJoinRequests;
 
@@ -45,9 +46,10 @@ public partial class ClubJoinRequestsGrid(
             IsProcessing = true;
             ErrorMessage = null;
 
-            var result = await clubJoinRequestService.ApproveJoinRequestAsync(
+            var result = await clubJoinRequestService.UpdateJoinRequestStatusAsync(
                 ClubId,
                 ConfirmingApproveRequest.ClubJoinRequestId,
+                RequestStatus.Approved,
                 CancellationToken);
 
             result.Switch(
@@ -89,9 +91,10 @@ public partial class ClubJoinRequestsGrid(
             IsProcessing = true;
             ErrorMessage = null;
 
-            var result = await clubJoinRequestService.RejectJoinRequestAsync(
+            var result = await clubJoinRequestService.UpdateJoinRequestStatusAsync(
                 ClubId,
                 ConfirmingRejectRequest.ClubJoinRequestId,
+                RequestStatus.Rejected,
                 CancellationToken);
 
             result.Switch(

@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 
 using Calcio.Client.Services.Players;
 using Calcio.Shared.DTOs.Players;
+using Calcio.Shared.Endpoints;
 using Calcio.Shared.Enums;
 using Calcio.Shared.Results;
 
@@ -30,7 +31,7 @@ public class PlayersServiceTests
         };
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/players")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Players.ForClub(clubId)}")
             .Respond(HttpStatusCode.OK, JsonContent.Create(expectedList));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -57,7 +58,7 @@ public class PlayersServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/players")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Players.ForClub(clubId)}")
             .Respond(HttpStatusCode.OK, JsonContent.Create(new List<ClubPlayerDto>()));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -80,7 +81,7 @@ public class PlayersServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/players")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Players.ForClub(clubId)}")
             .Respond(HttpStatusCode.NotFound);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -103,7 +104,7 @@ public class PlayersServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/players")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Players.ForClub(clubId)}")
             .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -126,7 +127,7 @@ public class PlayersServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/players")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Players.ForClub(clubId)}")
             .Respond(HttpStatusCode.InternalServerError);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -163,7 +164,7 @@ public class PlayersServiceTests
         var expectedResponse = new PlayerCreatedDto(1, "Test", "Player", "Test Player");
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/players")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.Players.ForClub(clubId)}")
             .Respond(HttpStatusCode.Created, JsonContent.Create(expectedResponse));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -195,7 +196,7 @@ public class PlayersServiceTests
             GraduationYear: DateTime.Today.Year + 3);
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/players")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.Players.ForClub(clubId)}")
             .Respond(HttpStatusCode.NotFound);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -223,7 +224,7 @@ public class PlayersServiceTests
             GraduationYear: DateTime.Today.Year + 3);
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/players")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.Players.ForClub(clubId)}")
             .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -251,7 +252,7 @@ public class PlayersServiceTests
             GraduationYear: DateTime.Today.Year + 3);
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/players")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.Players.ForClub(clubId)}")
             .Respond(HttpStatusCode.Conflict);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -279,7 +280,7 @@ public class PlayersServiceTests
             GraduationYear: DateTime.Today.Year + 3);
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/players")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.Players.ForClub(clubId)}")
             .Respond(HttpStatusCode.BadRequest);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -307,7 +308,7 @@ public class PlayersServiceTests
             GraduationYear: DateTime.Today.Year + 3);
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/players")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.Players.ForClub(clubId)}")
             .Respond(HttpStatusCode.InternalServerError);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -341,7 +342,7 @@ public class PlayersServiceTests
             "https://storage.blob.core.windows.net/photos/large.jpg?sas");
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/players/{playerId}/photo")
+        mockHttp.When(HttpMethod.Put, $"{BaseUrl}/{Routes.Players.ForPlayerPhoto(clubId, playerId)}")
             .Respond(HttpStatusCode.OK, JsonContent.Create(expectedResponse));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -372,7 +373,7 @@ public class PlayersServiceTests
         var playerId = 999L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/players/{playerId}/photo")
+        mockHttp.When(HttpMethod.Put, $"{BaseUrl}/{Routes.Players.ForPlayerPhoto(clubId, playerId)}")
             .Respond(HttpStatusCode.NotFound);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -398,7 +399,7 @@ public class PlayersServiceTests
         var playerId = 1L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/players/{playerId}/photo")
+        mockHttp.When(HttpMethod.Put, $"{BaseUrl}/{Routes.Players.ForPlayerPhoto(clubId, playerId)}")
             .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -424,7 +425,7 @@ public class PlayersServiceTests
         var playerId = 1L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/players/{playerId}/photo")
+        mockHttp.When(HttpMethod.Put, $"{BaseUrl}/{Routes.Players.ForPlayerPhoto(clubId, playerId)}")
             .Respond(HttpStatusCode.BadRequest);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -450,7 +451,7 @@ public class PlayersServiceTests
         var playerId = 1L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/players/{playerId}/photo")
+        mockHttp.When(HttpMethod.Put, $"{BaseUrl}/{Routes.Players.ForPlayerPhoto(clubId, playerId)}")
             .Respond(HttpStatusCode.InternalServerError);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -486,7 +487,7 @@ public class PlayersServiceTests
             "https://storage.blob.core.windows.net/photos/large.jpg?sas");
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/players/{playerId}/photo")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Players.ForPlayerPhoto(clubId, playerId)}")
             .Respond(HttpStatusCode.OK, JsonContent.Create(expectedResponse));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -513,7 +514,7 @@ public class PlayersServiceTests
         var playerId = 1L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/players/{playerId}/photo")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Players.ForPlayerPhoto(clubId, playerId)}")
             .Respond(HttpStatusCode.NoContent);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -537,7 +538,7 @@ public class PlayersServiceTests
         var playerId = 999L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/players/{playerId}/photo")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Players.ForPlayerPhoto(clubId, playerId)}")
             .Respond(HttpStatusCode.NotFound);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -561,7 +562,7 @@ public class PlayersServiceTests
         var playerId = 1L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/players/{playerId}/photo")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Players.ForPlayerPhoto(clubId, playerId)}")
             .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -585,7 +586,7 @@ public class PlayersServiceTests
         var playerId = 1L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/players/{playerId}/photo")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Players.ForPlayerPhoto(clubId, playerId)}")
             .Respond(HttpStatusCode.InternalServerError);
 
         var httpClient = mockHttp.ToHttpClient();

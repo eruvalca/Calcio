@@ -5,14 +5,13 @@ using Calcio.IntegrationTests.Data.Contexts;
 using Calcio.Services.ClubJoinRequests;
 using Calcio.Shared.Enums;
 using Calcio.Shared.Models.Entities;
+using Calcio.Shared.Results;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
-using Calcio.Shared.Results;
 
 using Shouldly;
 
@@ -424,10 +423,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
 
     #endregion
 
-    #region ApproveJoinRequestAsync Tests
+    #region UpdateJoinRequestStatusAsync Tests - Approve
 
     [Fact]
-    public async Task ApproveJoinRequestAsync_WhenValidRequest_ReturnsSuccessAndUpdatesUserClubAndAddsRole()
+    public async Task UpdateJoinRequestStatusAsync_WhenApproving_ReturnsSuccessAndUpdatesUserClubAndAddsRole()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -451,7 +450,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
         var requestId = joinRequest.ClubJoinRequestId;
 
         // Act
-        var result = await service.ApproveJoinRequestAsync(club.ClubId, requestId, cancellationToken);
+        var result = await service.UpdateJoinRequestStatusAsync(club.ClubId, requestId, RequestStatus.Approved, cancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -474,7 +473,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     }
 
     [Fact]
-    public async Task ApproveJoinRequestAsync_WhenRequestDoesNotExist_ReturnsNotFound()
+    public async Task UpdateJoinRequestStatusAsync_WhenApprovingAndRequestDoesNotExist_ReturnsNotFound()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -487,7 +486,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
         var club = await dbContext.Clubs.FirstAsync(cancellationToken);
 
         // Act
-        var result = await service.ApproveJoinRequestAsync(club.ClubId, 999999, cancellationToken);
+        var result = await service.UpdateJoinRequestStatusAsync(club.ClubId, 999999, RequestStatus.Approved, cancellationToken);
 
         // Assert
         result.IsProblem.ShouldBeTrue();
@@ -495,7 +494,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     }
 
     [Fact]
-    public async Task ApproveJoinRequestAsync_WhenUserIsNotMember_ReturnsNotFound()
+    public async Task UpdateJoinRequestStatusAsync_WhenApprovingAndUserIsNotMember_ReturnsNotFound()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -522,7 +521,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Act
-        var result = await service.ApproveJoinRequestAsync(otherClub.ClubId, joinRequest.ClubJoinRequestId, cancellationToken);
+        var result = await service.UpdateJoinRequestStatusAsync(otherClub.ClubId, joinRequest.ClubJoinRequestId, RequestStatus.Approved, cancellationToken);
 
         // Assert - Global query filters hide the join request, so it appears as NotFound
         result.IsProblem.ShouldBeTrue();
@@ -531,10 +530,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
 
     #endregion
 
-    #region RejectJoinRequestAsync Tests
+    #region UpdateJoinRequestStatusAsync Tests - Reject
 
     [Fact]
-    public async Task RejectJoinRequestAsync_WhenValidRequest_ReturnsSuccessAndUpdatesStatus()
+    public async Task UpdateJoinRequestStatusAsync_WhenRejecting_ReturnsSuccessAndUpdatesStatus()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -557,7 +556,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
         var requestId = joinRequest.ClubJoinRequestId;
 
         // Act
-        var result = await service.RejectJoinRequestAsync(club.ClubId, requestId, cancellationToken);
+        var result = await service.UpdateJoinRequestStatusAsync(club.ClubId, requestId, RequestStatus.Rejected, cancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -573,7 +572,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     }
 
     [Fact]
-    public async Task RejectJoinRequestAsync_WhenRequestDoesNotExist_ReturnsNotFound()
+    public async Task UpdateJoinRequestStatusAsync_WhenRejectingAndRequestDoesNotExist_ReturnsNotFound()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -586,7 +585,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
         var club = await dbContext.Clubs.FirstAsync(cancellationToken);
 
         // Act
-        var result = await service.RejectJoinRequestAsync(club.ClubId, 999999, cancellationToken);
+        var result = await service.UpdateJoinRequestStatusAsync(club.ClubId, 999999, RequestStatus.Rejected, cancellationToken);
 
         // Assert
         result.IsProblem.ShouldBeTrue();
@@ -594,7 +593,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     }
 
     [Fact]
-    public async Task RejectJoinRequestAsync_WhenUserIsNotMember_ReturnsNotFound()
+    public async Task UpdateJoinRequestStatusAsync_WhenRejectingAndUserIsNotMember_ReturnsNotFound()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -621,7 +620,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Act
-        var result = await service.RejectJoinRequestAsync(otherClub.ClubId, joinRequest.ClubJoinRequestId, cancellationToken);
+        var result = await service.UpdateJoinRequestStatusAsync(otherClub.ClubId, joinRequest.ClubJoinRequestId, RequestStatus.Rejected, cancellationToken);
 
         // Assert - Global query filters hide the join request, so it appears as NotFound
         result.IsProblem.ShouldBeTrue();

@@ -116,10 +116,18 @@
 - Register services via `AddHttpClient<TInterface, TImplementation>()` with base address.
 - Return `ServiceProblem.NotFound()` for 404, `ServiceProblem.Forbidden()` for 403, `ServiceProblem.Conflict()` for 409, `ServiceProblem.ServerError()` as fallback.
 
+## API Routes
+
+- All API route strings are centralized in `Calcio.Shared/Endpoints/Routes.cs`.
+- **Never use hardcoded route strings** in endpoints or client services; always reference `Routes.*` constants.
+- `Routes.{Feature}.Group` provides the route template with parameter placeholders (e.g., `{clubId:long}`) for `MapGroup()` in endpoint registration.
+- `Routes.{Feature}.ForClub(clubId)` and similar methods build concrete URLs for `HttpClient` calls in client services.
+- When adding new routes, follow the existing pattern: add a `Group` constant for endpoint registration and `For*()` methods for URL building.
+
 ## Minimal API Endpoints
 
 - Place endpoints in `Endpoints/` folder, organized by feature.
-- Use `MapGroup()` with `.RequireAuthorization()`.
+- Use `MapGroup(Routes.{Feature}.Group)` with `.RequireAuthorization()`.
 - Always use `TypedResults` (not `Results`) and declare explicit `Results<T1, T2, ...>` return types.
 - Use `ProblemHttpResult` as the single error result type; all HTTP errors return RFC 7807 ProblemDetails.
 - Use `.ProducesProblem(StatusCodes.StatusXXX)` on route groups to document common error responses (401, 403, 500).

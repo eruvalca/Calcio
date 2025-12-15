@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 using Calcio.Data.Contexts;
 using Calcio.Shared.DTOs.Players;
 using Calcio.Shared.Extensions.Players;
@@ -13,8 +15,6 @@ using OneOf;
 using OneOf.Types;
 
 using SkiaSharp;
-
-using System.ComponentModel;
 
 namespace Calcio.Services.Players;
 

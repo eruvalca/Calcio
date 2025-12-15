@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Calcio.Endpoints.Extensions;
 using Calcio.Endpoints.Filters;
 using Calcio.Shared.DTOs.CalcioUsers;
+using Calcio.Shared.Endpoints;
 using Calcio.Shared.Services.CalcioUsers;
 
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -13,7 +14,7 @@ public static class CalcioUsersEndpoints
 {
     public static IEndpointRouteBuilder MapCalcioUsersEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("api/clubs/{clubId:long}/members")
+        var group = endpoints.MapGroup(Routes.ClubMembers.Group)
             .RequireAuthorization(policy => policy.RequireRole("ClubAdmin"))
             .AddEndpointFilter<ClubMembershipFilter>()
             .ProducesProblem(StatusCodes.Status401Unauthorized)

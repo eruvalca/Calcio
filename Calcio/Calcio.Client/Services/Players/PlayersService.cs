@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
 using Calcio.Shared.DTOs.Players;
+using Calcio.Shared.Endpoints;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.Players;
 
@@ -15,7 +16,7 @@ public class PlayersService(HttpClient httpClient) : IPlayersService
 {
     public async Task<ServiceResult<List<ClubPlayerDto>>> GetClubPlayersAsync(long clubId, CancellationToken cancellationToken)
     {
-        var response = await httpClient.GetAsync($"api/clubs/{clubId}/players", cancellationToken);
+        var response = await httpClient.GetAsync(Routes.Players.ForClub(clubId), cancellationToken);
 
         return response.IsSuccessStatusCode
             ? (ServiceResult<List<ClubPlayerDto>>)(await response.Content.ReadFromJsonAsync<List<ClubPlayerDto>>(cancellationToken) ?? [])
@@ -30,7 +31,7 @@ public class PlayersService(HttpClient httpClient) : IPlayersService
 
     public async Task<ServiceResult<PlayerCreatedDto>> CreatePlayerAsync(long clubId, CreatePlayerDto dto, CancellationToken cancellationToken)
     {
-        var response = await httpClient.PostAsJsonAsync($"api/clubs/{clubId}/players", dto, cancellationToken);
+        var response = await httpClient.PostAsJsonAsync(Routes.Players.ForClub(clubId), dto, cancellationToken);
 
         return response.IsSuccessStatusCode
             ? (ServiceResult<PlayerCreatedDto>)(await response.Content.ReadFromJsonAsync<PlayerCreatedDto>(cancellationToken))!
@@ -56,7 +57,7 @@ public class PlayersService(HttpClient httpClient) : IPlayersService
         streamContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
         content.Add(streamContent, "file", "photo.jpg");
 
-        var response = await httpClient.PostAsync($"api/clubs/{clubId}/players/{playerId}/photo", content, cancellationToken);
+        var response = await httpClient.PutAsync(Routes.Players.ForPlayerPhoto(clubId, playerId), content, cancellationToken);
 
         return response.IsSuccessStatusCode
             ? (ServiceResult<PlayerPhotoDto>)(await response.Content.ReadFromJsonAsync<PlayerPhotoDto>(cancellationToken))!
@@ -71,7 +72,7 @@ public class PlayersService(HttpClient httpClient) : IPlayersService
 
     public async Task<ServiceResult<OneOf<PlayerPhotoDto, None>>> GetPlayerPhotoAsync(long clubId, long playerId, CancellationToken cancellationToken)
     {
-        var response = await httpClient.GetAsync($"api/clubs/{clubId}/players/{playerId}/photo", cancellationToken);
+        var response = await httpClient.GetAsync(Routes.Players.ForPlayerPhoto(clubId, playerId), cancellationToken);
 
         if (response.StatusCode == HttpStatusCode.NoContent)
         {

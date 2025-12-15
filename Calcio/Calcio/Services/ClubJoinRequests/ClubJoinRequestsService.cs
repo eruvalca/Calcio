@@ -112,7 +112,15 @@ public partial class ClubJoinRequestsService(
         return requests;
     }
 
-    public async Task<ServiceResult<Success>> ApproveJoinRequestAsync(long clubId, long requestId, CancellationToken cancellationToken)
+    public async Task<ServiceResult<Success>> UpdateJoinRequestStatusAsync(long clubId, long requestId, RequestStatus status, CancellationToken cancellationToken)
+        => status switch
+        {
+            RequestStatus.Approved => await ApproveJoinRequestInternalAsync(clubId, requestId, cancellationToken),
+            RequestStatus.Rejected => await RejectJoinRequestInternalAsync(clubId, requestId, cancellationToken),
+            _ => ServiceProblem.BadRequest("Invalid status. Only 'Approved' or 'Rejected' transitions are allowed.")
+        };
+
+    private async Task<ServiceResult<Success>> ApproveJoinRequestInternalAsync(long clubId, long requestId, CancellationToken cancellationToken)
     {
         // Club membership is validated by ClubMembershipFilter before this service is called.
         await using var dbContext = await readWriteDbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -154,7 +162,7 @@ public partial class ClubJoinRequestsService(
         return new Success();
     }
 
-    public async Task<ServiceResult<Success>> RejectJoinRequestAsync(long clubId, long requestId, CancellationToken cancellationToken)
+    private async Task<ServiceResult<Success>> RejectJoinRequestInternalAsync(long clubId, long requestId, CancellationToken cancellationToken)
     {
         // Club membership is validated by ClubMembershipFilter before this service is called.
         await using var dbContext = await readWriteDbContextFactory.CreateDbContextAsync(cancellationToken);

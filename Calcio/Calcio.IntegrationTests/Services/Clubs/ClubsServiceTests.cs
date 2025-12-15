@@ -180,6 +180,78 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
 
     #endregion
 
+    #region GetClubByIdAsync Tests
+
+    [Fact]
+    public async Task GetClubByIdAsync_WhenUserIsMember_ReturnsClub()
+    {
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<ReadOnlyDbContext>();
+        var service = CreateService(scope.ServiceProvider);
+
+        // Get a club that UserA belongs to
+        var userClub = await dbContext.Clubs.FirstOrDefaultAsync(cancellationToken);
+        userClub.ShouldNotBeNull();
+
+        // Act
+        var result = await service.GetClubByIdAsync(userClub.ClubId, cancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Id.ShouldBe(userClub.ClubId);
+        result.Value.Name.ShouldBe(userClub.Name);
+    }
+
+    [Fact]
+    public async Task GetClubByIdAsync_WhenUserIsNotMember_ReturnsNotFound()
+    {
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<ReadOnlyDbContext>();
+        var service = CreateService(scope.ServiceProvider);
+
+        // Get a club that UserA does NOT belong to (UserB's club)
+        var otherClub = await dbContext.Clubs
+            .IgnoreQueryFilters()
+            .Where(c => !c.CalcioUsers.Any(u => u.Id == UserAId))
+            .FirstOrDefaultAsync(cancellationToken);
+        otherClub.ShouldNotBeNull("Test requires at least one club that UserA is not a member of");
+
+        // Act
+        var result = await service.GetClubByIdAsync(otherClub.ClubId, cancellationToken);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
+    }
+
+    [Fact]
+    public async Task GetClubByIdAsync_WhenClubDoesNotExist_ReturnsNotFound()
+    {
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+
+        var service = CreateService(scope.ServiceProvider);
+
+        // Act
+        var result = await service.GetClubByIdAsync(99999, cancellationToken);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
+    }
+
+    #endregion
+
     #region CreateClubAsync Tests
 
     [Fact]

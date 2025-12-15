@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 
 using Calcio.Shared.DTOs.Clubs;
+using Calcio.Shared.Endpoints;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.Clubs;
 
@@ -11,7 +12,7 @@ public class ClubsService(HttpClient httpClient) : IClubsService
 {
     public async Task<ServiceResult<List<BaseClubDto>>> GetUserClubsAsync(CancellationToken cancellationToken)
     {
-        var response = await httpClient.GetAsync("api/clubs", cancellationToken);
+        var response = await httpClient.GetAsync(Routes.Clubs.Base, cancellationToken);
 
         if (response.IsSuccessStatusCode)
         {
@@ -27,7 +28,7 @@ public class ClubsService(HttpClient httpClient) : IClubsService
 
     public async Task<ServiceResult<List<BaseClubDto>>> GetAllClubsForBrowsingAsync(CancellationToken cancellationToken)
     {
-        var response = await httpClient.GetAsync("api/clubs/all", cancellationToken);
+        var response = await httpClient.GetAsync(Routes.Clubs.ForBrowsing(), cancellationToken);
 
         if (response.IsSuccessStatusCode)
         {
@@ -43,7 +44,7 @@ public class ClubsService(HttpClient httpClient) : IClubsService
 
     public async Task<ServiceResult<ClubCreatedDto>> CreateClubAsync(CreateClubDto dto, CancellationToken cancellationToken)
     {
-        var response = await httpClient.PostAsJsonAsync("api/clubs", dto, cancellationToken);
+        var response = await httpClient.PostAsJsonAsync(Routes.Clubs.Base, dto, cancellationToken);
 
         if (response.IsSuccessStatusCode)
         {
@@ -55,6 +56,24 @@ public class ClubsService(HttpClient httpClient) : IClubsService
         {
             HttpStatusCode.NotFound => ServiceProblem.NotFound(),
             HttpStatusCode.Conflict => ServiceProblem.Conflict(),
+            HttpStatusCode.Forbidden => ServiceProblem.Forbidden(),
+            _ => ServiceProblem.ServerError()
+        };
+    }
+
+    public async Task<ServiceResult<BaseClubDto>> GetClubByIdAsync(long clubId, CancellationToken cancellationToken)
+    {
+        var response = await httpClient.GetAsync(Routes.Clubs.ForClub(clubId), cancellationToken);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadFromJsonAsync<BaseClubDto>(cancellationToken)
+                ?? throw new InvalidOperationException("Response body was null");
+        }
+
+        return response.StatusCode switch
+        {
+            HttpStatusCode.NotFound => ServiceProblem.NotFound(),
             HttpStatusCode.Forbidden => ServiceProblem.Forbidden(),
             _ => ServiceProblem.ServerError()
         };

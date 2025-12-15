@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 using Calcio.Components;
 using Calcio.Components.Account;
 using Calcio.Data.Contexts;
@@ -38,8 +40,6 @@ using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.OpenApi;
 
 using Scalar.AspNetCore;
-
-using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 

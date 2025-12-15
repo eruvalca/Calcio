@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 
 using Calcio.Client.Services.CalcioUsers;
 using Calcio.Shared.DTOs.CalcioUsers;
+using Calcio.Shared.Endpoints;
 using Calcio.Shared.Results;
 
 using RichardSzalay.MockHttp;
@@ -29,7 +30,7 @@ public class CalcioUsersServiceTests
         };
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/members")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.ClubMembers.ForClub(clubId)}")
             .Respond(HttpStatusCode.OK, JsonContent.Create(expectedList));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -57,7 +58,7 @@ public class CalcioUsersServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/members")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.ClubMembers.ForClub(clubId)}")
             .Respond(HttpStatusCode.OK, JsonContent.Create(new List<ClubMemberDto>()));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -80,7 +81,7 @@ public class CalcioUsersServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/members")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.ClubMembers.ForClub(clubId)}")
             .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -103,7 +104,7 @@ public class CalcioUsersServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/members")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.ClubMembers.ForClub(clubId)}")
             .Respond(HttpStatusCode.InternalServerError);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -131,7 +132,7 @@ public class CalcioUsersServiceTests
         var userId = 100L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/api/clubs/{clubId}/members/{userId}")
+        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/{Routes.ClubMembers.ForMember(clubId, userId)}")
             .Respond(HttpStatusCode.NoContent);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -154,7 +155,7 @@ public class CalcioUsersServiceTests
         var userId = 999L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/api/clubs/{clubId}/members/{userId}")
+        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/{Routes.ClubMembers.ForMember(clubId, userId)}")
             .Respond(HttpStatusCode.NotFound);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -178,7 +179,7 @@ public class CalcioUsersServiceTests
         var userId = 100L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/api/clubs/{clubId}/members/{userId}")
+        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/{Routes.ClubMembers.ForMember(clubId, userId)}")
             .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -202,7 +203,7 @@ public class CalcioUsersServiceTests
         var userId = 100L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/api/clubs/{clubId}/members/{userId}")
+        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/{Routes.ClubMembers.ForMember(clubId, userId)}")
             .Respond(HttpStatusCode.InternalServerError);
 
         var httpClient = mockHttp.ToHttpClient();

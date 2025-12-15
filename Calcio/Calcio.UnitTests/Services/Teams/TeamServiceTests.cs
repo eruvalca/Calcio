@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 
 using Calcio.Client.Services.Teams;
 using Calcio.Shared.DTOs.Teams;
+using Calcio.Shared.Endpoints;
 using Calcio.Shared.Results;
 
 using RichardSzalay.MockHttp;
@@ -29,7 +30,7 @@ public class TeamServiceTests
         };
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/teams")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Teams.ForClub(clubId)}")
             .Respond(HttpStatusCode.OK, JsonContent.Create(expectedList));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -57,7 +58,7 @@ public class TeamServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/teams")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Teams.ForClub(clubId)}")
             .Respond(HttpStatusCode.OK, JsonContent.Create(new List<TeamDto>()));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -80,7 +81,7 @@ public class TeamServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/teams")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Teams.ForClub(clubId)}")
             .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -103,7 +104,7 @@ public class TeamServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/teams")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Teams.ForClub(clubId)}")
             .Respond(HttpStatusCode.InternalServerError);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -126,7 +127,7 @@ public class TeamServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/teams")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Teams.ForClub(clubId)}")
             .Respond(HttpStatusCode.OK, new StringContent("null", System.Text.Encoding.UTF8, "application/json"));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -150,7 +151,7 @@ public class TeamServiceTests
         var expectedTeam = new TeamDto(42, "Test Team", 2015);
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/teams")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Teams.ForClub(clubId)}")
             .Respond(HttpStatusCode.OK, JsonContent.Create(new List<TeamDto> { expectedTeam }));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -184,7 +185,7 @@ public class TeamServiceTests
         var dto = new CreateTeamDto("U12 Red", 2030);
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/teams")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.Teams.ForClub(clubId)}")
             .Respond(HttpStatusCode.Created);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -207,7 +208,7 @@ public class TeamServiceTests
         var dto = new CreateTeamDto("U12 Red", 2030);
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/teams")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.Teams.ForClub(clubId)}")
             .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -231,7 +232,7 @@ public class TeamServiceTests
         var dto = new CreateTeamDto("U12 Red", 2030);
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/teams")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.Teams.ForClub(clubId)}")
             .Respond(HttpStatusCode.Conflict);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -255,7 +256,7 @@ public class TeamServiceTests
         var dto = new CreateTeamDto("U12 Red", 2030);
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/teams")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.Teams.ForClub(clubId)}")
             .Respond(HttpStatusCode.InternalServerError);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -280,7 +281,7 @@ public class TeamServiceTests
         var dto = new CreateTeamDto("U12 Red", graduationYear);
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/teams")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.Teams.ForClub(clubId)}")
             .With(request =>
             {
                 var content = request.Content?.ReadAsStringAsync().Result;

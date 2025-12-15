@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Calcio.Endpoints.Extensions;
 using Calcio.Endpoints.Filters;
 using Calcio.Shared.DTOs.Players;
+using Calcio.Shared.Endpoints;
 using Calcio.Shared.Services.Players;
 
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -15,7 +16,7 @@ public static class PlayersEndpoints
 
     public static IEndpointRouteBuilder MapPlayersEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("api/clubs/{clubId:long}/players")
+        var group = endpoints.MapGroup(Routes.Players.Group)
             .RequireAuthorization(policy => policy.RequireRole("ClubAdmin"))
             .AddEndpointFilter<ClubMembershipFilter>()
             .ProducesProblem(StatusCodes.Status401Unauthorized)
@@ -27,7 +28,8 @@ public static class PlayersEndpoints
         group.MapPost("", CreatePlayer)
             .ProducesProblem(StatusCodes.Status400BadRequest);
 
-        group.MapPost("{playerId:long}/photo", UploadPlayerPhoto)
+        // Canonical RESTful route for a single photo resource
+        group.MapPut("{playerId:long}/photo", UploadPlayerPhoto)
             .DisableAntiforgery()
             .Accepts<IFormFile>("multipart/form-data")
             .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -61,7 +63,7 @@ public static class PlayersEndpoints
     {
         var result = await service.CreatePlayerAsync(clubId, dto, cancellationToken);
 
-        return result.ToHttpResult(value => TypedResults.Created($"/api/clubs/{clubId}/players/{value.PlayerId}", value));
+        return result.ToHttpResult(value => TypedResults.Created($"{Routes.Clubs.Base}/{clubId}/players/{value.PlayerId}", value));
     }
 
     private static async Task<Results<Ok<PlayerPhotoDto>, ProblemHttpResult>> UploadPlayerPhoto(

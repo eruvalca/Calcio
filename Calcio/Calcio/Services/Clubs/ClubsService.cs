@@ -30,6 +30,20 @@ public partial class ClubsService(
         return clubs;
     }
 
+    public async Task<ServiceResult<BaseClubDto>> GetClubByIdAsync(long clubId, CancellationToken cancellationToken)
+    {
+        await using var dbContext = await readOnlyDbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        var club = await dbContext.Clubs
+            .Where(c => c.ClubId == clubId)
+            .Select(c => c.ToClubDto())
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return club is not null
+            ? club
+            : ServiceProblem.NotFound();
+    }
+
     public async Task<ServiceResult<List<BaseClubDto>>> GetAllClubsForBrowsingAsync(CancellationToken cancellationToken)
     {
         await using var dbContext = await readOnlyDbContextFactory.CreateDbContextAsync(cancellationToken);

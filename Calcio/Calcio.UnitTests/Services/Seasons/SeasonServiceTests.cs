@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 
 using Calcio.Client.Services.Seasons;
 using Calcio.Shared.DTOs.Seasons;
+using Calcio.Shared.Endpoints;
 using Calcio.Shared.Results;
 
 using RichardSzalay.MockHttp;
@@ -29,7 +30,7 @@ public class SeasonServiceTests
         };
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/seasons")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Seasons.ForClub(clubId)}")
             .Respond(HttpStatusCode.OK, JsonContent.Create(expectedList));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -41,8 +42,8 @@ public class SeasonServiceTests
         var result = await service.GetSeasonsAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var list = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var list = result.Value;
         list.Count.ShouldBe(2);
         list[0].Name.ShouldBe("2024-2025");
         list[0].IsComplete.ShouldBeTrue();
@@ -57,7 +58,7 @@ public class SeasonServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/seasons")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Seasons.ForClub(clubId)}")
             .Respond(HttpStatusCode.OK, JsonContent.Create(new List<SeasonDto>()));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -69,8 +70,8 @@ public class SeasonServiceTests
         var result = await service.GetSeasonsAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        result.AsT0.ShouldBeEmpty();
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeEmpty();
     }
 
     [Fact]
@@ -80,7 +81,7 @@ public class SeasonServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/seasons")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Seasons.ForClub(clubId)}")
             .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -103,7 +104,7 @@ public class SeasonServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/seasons")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Seasons.ForClub(clubId)}")
             .Respond(HttpStatusCode.InternalServerError);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -126,7 +127,7 @@ public class SeasonServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/seasons")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Seasons.ForClub(clubId)}")
             .Respond(HttpStatusCode.OK, new StringContent("null", System.Text.Encoding.UTF8, "application/json"));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -138,8 +139,8 @@ public class SeasonServiceTests
         var result = await service.GetSeasonsAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        result.AsT0.ShouldBeEmpty();
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeEmpty();
     }
 
     [Fact]
@@ -152,7 +153,7 @@ public class SeasonServiceTests
         var expectedSeason = new SeasonDto(42, "Test Season", startDate, endDate, true);
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/seasons")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Seasons.ForClub(clubId)}")
             .Respond(HttpStatusCode.OK, JsonContent.Create(new List<SeasonDto> { expectedSeason }));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -164,8 +165,8 @@ public class SeasonServiceTests
         var result = await service.GetSeasonsAsync(clubId, CancellationToken.None);
 
         // Assert
-        result.IsT0.ShouldBeTrue();
-        var seasons = result.AsT0;
+        result.IsSuccess.ShouldBeTrue();
+        var seasons = result.Value;
         seasons.Count.ShouldBe(1);
 
         var season = seasons[0];
@@ -188,7 +189,7 @@ public class SeasonServiceTests
         var dto = new CreateSeasonDto("Spring 2025", DateOnly.FromDateTime(DateTime.Today), DateOnly.FromDateTime(DateTime.Today.AddMonths(3)));
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/seasons")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.Seasons.ForClub(clubId)}")
             .Respond(HttpStatusCode.Created);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -211,7 +212,7 @@ public class SeasonServiceTests
         var dto = new CreateSeasonDto("Spring 2025", DateOnly.FromDateTime(DateTime.Today));
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/seasons")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.Seasons.ForClub(clubId)}")
             .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -235,7 +236,7 @@ public class SeasonServiceTests
         var dto = new CreateSeasonDto("Spring 2025", DateOnly.FromDateTime(DateTime.Today));
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/seasons")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.Seasons.ForClub(clubId)}")
             .Respond(HttpStatusCode.Conflict);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -259,7 +260,7 @@ public class SeasonServiceTests
         var dto = new CreateSeasonDto("Spring 2025", DateOnly.FromDateTime(DateTime.Today));
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/seasons")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.Seasons.ForClub(clubId)}")
             .Respond(HttpStatusCode.InternalServerError);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -285,7 +286,7 @@ public class SeasonServiceTests
         var dto = new CreateSeasonDto("Fall 2025", startDate, endDate);
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/seasons")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.Seasons.ForClub(clubId)}")
             .With(request =>
             {
                 var content = request.Content?.ReadAsStringAsync().Result;
@@ -317,7 +318,7 @@ public class SeasonServiceTests
         var dto = new CreateSeasonDto("Spring 2025", startDate);
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/seasons")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.Seasons.ForClub(clubId)}")
             .With(request =>
             {
                 var content = request.Content?.ReadAsStringAsync().Result;

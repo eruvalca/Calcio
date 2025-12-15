@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 
 using Calcio.Client.Services.ClubJoinRequests;
 using Calcio.Shared.DTOs.ClubJoinRequests;
+using Calcio.Shared.Endpoints;
 using Calcio.Shared.Enums;
 using Calcio.Shared.Results;
 
@@ -25,7 +26,7 @@ public class ClubJoinRequestServiceTests
         var expectedDto = new ClubJoinRequestDto(1, 10, 100, RequestStatus.Pending);
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/club-join-requests/current")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.ClubJoinRequests.GetCurrent}")
             .Respond(HttpStatusCode.OK, JsonContent.Create(expectedDto));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -50,7 +51,7 @@ public class ClubJoinRequestServiceTests
     {
         // Arrange
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/club-join-requests/current")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.ClubJoinRequests.GetCurrent}")
             .Respond(HttpStatusCode.NotFound);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -71,7 +72,7 @@ public class ClubJoinRequestServiceTests
     {
         // Arrange
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/club-join-requests/current")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.ClubJoinRequests.GetCurrent}")
             .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -92,7 +93,7 @@ public class ClubJoinRequestServiceTests
     {
         // Arrange
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/club-join-requests/current")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.ClubJoinRequests.GetCurrent}")
             .Respond(HttpStatusCode.InternalServerError);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -119,7 +120,7 @@ public class ClubJoinRequestServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/club-join-requests/{clubId}")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.ClubJoinRequests.ForClub(clubId)}")
             .Respond(HttpStatusCode.Created);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -141,7 +142,7 @@ public class ClubJoinRequestServiceTests
         var clubId = 999L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/club-join-requests/{clubId}")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.ClubJoinRequests.ForClub(clubId)}")
             .Respond(HttpStatusCode.NotFound);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -164,7 +165,7 @@ public class ClubJoinRequestServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/club-join-requests/{clubId}")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.ClubJoinRequests.ForClub(clubId)}")
             .Respond(HttpStatusCode.Conflict);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -187,7 +188,7 @@ public class ClubJoinRequestServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/club-join-requests/{clubId}")
+        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/{Routes.ClubJoinRequests.ForClub(clubId)}")
             .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -212,7 +213,7 @@ public class ClubJoinRequestServiceTests
     {
         // Arrange
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/api/club-join-requests/current")
+        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/{Routes.ClubJoinRequests.CancelCurrent}")
             .Respond(HttpStatusCode.NoContent);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -232,7 +233,7 @@ public class ClubJoinRequestServiceTests
     {
         // Arrange
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/api/club-join-requests/current")
+        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/{Routes.ClubJoinRequests.CancelCurrent}")
             .Respond(HttpStatusCode.NotFound);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -253,7 +254,7 @@ public class ClubJoinRequestServiceTests
     {
         // Arrange
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/api/club-join-requests/current")
+        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/{Routes.ClubJoinRequests.CancelCurrent}")
             .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -285,7 +286,7 @@ public class ClubJoinRequestServiceTests
         };
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/join-requests")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.ClubJoinRequests.Admin.ForClub(clubId)}")
             .Respond(HttpStatusCode.OK, JsonContent.Create(expectedList));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -311,7 +312,7 @@ public class ClubJoinRequestServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/join-requests")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.ClubJoinRequests.Admin.ForClub(clubId)}")
             .Respond(HttpStatusCode.OK, JsonContent.Create(new List<ClubJoinRequestWithUserDto>()));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -334,7 +335,7 @@ public class ClubJoinRequestServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/join-requests")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.ClubJoinRequests.Admin.ForClub(clubId)}")
             .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -357,7 +358,7 @@ public class ClubJoinRequestServiceTests
         var clubId = 10L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/api/clubs/{clubId}/join-requests")
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.ClubJoinRequests.Admin.ForClub(clubId)}")
             .Respond(HttpStatusCode.InternalServerError);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -375,17 +376,19 @@ public class ClubJoinRequestServiceTests
 
     #endregion
 
-    #region ApproveJoinRequestAsync Tests
+    #region UpdateJoinRequestStatusAsync Tests
 
-    [Fact]
-    public async Task ApproveJoinRequestAsync_WhenNoContent_ReturnsSuccess()
+    [Theory]
+    [InlineData(RequestStatus.Approved)]
+    [InlineData(RequestStatus.Rejected)]
+    public async Task UpdateJoinRequestStatusAsync_WhenNoContent_ReturnsSuccess(RequestStatus status)
     {
         // Arrange
         var clubId = 10L;
         var requestId = 1L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/join-requests/{requestId}/approve")
+        mockHttp.When(HttpMethod.Patch, $"{BaseUrl}/{Routes.ClubJoinRequests.Admin.ForRequest(clubId, requestId)}")
             .Respond(HttpStatusCode.NoContent);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -394,21 +397,23 @@ public class ClubJoinRequestServiceTests
         var service = new ClubJoinRequestsService(httpClient);
 
         // Act
-        var result = await service.ApproveJoinRequestAsync(clubId, requestId, CancellationToken.None);
+        var result = await service.UpdateJoinRequestStatusAsync(clubId, requestId, status, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
     }
 
-    [Fact]
-    public async Task ApproveJoinRequestAsync_WhenNotFound_ReturnsNotFoundProblem()
+    [Theory]
+    [InlineData(RequestStatus.Approved)]
+    [InlineData(RequestStatus.Rejected)]
+    public async Task UpdateJoinRequestStatusAsync_WhenNotFound_ReturnsNotFoundProblem(RequestStatus status)
     {
         // Arrange
         var clubId = 10L;
         var requestId = 999L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/join-requests/{requestId}/approve")
+        mockHttp.When(HttpMethod.Patch, $"{BaseUrl}/{Routes.ClubJoinRequests.Admin.ForRequest(clubId, requestId)}")
             .Respond(HttpStatusCode.NotFound);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -417,22 +422,24 @@ public class ClubJoinRequestServiceTests
         var service = new ClubJoinRequestsService(httpClient);
 
         // Act
-        var result = await service.ApproveJoinRequestAsync(clubId, requestId, CancellationToken.None);
+        var result = await service.UpdateJoinRequestStatusAsync(clubId, requestId, status, CancellationToken.None);
 
         // Assert
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
 
-    [Fact]
-    public async Task ApproveJoinRequestAsync_WhenForbidden_ReturnsForbiddenProblem()
+    [Theory]
+    [InlineData(RequestStatus.Approved)]
+    [InlineData(RequestStatus.Rejected)]
+    public async Task UpdateJoinRequestStatusAsync_WhenForbidden_ReturnsForbiddenProblem(RequestStatus status)
     {
         // Arrange
         var clubId = 10L;
         var requestId = 1L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/join-requests/{requestId}/approve")
+        mockHttp.When(HttpMethod.Patch, $"{BaseUrl}/{Routes.ClubJoinRequests.Admin.ForRequest(clubId, requestId)}")
             .Respond(HttpStatusCode.Forbidden);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -441,82 +448,7 @@ public class ClubJoinRequestServiceTests
         var service = new ClubJoinRequestsService(httpClient);
 
         // Act
-        var result = await service.ApproveJoinRequestAsync(clubId, requestId, CancellationToken.None);
-
-        // Assert
-        result.IsProblem.ShouldBeTrue();
-        result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
-    }
-
-    #endregion
-
-    #region RejectJoinRequestAsync Tests
-
-    [Fact]
-    public async Task RejectJoinRequestAsync_WhenNoContent_ReturnsSuccess()
-    {
-        // Arrange
-        var clubId = 10L;
-        var requestId = 1L;
-
-        var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/join-requests/{requestId}/reject")
-            .Respond(HttpStatusCode.NoContent);
-
-        var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri(BaseUrl);
-
-        var service = new ClubJoinRequestsService(httpClient);
-
-        // Act
-        var result = await service.RejectJoinRequestAsync(clubId, requestId, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-    }
-
-    [Fact]
-    public async Task RejectJoinRequestAsync_WhenNotFound_ReturnsNotFoundProblem()
-    {
-        // Arrange
-        var clubId = 10L;
-        var requestId = 999L;
-
-        var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/join-requests/{requestId}/reject")
-            .Respond(HttpStatusCode.NotFound);
-
-        var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri(BaseUrl);
-
-        var service = new ClubJoinRequestsService(httpClient);
-
-        // Act
-        var result = await service.RejectJoinRequestAsync(clubId, requestId, CancellationToken.None);
-
-        // Assert
-        result.IsProblem.ShouldBeTrue();
-        result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
-    }
-
-    [Fact]
-    public async Task RejectJoinRequestAsync_WhenForbidden_ReturnsForbiddenProblem()
-    {
-        // Arrange
-        var clubId = 10L;
-        var requestId = 1L;
-
-        var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/join-requests/{requestId}/reject")
-            .Respond(HttpStatusCode.Forbidden);
-
-        var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri(BaseUrl);
-
-        var service = new ClubJoinRequestsService(httpClient);
-
-        // Act
-        var result = await service.RejectJoinRequestAsync(clubId, requestId, CancellationToken.None);
+        var result = await service.UpdateJoinRequestStatusAsync(clubId, requestId, status, CancellationToken.None);
 
         // Assert
         result.IsProblem.ShouldBeTrue();
@@ -524,14 +456,40 @@ public class ClubJoinRequestServiceTests
     }
 
     [Fact]
-    public async Task RejectJoinRequestAsync_WhenServerError_ReturnsServerErrorProblem()
+    public async Task UpdateJoinRequestStatusAsync_WhenBadRequest_ReturnsBadRequestProblem()
     {
         // Arrange
         var clubId = 10L;
         var requestId = 1L;
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(HttpMethod.Post, $"{BaseUrl}/api/clubs/{clubId}/join-requests/{requestId}/reject")
+        mockHttp.When(HttpMethod.Patch, $"{BaseUrl}/{Routes.ClubJoinRequests.Admin.ForRequest(clubId, requestId)}")
+            .Respond(HttpStatusCode.BadRequest);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new ClubJoinRequestsService(httpClient);
+
+        // Act
+        var result = await service.UpdateJoinRequestStatusAsync(clubId, requestId, RequestStatus.Pending, CancellationToken.None);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.BadRequest);
+    }
+
+    [Theory]
+    [InlineData(RequestStatus.Approved)]
+    [InlineData(RequestStatus.Rejected)]
+    public async Task UpdateJoinRequestStatusAsync_WhenServerError_ReturnsServerErrorProblem(RequestStatus status)
+    {
+        // Arrange
+        var clubId = 10L;
+        var requestId = 1L;
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Patch, $"{BaseUrl}/{Routes.ClubJoinRequests.Admin.ForRequest(clubId, requestId)}")
             .Respond(HttpStatusCode.InternalServerError);
 
         var httpClient = mockHttp.ToHttpClient();
@@ -540,7 +498,7 @@ public class ClubJoinRequestServiceTests
         var service = new ClubJoinRequestsService(httpClient);
 
         // Act
-        var result = await service.RejectJoinRequestAsync(clubId, requestId, CancellationToken.None);
+        var result = await service.UpdateJoinRequestStatusAsync(clubId, requestId, status, CancellationToken.None);
 
         // Assert
         result.IsProblem.ShouldBeTrue();

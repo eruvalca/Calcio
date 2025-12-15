@@ -1,4 +1,5 @@
 using Calcio.Shared.DTOs.ClubJoinRequests;
+using Calcio.Shared.Enums;
 using Calcio.Shared.Results;
 
 using OneOf.Types;
@@ -11,6 +12,5 @@ public interface IClubJoinRequestsService
     Task<ServiceResult<Success>> CreateJoinRequestAsync(long clubId, CancellationToken cancellationToken);
     Task<ServiceResult<Success>> CancelJoinRequestAsync(CancellationToken cancellationToken);
     Task<ServiceResult<List<ClubJoinRequestWithUserDto>>> GetPendingRequestsForClubAsync(long clubId, CancellationToken cancellationToken);
-    Task<ServiceResult<Success>> ApproveJoinRequestAsync(long clubId, long requestId, CancellationToken cancellationToken);
-    Task<ServiceResult<Success>> RejectJoinRequestAsync(long clubId, long requestId, CancellationToken cancellationToken);
+    Task<ServiceResult<Success>> UpdateJoinRequestStatusAsync(long clubId, long requestId, RequestStatus status, CancellationToken cancellationToken);
 }

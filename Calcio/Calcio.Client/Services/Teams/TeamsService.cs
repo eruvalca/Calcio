@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 
 using Calcio.Shared.DTOs.Teams;
+using Calcio.Shared.Endpoints;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.Teams;
 
@@ -13,7 +14,7 @@ public class TeamsService(HttpClient httpClient) : ITeamsService
 {
     public async Task<ServiceResult<List<TeamDto>>> GetTeamsAsync(long clubId, CancellationToken cancellationToken)
     {
-        var response = await httpClient.GetAsync($"api/clubs/{clubId}/teams", cancellationToken);
+        var response = await httpClient.GetAsync(Routes.Teams.ForClub(clubId), cancellationToken);
 
         return response.IsSuccessStatusCode
             ? (ServiceResult<List<TeamDto>>)(await response.Content.ReadFromJsonAsync<List<TeamDto>>(cancellationToken) ?? [])
@@ -28,7 +29,7 @@ public class TeamsService(HttpClient httpClient) : ITeamsService
 
     public async Task<ServiceResult<Success>> CreateTeamAsync(long clubId, CreateTeamDto dto, CancellationToken cancellationToken)
     {
-        var response = await httpClient.PostAsJsonAsync($"api/clubs/{clubId}/teams", dto, cancellationToken);
+        var response = await httpClient.PostAsJsonAsync(Routes.Teams.ForClub(clubId), dto, cancellationToken);
 
         if (response.IsSuccessStatusCode)
         {
