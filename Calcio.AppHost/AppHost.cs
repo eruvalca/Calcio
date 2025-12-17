@@ -29,6 +29,22 @@ builder.AddProject<Projects.Calcio>("calcio")
     .WithReference(blobStorage)
     .WaitFor(blobStorage)
     .WaitFor(postgres)
-    .WaitFor(postgresDb);
+    .WaitFor(postgresDb)
+    .WithUrls(context =>
+    {
+        // Remove HTTP URLs and customize HTTPS URL
+        context.Urls.RemoveAll(url => url.Endpoint?.Scheme == "http");
+
+        foreach (var url in context.Urls)
+        {
+            if (url.Endpoint?.Scheme == "https")
+            {
+                url.DisplayText = "Calcio";
+            }
+        }
+
+        // Add Scalar link
+        context.Urls.Add(new() { Endpoint = context.GetEndpoint("https"), Url = "/scalar/v1", DisplayText = "Scalar" });
+    });
 
 builder.Build().Run();
