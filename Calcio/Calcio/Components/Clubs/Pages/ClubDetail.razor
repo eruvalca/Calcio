@@ -1,0 +1,44 @@
+@page "/clubs/{ClubId:long}"
+@using Microsoft.AspNetCore.Authorization
+@using Calcio.Shared.DTOs.ClubJoinRequests
+@using Calcio.Shared.DTOs.Clubs
+@using Calcio.UI.Components.CalcioUsers.Shared
+@using Calcio.UI.Components.Players.Shared
+@using Calcio.UI.Components.Seasons.Shared
+@using Calcio.UI.Components.Teams.Shared
+
+@if (Club is not null)
+{
+    <PageTitle>@Club.Name</PageTitle>
+
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/account/manage/clubs">Clubs</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Club.Name</li>
+        </ol>
+    </nav>
+
+    <h3>@Club.Name</h3>
+    <p class="text-muted">@Club.City, @Club.State</p>
+
+    @if (IsClubAdmin)
+    {
+        @if (ClubJoinRequests.Count > 0)
+        {
+            <h5>Manage Join Requests</h5>
+            <ClubJoinRequestsGrid ClubId="ClubId" JoinRequests="ClubJoinRequests" @rendermode="InteractiveAuto" />
+        }
+
+        <h5>Manage Club Members</h5>
+        <ClubMembersGrid ClubId="ClubId" Members="ClubMembers" @rendermode="InteractiveAuto" />
+
+        <h5>Manage Club Players</h5>
+        <ClubPlayersGrid Players="ClubPlayers" @rendermode="InteractiveAuto" />
+
+        <h5>Manage Seasons</h5>
+        <SeasonsGrid ClubId="ClubId" Seasons="ClubSeasons" @rendermode="InteractiveAuto" />
+
+        <h5>Manage Teams</h5>
+        <TeamsGrid ClubId="ClubId" Teams="ClubTeams" @rendermode="InteractiveAuto" />
+    }
+}

@@ -2,13 +2,7 @@
 @using Calcio.Shared.DTOs.ClubJoinRequests
 @using Calcio.Shared.DTOs.Clubs
 @using Calcio.Shared.Enums
-@using Calcio.UI.Components.CalcioUsers.Shared
 @using Calcio.UI.Components.Clubs.Shared
-@using Calcio.UI.Components.Players.Shared
-@using Calcio.UI.Components.Seasons.Shared
-@using Calcio.UI.Components.Teams.Shared
-@using Microsoft.AspNetCore.Components.QuickGrid
-@using Calcio.Shared.Extensions.Clubs
 
 <PageTitle>Clubs</PageTitle>
 
@@ -23,30 +17,10 @@
         {
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <span><strong>@club.Name</strong> &mdash; @club.City, @club.State</span>
+                <a href="/clubs/@club.Id" class="btn btn-primary btn-sm">Manage</a>
             </li>
         }
     </ul>
-
-    @if (IsClubAdmin && ClubJoinRequests.Count > 0)
-    {
-        <h5>Manage Join Requests</h5>
-        <ClubJoinRequestsGrid ClubId="UserClubs[0].Id" JoinRequests="ClubJoinRequests" @rendermode="InteractiveAuto" />
-    }
-
-    @if (IsClubAdmin)
-    {
-        <h5>Manage Club Members</h5>
-        <ClubMembersGrid ClubId="UserClubs[0].Id" Members="ClubMembers" @rendermode="InteractiveAuto" />
-
-        <h5>Manage Club Players</h5>
-        <ClubPlayersGrid Players="ClubPlayers" @rendermode="InteractiveAuto" />
-
-        <h5>Manage Seasons</h5>
-        <SeasonsGrid ClubId="UserClubs[0].Id" Seasons="ClubSeasons" @rendermode="InteractiveAuto" />
-
-        <h5>Manage Teams</h5>
-        <TeamsGrid ClubId="UserClubs[0].Id" Teams="ClubTeams" @rendermode="InteractiveAuto" />
-    }
 }
 else
 {
