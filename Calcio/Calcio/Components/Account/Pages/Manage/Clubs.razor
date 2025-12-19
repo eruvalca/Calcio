@@ -17,8 +17,46 @@
         {
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <span><strong>@club.Name</strong> &mdash; @club.City, @club.State</span>
-                <a href="/clubs/@club.Id" class="btn btn-primary btn-sm">Manage</a>
+                <div class="btn-group" role="group">
+                    <a href="/clubs/@club.Id" class="btn btn-primary btn-sm">Manage</a>
+                    @if (!IsClubAdmin)
+                    {
+                        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal"
+                            data-bs-target="#leaveClubModal-@club.Id">
+                            Leave
+                        </button>
+                    }
+                </div>
             </li>
+
+            @if (!IsClubAdmin)
+            {
+                <div class="modal fade" id="leaveClubModal-@club.Id" tabindex="-1" aria-labelledby="leaveClubModalLabel-@club.Id"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="leaveClubModalLabel-@club.Id">Leave club</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>
+                                    Are you sure you want to leave <strong>@club.Name</strong>?
+                                </p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                                <EditForm Model="LeaveClubInput" method="post" OnValidSubmit="LeaveClub"
+                                    FormName="@($"leaveClub-{club.Id}")">
+                                    <input type="hidden" name="LeaveClubInput.ClubId" value="@club.Id" />
+                                    <button type="submit" class="btn btn-danger">Leave club</button>
+                                </EditForm>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
         }
     </ul>
 }

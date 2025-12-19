@@ -55,6 +55,18 @@ public static class Routes
     }
 
     /// <summary>
+    /// Current user's club membership routes.
+    /// </summary>
+    public static class ClubMembership
+    {
+        /// <summary>Route group: DELETE (leave club).</summary>
+        public const string Group = Clubs.Base + "/" + Parameters.ClubIdLong + "/membership";
+
+        /// <summary>Builds the URL for the current user's membership in a club.</summary>
+        public static string ForClub(long clubId) => $"{Clubs.Base}/{clubId}/membership";
+    }
+
+    /// <summary>
     /// Club join request routes.
     /// </summary>
     public static class ClubJoinRequests

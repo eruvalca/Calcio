@@ -1,6 +1,8 @@
 using Calcio.Shared.DTOs.Clubs;
 using Calcio.Shared.Results;
 
+using OneOf.Types;
+
 namespace Calcio.Shared.Services.Clubs;
 
 public interface IClubsService
@@ -25,4 +27,10 @@ public interface IClubsService
     /// Gets a specific club by ID that the current user belongs to.
     /// </summary>
     Task<ServiceResult<BaseClubDto>> GetClubByIdAsync(long clubId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Allows the current user to leave a club they belong to.
+    /// ClubAdmins are not allowed to leave and must transfer ownership or delete the club.
+    /// </summary>
+    Task<ServiceResult<Success>> LeaveClubAsync(long clubId, CancellationToken cancellationToken);
 }

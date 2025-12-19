@@ -9,6 +9,8 @@ using Calcio.Shared.Services.Clubs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
+using OneOf.Types;
+
 namespace Calcio.Services.Clubs;
 
 public partial class ClubsService(
@@ -132,4 +134,55 @@ public partial class ClubsService(
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to add ClubAdmin role to user {UserId}: {Errors}")]
     private static partial void LogClubAdminRoleFailed(ILogger logger, long userId, string errors);
+
+    public async Task<ServiceResult<Success>> LeaveClubAsync(long clubId, CancellationToken cancellationToken)
+    {
+        await using var dbContext = await readWriteDbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        var currentUser = await dbContext.Users
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(u => u.Id == CurrentUserId && u.ClubId == clubId, cancellationToken);
+
+        if (currentUser is null)
+        {
+            return ServiceProblem.NotFound();
+        }
+
+        // Check if user is a ClubAdmin - they cannot leave
+        var userForRoleCheck = await userManager.FindByIdAsync(CurrentUserId.ToString());
+        if (userForRoleCheck is not null && await userManager.IsInRoleAsync(userForRoleCheck, "ClubAdmin"))
+        {
+            return ServiceProblem.Forbidden("ClubAdmins cannot leave the club. Transfer ownership or delete the club instead.");
+        }
+
+        currentUser.ClubId = null;
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        // Keep the UserManager-tracked user entity in sync; otherwise subsequent identity updates
+        // (e.g., role changes/security stamp updates) can overwrite ClubId back to its previous value.
+        if (userForRoleCheck is not null)
+        {
+            userForRoleCheck.ClubId = null;
+        }
+
+        // Remove StandardUser role
+        if (userForRoleCheck is not null)
+        {
+            var removeRoleResult = await userManager.RemoveFromRoleAsync(userForRoleCheck, "StandardUser");
+            if (!removeRoleResult.Succeeded)
+            {
+                var errors = string.Join(", ", removeRoleResult.Errors.Select(e => e.Description));
+                LogRoleRemovalFailed(logger, CurrentUserId, "StandardUser", errors);
+            }
+        }
+
+        LogUserLeftClub(logger, clubId, CurrentUserId);
+        return new Success();
+    }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "User {UserId} left club {ClubId}")]
+    private static partial void LogUserLeftClub(ILogger logger, long clubId, long userId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to remove {RoleName} role from user {UserId}: {Errors}")]
+    private static partial void LogRoleRemovalFailed(ILogger logger, long userId, string roleName, string errors);
 }

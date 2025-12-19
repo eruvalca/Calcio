@@ -398,6 +398,129 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
 
     #endregion
 
+    #region LeaveClubAsync Tests
+
+    [Fact]
+    public async Task LeaveClubAsync_WhenMemberAndNotClubAdmin_RemovesClubAndReturnsSuccess()
+    {
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UnaffiliatedUserId);
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<CalcioUserEntity>>();
+        var service = CreateService(scope.ServiceProvider);
+
+        var club = await dbContext.Clubs.IgnoreQueryFilters().FirstAsync(cancellationToken);
+
+        var user = await dbContext.Users
+            .IgnoreQueryFilters()
+            .FirstAsync(u => u.Id == UnaffiliatedUserId, cancellationToken);
+
+        user.ClubId = club.ClubId;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        dbContext.ChangeTracker.Clear();
+
+        var userForRole = await userManager.FindByIdAsync(UnaffiliatedUserId.ToString());
+        userForRole.ShouldNotBeNull();
+
+        // Ensure user is not a ClubAdmin and has StandardUser role to exercise role removal.
+        if (await userManager.IsInRoleAsync(userForRole, "ClubAdmin"))
+        {
+            await userManager.RemoveFromRoleAsync(userForRole, "ClubAdmin");
+        }
+
+        if (!await userManager.IsInRoleAsync(userForRole, "StandardUser"))
+        {
+            await userManager.AddToRoleAsync(userForRole, "StandardUser");
+        }
+
+        // Act
+        var result = await service.LeaveClubAsync(club.ClubId, cancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        dbContext.ChangeTracker.Clear();
+        var updatedUser = await dbContext.Users
+            .IgnoreQueryFilters()
+            .FirstAsync(u => u.Id == UnaffiliatedUserId, cancellationToken);
+
+        updatedUser.ClubId.ShouldBeNull();
+
+        var updatedUserForRole = await userManager.FindByIdAsync(UnaffiliatedUserId.ToString());
+        updatedUserForRole.ShouldNotBeNull();
+        (await userManager.IsInRoleAsync(updatedUserForRole, "StandardUser")).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task LeaveClubAsync_WhenUserNotInClub_ReturnsNotFound()
+    {
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UnaffiliatedUserId);
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
+        var service = CreateService(scope.ServiceProvider);
+
+        var club = await dbContext.Clubs.IgnoreQueryFilters().FirstAsync(cancellationToken);
+        var user = await dbContext.Users.IgnoreQueryFilters().FirstAsync(u => u.Id == UnaffiliatedUserId, cancellationToken);
+
+        // Ensure user is not in this club
+        user.ClubId = null;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        dbContext.ChangeTracker.Clear();
+
+        // Act
+        var result = await service.LeaveClubAsync(club.ClubId, cancellationToken);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
+    }
+
+    [Fact]
+    public async Task LeaveClubAsync_WhenUserIsClubAdmin_ReturnsForbiddenAndDoesNotLeave()
+    {
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UnaffiliatedUserId);
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<CalcioUserEntity>>();
+        var service = CreateService(scope.ServiceProvider);
+
+        var club = await dbContext.Clubs.IgnoreQueryFilters().FirstAsync(cancellationToken);
+        var user = await dbContext.Users.IgnoreQueryFilters().FirstAsync(u => u.Id == UnaffiliatedUserId, cancellationToken);
+        user.ClubId = club.ClubId;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        dbContext.ChangeTracker.Clear();
+
+        var userForRole = await userManager.FindByIdAsync(UnaffiliatedUserId.ToString());
+        userForRole.ShouldNotBeNull();
+
+        if (!await userManager.IsInRoleAsync(userForRole, "ClubAdmin"))
+        {
+            await userManager.AddToRoleAsync(userForRole, "ClubAdmin");
+        }
+
+        // Act
+        var result = await service.LeaveClubAsync(club.ClubId, cancellationToken);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
+
+        dbContext.ChangeTracker.Clear();
+        var updatedUser = await dbContext.Users.IgnoreQueryFilters().FirstAsync(u => u.Id == UnaffiliatedUserId, cancellationToken);
+        updatedUser.ClubId.ShouldBe(club.ClubId);
+    }
+
+    #endregion
+
     #region Helpers
 
     private static ClubsService CreateService(IServiceProvider services)

@@ -310,6 +310,101 @@ public class ClubsServiceTests
 
     #endregion
 
+    #region LeaveClubAsync Tests
+
+    [Fact]
+    public async Task LeaveClubAsync_WhenNoContent_ReturnsSuccess()
+    {
+        // Arrange
+        var clubId = 10L;
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/{Routes.ClubMembership.ForClub(clubId)}")
+            .Respond(HttpStatusCode.NoContent);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new ClubsService(httpClient);
+
+        // Act
+        var result = await service.LeaveClubAsync(clubId, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task LeaveClubAsync_WhenNotFound_ReturnsNotFoundProblem()
+    {
+        // Arrange
+        var clubId = 999L;
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/{Routes.ClubMembership.ForClub(clubId)}")
+            .Respond(HttpStatusCode.NotFound);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new ClubsService(httpClient);
+
+        // Act
+        var result = await service.LeaveClubAsync(clubId, CancellationToken.None);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
+    }
+
+    [Fact]
+    public async Task LeaveClubAsync_WhenForbidden_ReturnsForbiddenProblem()
+    {
+        // Arrange
+        var clubId = 10L;
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/{Routes.ClubMembership.ForClub(clubId)}")
+            .Respond(HttpStatusCode.Forbidden);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new ClubsService(httpClient);
+
+        // Act
+        var result = await service.LeaveClubAsync(clubId, CancellationToken.None);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
+    }
+
+    [Fact]
+    public async Task LeaveClubAsync_WhenServerError_ReturnsServerErrorProblem()
+    {
+        // Arrange
+        var clubId = 10L;
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Delete, $"{BaseUrl}/{Routes.ClubMembership.ForClub(clubId)}")
+            .Respond(HttpStatusCode.InternalServerError);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new ClubsService(httpClient);
+
+        // Act
+        var result = await service.LeaveClubAsync(clubId, CancellationToken.None);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.ServerError);
+    }
+
+    #endregion
+
     #region CreateClubAsync Tests
 
     [Fact]

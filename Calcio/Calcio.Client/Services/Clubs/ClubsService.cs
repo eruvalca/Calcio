@@ -6,6 +6,8 @@ using Calcio.Shared.Endpoints;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.Clubs;
 
+using OneOf.Types;
+
 namespace Calcio.Client.Services.Clubs;
 
 public class ClubsService(HttpClient httpClient) : IClubsService
@@ -69,6 +71,23 @@ public class ClubsService(HttpClient httpClient) : IClubsService
         {
             return await response.Content.ReadFromJsonAsync<BaseClubDto>(cancellationToken)
                 ?? throw new InvalidOperationException("Response body was null");
+        }
+
+        return response.StatusCode switch
+        {
+            HttpStatusCode.NotFound => ServiceProblem.NotFound(),
+            HttpStatusCode.Forbidden => ServiceProblem.Forbidden(),
+            _ => ServiceProblem.ServerError()
+        };
+    }
+
+    public async Task<ServiceResult<Success>> LeaveClubAsync(long clubId, CancellationToken cancellationToken)
+    {
+        var response = await httpClient.DeleteAsync(Routes.ClubMembership.ForClub(clubId), cancellationToken);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return new Success();
         }
 
         return response.StatusCode switch

@@ -210,6 +210,7 @@ app.MapAdditionalIdentityEndpoints();
 
 app.MapClubJoinRequestsEndpoints();
 app.MapClubsEndpoints();
+app.MapClubMembershipEndpoints();
 app.MapCalcioUsersEndpoints();
 app.MapPlayersEndpoints();
 app.MapSeasonsEndpoints();
