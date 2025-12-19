@@ -22,11 +22,17 @@
                         <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
                     </NavLink>
                 </li>
-                <li class="nav-item">
-                    <NavLink class="nav-link" href="auth">
-                        <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
-                    </NavLink>
-                </li>
+
+                @if (UserClubs.Count > 0)
+                {
+                    var userClubDetailUrl = $"/clubs/{UserClubs[0].Id}";
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href=@userClubDetailUrl>
+                            <span class="bi bi-people-fill-nav-menu" aria-hidden="true"></span> @UserClubs[0].Name
+                        </NavLink>
+                    </li>
+                }
+
                 @* Theme picker for mobile - shown as nav item *@
                 <li class="nav-item d-sm-none">
                     <div class="dropdown dropup">

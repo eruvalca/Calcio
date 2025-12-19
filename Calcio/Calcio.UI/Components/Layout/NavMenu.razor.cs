@@ -1,3 +1,5 @@
+using Calcio.Shared.DTOs.Clubs;
+using Calcio.Shared.Services.Clubs;
 using Calcio.UI.Services.Theme;
 
 using Microsoft.AspNetCore.Components;
@@ -7,15 +9,23 @@ namespace Calcio.UI.Components.Layout;
 
 public partial class NavMenu(
     NavigationManager navigationManager,
+    IClubsService clubsService,
     ThemeService themeService)
 {
     private string? currentUrl;
     private bool _themeSubscribed;
 
-    protected override void OnInitialized()
+    private List<BaseClubDto> UserClubs { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
     {
         currentUrl = navigationManager.ToBaseRelativePath(navigationManager.Uri);
         navigationManager.LocationChanged += OnLocationChanged;
+
+        var userClubsResult = await clubsService.GetUserClubsAsync(CancellationToken);
+        userClubsResult.Switch(
+            clubs => UserClubs = clubs,
+            problem => UserClubs = []);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
