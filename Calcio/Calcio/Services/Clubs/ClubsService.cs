@@ -160,10 +160,7 @@ public partial class ClubsService(
 
         // Keep the UserManager-tracked user entity in sync; otherwise subsequent identity updates
         // (e.g., role changes/security stamp updates) can overwrite ClubId back to its previous value.
-        if (userForRoleCheck is not null)
-        {
-            userForRoleCheck.ClubId = null;
-        }
+        userForRoleCheck?.ClubId = null;
 
         // Remove StandardUser role
         if (userForRoleCheck is not null)
