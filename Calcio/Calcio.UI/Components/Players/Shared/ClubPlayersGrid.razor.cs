@@ -1,12 +1,13 @@
 using Calcio.Shared.DTOs.Players;
 using Calcio.Shared.Extensions.Shared;
+using Calcio.Shared.Security;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 
 namespace Calcio.UI.Components.Players.Shared;
 
-[Authorize(Roles = "ClubAdmin")]
+[Authorize(Roles = Roles.ClubAdmin)]
 public partial class ClubPlayersGrid
 {
     [Parameter]

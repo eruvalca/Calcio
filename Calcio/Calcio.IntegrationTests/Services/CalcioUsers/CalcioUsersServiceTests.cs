@@ -5,6 +5,7 @@ using Calcio.IntegrationTests.Data.Contexts;
 using Calcio.Services.CalcioUsers;
 using Calcio.Shared.Models.Entities;
 using Calcio.Shared.Results;
+using Calcio.Shared.Security;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -53,7 +54,7 @@ public class CalcioUsersServiceTests(CustomApplicationFactory factory) : BaseDbC
             }
 
             // Add StandardUser role
-            await userManager.AddToRoleAsync(standardMember, "StandardUser");
+            await userManager.AddToRoleAsync(standardMember, Roles.StandardUser);
         }
         else if (existingUser.ClubId != club.ClubId)
         {
@@ -63,9 +64,9 @@ public class CalcioUsersServiceTests(CustomApplicationFactory factory) : BaseDbC
 
             // Also re-add the StandardUser role if needed
             var freshUser = await userManager.FindByIdAsync(StandardMemberUserId.ToString());
-            if (freshUser is not null && !await userManager.IsInRoleAsync(freshUser, "StandardUser"))
+            if (freshUser is not null && !await userManager.IsInRoleAsync(freshUser, Roles.StandardUser))
             {
-                await userManager.AddToRoleAsync(freshUser, "StandardUser");
+                await userManager.AddToRoleAsync(freshUser, Roles.StandardUser);
             }
         }
     }
@@ -201,7 +202,7 @@ public class CalcioUsersServiceTests(CustomApplicationFactory factory) : BaseDbC
 
         // Verify StandardUser role was removed
         var freshUser = await userManager.FindByIdAsync(StandardMemberUserId.ToString());
-        var isInRole = await userManager.IsInRoleAsync(freshUser!, "StandardUser");
+        var isInRole = await userManager.IsInRoleAsync(freshUser!, Roles.StandardUser);
         isInRole.ShouldBeFalse();
     }
 

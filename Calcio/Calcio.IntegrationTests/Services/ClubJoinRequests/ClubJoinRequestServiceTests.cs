@@ -6,6 +6,7 @@ using Calcio.Services.ClubJoinRequests;
 using Calcio.Shared.Enums;
 using Calcio.Shared.Models.Entities;
 using Calcio.Shared.Results;
+using Calcio.Shared.Security;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -468,7 +469,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
         updatedUser.ClubId.ShouldBe(club.ClubId);
 
         // Verify user was assigned the StandardUser role
-        var isInRole = await userManager.IsInRoleAsync(updatedUser, "StandardUser");
+        var isInRole = await userManager.IsInRoleAsync(updatedUser, Roles.StandardUser);
         isInRole.ShouldBeTrue();
     }
 

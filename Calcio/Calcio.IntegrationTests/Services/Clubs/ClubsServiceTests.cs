@@ -7,6 +7,7 @@ using Calcio.Shared.DTOs.Clubs;
 using Calcio.Shared.Enums;
 using Calcio.Shared.Models.Entities;
 using Calcio.Shared.Results;
+using Calcio.Shared.Security;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -73,9 +74,9 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
 
                 // Remove ClubAdmin role if assigned
                 var userForRole = await userManager.FindByIdAsync(UnaffiliatedUserId.ToString());
-                if (userForRole is not null && await userManager.IsInRoleAsync(userForRole, "ClubAdmin"))
+                if (userForRole is not null && await userManager.IsInRoleAsync(userForRole, Roles.ClubAdmin))
                 {
-                    await userManager.RemoveFromRoleAsync(userForRole, "ClubAdmin");
+                    await userManager.RemoveFromRoleAsync(userForRole, Roles.ClubAdmin);
                 }
             }
         }
@@ -294,7 +295,7 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
         updatedUser.ClubId.ShouldBe(result.Value.ClubId);
 
         // Verify user was assigned ClubAdmin role
-        var isInRole = await userManager.IsInRoleAsync(updatedUser, "ClubAdmin");
+        var isInRole = await userManager.IsInRoleAsync(updatedUser, Roles.ClubAdmin);
         isInRole.ShouldBeTrue();
     }
 
@@ -426,14 +427,14 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
         userForRole.ShouldNotBeNull();
 
         // Ensure user is not a ClubAdmin and has StandardUser role to exercise role removal.
-        if (await userManager.IsInRoleAsync(userForRole, "ClubAdmin"))
+        if (await userManager.IsInRoleAsync(userForRole, Roles.ClubAdmin))
         {
-            await userManager.RemoveFromRoleAsync(userForRole, "ClubAdmin");
+            await userManager.RemoveFromRoleAsync(userForRole, Roles.ClubAdmin);
         }
 
-        if (!await userManager.IsInRoleAsync(userForRole, "StandardUser"))
+        if (!await userManager.IsInRoleAsync(userForRole, Roles.StandardUser))
         {
-            await userManager.AddToRoleAsync(userForRole, "StandardUser");
+            await userManager.AddToRoleAsync(userForRole, Roles.StandardUser);
         }
 
         // Act
@@ -451,7 +452,7 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
 
         var updatedUserForRole = await userManager.FindByIdAsync(UnaffiliatedUserId.ToString());
         updatedUserForRole.ShouldNotBeNull();
-        (await userManager.IsInRoleAsync(updatedUserForRole, "StandardUser")).ShouldBeFalse();
+        (await userManager.IsInRoleAsync(updatedUserForRole, Roles.StandardUser)).ShouldBeFalse();
     }
 
     [Fact]
@@ -502,9 +503,9 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
         var userForRole = await userManager.FindByIdAsync(UnaffiliatedUserId.ToString());
         userForRole.ShouldNotBeNull();
 
-        if (!await userManager.IsInRoleAsync(userForRole, "ClubAdmin"))
+        if (!await userManager.IsInRoleAsync(userForRole, Roles.ClubAdmin))
         {
-            await userManager.AddToRoleAsync(userForRole, "ClubAdmin");
+            await userManager.AddToRoleAsync(userForRole, Roles.ClubAdmin);
         }
 
         // Act

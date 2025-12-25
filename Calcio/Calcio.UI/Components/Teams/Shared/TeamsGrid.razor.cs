@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Calcio.Shared.DTOs.Teams;
 using Calcio.Shared.Extensions.Shared;
 using Calcio.Shared.Results;
+using Calcio.Shared.Security;
 using Calcio.Shared.Services.Teams;
 using Calcio.Shared.Validation;
 
@@ -11,7 +12,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace Calcio.UI.Components.Teams.Shared;
 
-[Authorize(Roles = "ClubAdmin")]
+[Authorize(Roles = Roles.ClubAdmin)]
 public partial class TeamsGrid(
     ITeamsService teamService,
     NavigationManager navigationManager)

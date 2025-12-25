@@ -20,6 +20,7 @@ using Calcio.Services.Players;
 using Calcio.Services.Seasons;
 using Calcio.Services.Teams;
 using Calcio.Shared.Models.Entities;
+using Calcio.Shared.Security;
 using Calcio.Shared.Services.BlobStorage;
 using Calcio.Shared.Services.CalcioUsers;
 using Calcio.Shared.Services.ClubJoinRequests;
@@ -230,7 +231,7 @@ if (app.Environment.IsDevelopment())
         {
             await context.Database.MigrateAsync();
 
-            string[] roles = ["Admin", "ClubAdmin", "StandardUser"];
+            string[] roles = [Roles.Admin, Roles.ClubAdmin, Roles.StandardUser];
 
             foreach (var role in roles)
             {

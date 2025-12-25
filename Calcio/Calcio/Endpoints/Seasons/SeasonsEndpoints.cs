@@ -4,6 +4,7 @@ using Calcio.Endpoints.Extensions;
 using Calcio.Endpoints.Filters;
 using Calcio.Shared.DTOs.Seasons;
 using Calcio.Shared.Endpoints;
+using Calcio.Shared.Security;
 using Calcio.Shared.Services.Seasons;
 
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -24,7 +25,7 @@ public static class SeasonsEndpoints
         group.MapGet("", GetSeasons);
 
         var clubAdminGroup = endpoints.MapGroup(Routes.Seasons.Group)
-            .RequireAuthorization(policy => policy.RequireRole("ClubAdmin"))
+            .RequireAuthorization(policy => policy.RequireRole(Roles.ClubAdmin))
             .AddEndpointFilter<ClubMembershipFilter>()
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status403Forbidden)

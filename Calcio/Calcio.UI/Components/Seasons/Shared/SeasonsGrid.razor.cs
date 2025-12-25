@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Calcio.Shared.DTOs.Seasons;
 using Calcio.Shared.Extensions.Shared;
 using Calcio.Shared.Results;
+using Calcio.Shared.Security;
 using Calcio.Shared.Services.Seasons;
 using Calcio.Shared.Validation;
 
@@ -11,7 +12,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace Calcio.UI.Components.Seasons.Shared;
 
-[Authorize(Roles = "ClubAdmin")]
+[Authorize(Roles = Roles.ClubAdmin)]
 public partial class SeasonsGrid(
     ISeasonsService seasonService,
     NavigationManager navigationManager)

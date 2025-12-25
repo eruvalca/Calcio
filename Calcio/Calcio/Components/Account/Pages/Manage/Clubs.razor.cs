@@ -5,6 +5,7 @@ using Calcio.Shared.DTOs.Clubs;
 using Calcio.Shared.Enums;
 using Calcio.Shared.Models.Entities;
 using Calcio.Shared.Results;
+using Calcio.Shared.Security;
 using Calcio.Shared.Services.ClubJoinRequests;
 using Calcio.Shared.Services.Clubs;
 
@@ -53,7 +54,7 @@ public partial class Clubs(
         LeaveClubInput ??= new();
 
         var user = await userManager.FindByIdAsync(UserId.ToString());
-        IsClubAdmin = user is not null && await userManager.IsInRoleAsync(user, "ClubAdmin");
+        IsClubAdmin = user is not null && await userManager.IsInRoleAsync(user, Roles.ClubAdmin);
 
         var userClubsResult = await clubsService.GetUserClubsAsync(CancellationToken);
         userClubsResult.Switch(

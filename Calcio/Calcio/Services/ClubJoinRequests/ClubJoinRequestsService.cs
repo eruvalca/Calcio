@@ -4,6 +4,7 @@ using Calcio.Shared.Enums;
 using Calcio.Shared.Extensions.ClubJoinRequests;
 using Calcio.Shared.Models.Entities;
 using Calcio.Shared.Results;
+using Calcio.Shared.Security;
 using Calcio.Shared.Services.ClubJoinRequests;
 
 using Microsoft.AspNetCore.Identity;
@@ -150,7 +151,7 @@ public partial class ClubJoinRequestsService(
         var userForRoleAssignment = await userManager.FindByIdAsync(requestingUserId.ToString());
         if (userForRoleAssignment is not null)
         {
-            var roleResult = await userManager.AddToRoleAsync(userForRoleAssignment, "StandardUser");
+            var roleResult = await userManager.AddToRoleAsync(userForRoleAssignment, Roles.StandardUser);
             if (!roleResult.Succeeded)
             {
                 var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));

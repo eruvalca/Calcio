@@ -3,6 +3,7 @@ using Bunit.TestDoubles;
 
 using Calcio.Shared.DTOs.Players;
 using Calcio.Shared.Results;
+using Calcio.Shared.Security;
 using Calcio.Shared.Services.Players;
 using Calcio.UI.Components.Players.Shared;
 
@@ -47,7 +48,7 @@ public sealed class CreatePlayerFormTests : BunitContext
         // Set up authorization after services are registered
         _authContext = AddAuthorization();
         _authContext.SetAuthorized("TestUser");
-        _authContext.SetRoles("ClubAdmin");
+        _authContext.SetRoles(Roles.ClubAdmin);
 
         // Set RendererInfo for interactive components
         SetRendererInfo(new RendererInfo("Server", isInteractive: true));

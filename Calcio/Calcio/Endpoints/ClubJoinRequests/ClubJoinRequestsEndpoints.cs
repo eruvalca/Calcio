@@ -4,6 +4,7 @@ using Calcio.Endpoints.Extensions;
 using Calcio.Endpoints.Filters;
 using Calcio.Shared.DTOs.ClubJoinRequests;
 using Calcio.Shared.Endpoints;
+using Calcio.Shared.Security;
 using Calcio.Shared.Services.ClubJoinRequests;
 
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -29,7 +30,7 @@ public static class ClubJoinRequestsEndpoints
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         var clubAdminGroup = endpoints.MapGroup(Routes.ClubJoinRequests.Admin.Group)
-            .RequireAuthorization(policy => policy.RequireRole("ClubAdmin"))
+            .RequireAuthorization(policy => policy.RequireRole(Roles.ClubAdmin))
             .AddEndpointFilter<ClubMembershipFilter>()
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status403Forbidden)

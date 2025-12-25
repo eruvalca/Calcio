@@ -1,6 +1,7 @@
 using Calcio.Shared.DTOs.ClubJoinRequests;
 using Calcio.Shared.Enums;
 using Calcio.Shared.Results;
+using Calcio.Shared.Security;
 using Calcio.Shared.Services.ClubJoinRequests;
 
 using Microsoft.AspNetCore.Authorization;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace Calcio.UI.Components.CalcioUsers.Shared;
 
-[Authorize(Roles = "ClubAdmin")]
+[Authorize(Roles = Roles.ClubAdmin)]
 public partial class ClubJoinRequestsGrid(
     IClubJoinRequestsService clubJoinRequestService,
     NavigationManager navigationManager)

@@ -4,6 +4,7 @@ using Calcio.Shared.DTOs.Clubs;
 using Calcio.Shared.DTOs.Players;
 using Calcio.Shared.DTOs.Seasons;
 using Calcio.Shared.DTOs.Teams;
+using Calcio.Shared.Security;
 using Calcio.Shared.Services.CalcioUsers;
 using Calcio.Shared.Services.ClubJoinRequests;
 using Calcio.Shared.Services.Clubs;
@@ -41,7 +42,7 @@ public partial class ClubDetail(
 
     protected override async Task OnInitializedAsync()
     {
-        IsClubAdmin = HttpContext.User.IsInRole("ClubAdmin");
+        IsClubAdmin = HttpContext.User.IsInRole(Roles.ClubAdmin);
 
         var clubResult = await clubsService.GetClubByIdAsync(ClubId, CancellationToken);
         clubResult.Switch(

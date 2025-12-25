@@ -3,6 +3,7 @@ using Calcio.Shared.DTOs.CalcioUsers;
 using Calcio.Shared.Extensions.CalcioUsers;
 using Calcio.Shared.Models.Entities;
 using Calcio.Shared.Results;
+using Calcio.Shared.Security;
 using Calcio.Shared.Services.CalcioUsers;
 
 using Microsoft.AspNetCore.Identity;
@@ -31,7 +32,7 @@ public partial class CalcioUsersService(
         var members = new List<ClubMemberDto>();
         foreach (var user in users)
         {
-            var isClubAdmin = await userManager.IsInRoleAsync(user, "ClubAdmin");
+            var isClubAdmin = await userManager.IsInRoleAsync(user, Roles.ClubAdmin);
             members.Add(user.ToClubMemberDto(isClubAdmin));
         }
 
@@ -62,11 +63,11 @@ public partial class CalcioUsersService(
         var userForRoleRemoval = await userManager.FindByIdAsync(userId.ToString());
         if (userForRoleRemoval is not null)
         {
-            var removeRoleResult = await userManager.RemoveFromRoleAsync(userForRoleRemoval, "StandardUser");
+            var removeRoleResult = await userManager.RemoveFromRoleAsync(userForRoleRemoval, Roles.StandardUser);
             if (!removeRoleResult.Succeeded)
             {
                 var errors = string.Join(", ", removeRoleResult.Errors.Select(e => e.Description));
-                LogRoleRemovalFailed(logger, userId, "StandardUser", errors);
+                LogRoleRemovalFailed(logger, userId, Roles.StandardUser, errors);
             }
         }
 

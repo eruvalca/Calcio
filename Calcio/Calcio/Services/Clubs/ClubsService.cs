@@ -4,6 +4,7 @@ using Calcio.Shared.Enums;
 using Calcio.Shared.Extensions.Clubs;
 using Calcio.Shared.Models.Entities;
 using Calcio.Shared.Results;
+using Calcio.Shared.Security;
 using Calcio.Shared.Services.Clubs;
 
 using Microsoft.AspNetCore.Identity;
@@ -116,7 +117,7 @@ public partial class ClubsService(
         var userForRole = await userManager.FindByIdAsync(CurrentUserId.ToString());
         if (userForRole is not null)
         {
-            var roleResult = await userManager.AddToRoleAsync(userForRole, "ClubAdmin");
+            var roleResult = await userManager.AddToRoleAsync(userForRole, Roles.ClubAdmin);
             if (!roleResult.Succeeded)
             {
                 var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
@@ -150,7 +151,7 @@ public partial class ClubsService(
 
         // Check if user is a ClubAdmin - they cannot leave
         var userForRoleCheck = await userManager.FindByIdAsync(CurrentUserId.ToString());
-        if (userForRoleCheck is not null && await userManager.IsInRoleAsync(userForRoleCheck, "ClubAdmin"))
+        if (userForRoleCheck is not null && await userManager.IsInRoleAsync(userForRoleCheck, Roles.ClubAdmin))
         {
             return ServiceProblem.Forbidden("ClubAdmins cannot leave the club. Transfer ownership or delete the club instead.");
         }
@@ -165,11 +166,11 @@ public partial class ClubsService(
         // Remove StandardUser role
         if (userForRoleCheck is not null)
         {
-            var removeRoleResult = await userManager.RemoveFromRoleAsync(userForRoleCheck, "StandardUser");
+            var removeRoleResult = await userManager.RemoveFromRoleAsync(userForRoleCheck, Roles.StandardUser);
             if (!removeRoleResult.Succeeded)
             {
                 var errors = string.Join(", ", removeRoleResult.Errors.Select(e => e.Description));
-                LogRoleRemovalFailed(logger, CurrentUserId, "StandardUser", errors);
+                LogRoleRemovalFailed(logger, CurrentUserId, Roles.StandardUser, errors);
             }
         }
 
