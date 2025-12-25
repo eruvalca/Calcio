@@ -1,11 +1,16 @@
 using Bunit;
 using Bunit.TestDoubles;
 
+using Calcio.Shared.DTOs.Clubs;
+using Calcio.Shared.Results;
+using Calcio.Shared.Services.Clubs;
 using Calcio.UI.Components.Layout;
 using Calcio.UI.Services.Theme;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+
+using NSubstitute;
 
 using Shouldly;
 
@@ -28,6 +33,7 @@ namespace Calcio.UnitTests.Components.Layout;
 public sealed class NavMenuTests : BunitContext
 {
     private readonly BunitAuthorizationContext _authContext;
+    private readonly IClubsService _clubsService;
 
     public NavMenuTests()
     {
@@ -39,6 +45,13 @@ public sealed class NavMenuTests : BunitContext
 
         // Register ThemeService - it will use loose JSInterop
         Services.AddSingleton<ThemeService>();
+
+        // Register IClubsService required by NavMenu
+        _clubsService = Substitute.For<IClubsService>();
+        _clubsService
+            .GetUserClubsAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ServiceResult<List<BaseClubDto>>(new List<BaseClubDto>())));
+        Services.AddSingleton(_clubsService);
 
         // Add authorization services with a default unauthenticated state
         // bUnit provides AddAuthorization() for easy auth mocking
@@ -91,9 +104,7 @@ public sealed class NavMenuTests : BunitContext
         var cut = RenderNavMenu();
 
         // Assert
-        cut.Markup.ShouldContain("Counter");
         cut.Markup.ShouldContain("Weather");
-        cut.Markup.ShouldContain("Auth Required");
     }
 
     [Fact]
@@ -110,6 +121,31 @@ public sealed class NavMenuTests : BunitContext
         cut.Markup.ShouldContain("Light");
         cut.Markup.ShouldContain("Dark");
         cut.Markup.ShouldContain("Auto");
+    }
+
+    [Fact]
+    public void WhenClubsServiceReturnsAClub_ShouldRenderClubNavLink()
+    {
+        // Arrange
+        _clubsService
+            .GetUserClubsAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ServiceResult<List<BaseClubDto>>(new List<BaseClubDto>
+            {
+                new(123, "Test Club", "City", "State")
+            })));
+
+        // Act
+        var cut = RenderNavMenu();
+
+        // Assert
+        _clubsService.Received(1).GetUserClubsAsync(Arg.Any<CancellationToken>());
+
+        var clubLink = cut.FindAll("a.nav-link").FirstOrDefault(a => a.TextContent.Contains("Test Club"));
+        clubLink.ShouldNotBeNull();
+
+        var href = clubLink.GetAttribute("href");
+        href.ShouldNotBeNull();
+        (href.EndsWith("/clubs/123", StringComparison.Ordinal) || href.EndsWith("clubs/123", StringComparison.Ordinal)).ShouldBeTrue();
     }
 
     #endregion
@@ -176,6 +212,25 @@ public sealed class NavMenuTests : BunitContext
         logoutForm.GetAttribute("method").ShouldBe("post");
     }
 
+    [Fact]
+    public void WhenAuthenticated_ReturnUrlShouldTrackNavigationChanges()
+    {
+        // Arrange
+        SetupAuthenticatedUser();
+        var cut = RenderNavMenu();
+        var nav = Services.GetRequiredService<NavigationManager>();
+
+        // Act
+        nav.NavigateTo("weather");
+
+        // Assert
+        cut.WaitForAssertion(() =>
+        {
+            var returnUrlInput = cut.Find("input[name='ReturnUrl']");
+            returnUrlInput.GetAttribute("value").ShouldBe("weather");
+        });
+    }
+
     #endregion
 
     #region Theme Dropdown Tests
@@ -226,6 +281,27 @@ public sealed class NavMenuTests : BunitContext
         (buttonText.Contains("☀️") || buttonText.Contains("🌙") || buttonText.Contains("🌗")).ShouldBeTrue();
     }
 
+    [Fact]
+    public void WhenThemeIsChangedToLight_ShouldMarkLightAsActive()
+    {
+        // Arrange
+        var cut = RenderNavMenu();
+
+        // Act
+        var lightButtons = cut.FindAll("button.dropdown-item").Where(b => b.TextContent.Contains("Light")).ToList();
+        lightButtons.Count.ShouldBe(2);
+        lightButtons[0].Click();
+
+        // Assert
+        Services.GetRequiredService<ThemeService>().Current.ShouldBe(ThemePreference.Light);
+        cut.WaitForAssertion(() =>
+        {
+            var updatedLightButtons = cut.FindAll("button.dropdown-item").Where(b => b.TextContent.Contains("Light")).ToList();
+            updatedLightButtons.Count.ShouldBe(2);
+            updatedLightButtons.All(b => b.ClassList.Contains("active")).ShouldBeTrue();
+        });
+    }
+
     #endregion
 
     #region Navigation Link Tests
@@ -239,9 +315,10 @@ public sealed class NavMenuTests : BunitContext
         // Assert
         var navLinks = cut.FindAll("a.nav-link");
 
-        navLinks.ShouldContain(link => link.GetAttribute("href") == "counter");
+        // Default auth state is unauthenticated
         navLinks.ShouldContain(link => link.GetAttribute("href") == "weather");
-        navLinks.ShouldContain(link => link.GetAttribute("href") == "auth");
+        navLinks.ShouldContain(link => link.GetAttribute("href") == "Account/Register");
+        navLinks.ShouldContain(link => link.GetAttribute("href") == "Account/Login");
     }
 
     [Fact]
