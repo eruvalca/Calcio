@@ -1,4 +1,4 @@
-using Calcio.Shared.Models.Entities;
+using Calcio.Shared.Entities;
 
 namespace Calcio.Shared.Extensions.CalcioUsers;
 

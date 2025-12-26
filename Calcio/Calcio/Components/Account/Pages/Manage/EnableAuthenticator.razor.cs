@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.Encodings.Web;
 
-using Calcio.Shared.Models.Entities;
+using Calcio.Shared.Entities;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;

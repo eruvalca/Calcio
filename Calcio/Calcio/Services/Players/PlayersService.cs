@@ -2,8 +2,8 @@ using System.ComponentModel;
 
 using Calcio.Data.Contexts;
 using Calcio.Shared.DTOs.Players;
+using Calcio.Shared.Entities;
 using Calcio.Shared.Extensions.Players;
-using Calcio.Shared.Models.Entities;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.BlobStorage;
 using Calcio.Shared.Services.Players;

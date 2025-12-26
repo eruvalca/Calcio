@@ -1,7 +1,7 @@
+using Calcio.Shared.Entities.Base;
 using Calcio.Shared.Enums;
-using Calcio.Shared.Models.Entities.Base;
 
-namespace Calcio.Shared.Models.Entities;
+namespace Calcio.Shared.Entities;
 
 public class ClubJoinRequestEntity : BaseEntity
 {

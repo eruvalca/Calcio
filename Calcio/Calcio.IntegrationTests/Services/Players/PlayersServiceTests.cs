@@ -1,7 +1,7 @@
 using Calcio.Data.Contexts;
 using Calcio.IntegrationTests.Data.Contexts;
 using Calcio.Services.Players;
-using Calcio.Shared.Models.Entities;
+using Calcio.Shared.Entities;
 using Calcio.Shared.Services.BlobStorage;
 
 using Microsoft.AspNetCore.Http;

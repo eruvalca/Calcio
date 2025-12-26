@@ -1,6 +1,6 @@
-﻿using Calcio.Shared.Models.Entities.Base;
+﻿using Calcio.Shared.Entities.Base;
 
-namespace Calcio.Shared.Models.Entities;
+namespace Calcio.Shared.Entities;
 
 public class PlayerCampaignAssignmentEntity : BaseEntity
 {

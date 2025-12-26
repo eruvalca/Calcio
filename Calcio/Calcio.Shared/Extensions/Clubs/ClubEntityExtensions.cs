@@ -1,5 +1,5 @@
 ﻿using Calcio.Shared.DTOs.Clubs;
-using Calcio.Shared.Models.Entities;
+using Calcio.Shared.Entities;
 
 namespace Calcio.Shared.Extensions.Clubs;
 

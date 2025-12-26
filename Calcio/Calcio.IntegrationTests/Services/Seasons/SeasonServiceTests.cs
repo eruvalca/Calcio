@@ -2,6 +2,7 @@ using Calcio.Data.Contexts;
 using Calcio.IntegrationTests.Data.Contexts;
 using Calcio.Services.Seasons;
 using Calcio.Shared.DTOs.Seasons;
+using Calcio.Shared.Entities;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -276,7 +277,7 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
         var club = await readOnlyDbContext.Clubs.FirstAsync(cancellationToken);
 
         // Create a season directly with a past end date for testing IsComplete logic
-        var pastSeason = new Calcio.Shared.Models.Entities.SeasonEntity
+        var pastSeason = new SeasonEntity
         {
             Name = "Past Season",
             StartDate = DateOnly.FromDateTime(DateTime.Today.AddMonths(-6)),

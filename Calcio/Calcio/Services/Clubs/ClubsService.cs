@@ -1,8 +1,8 @@
 using Calcio.Data.Contexts;
 using Calcio.Shared.DTOs.Clubs;
+using Calcio.Shared.Entities;
 using Calcio.Shared.Enums;
 using Calcio.Shared.Extensions.Clubs;
-using Calcio.Shared.Models.Entities;
 using Calcio.Shared.Results;
 using Calcio.Shared.Security;
 using Calcio.Shared.Services.Clubs;

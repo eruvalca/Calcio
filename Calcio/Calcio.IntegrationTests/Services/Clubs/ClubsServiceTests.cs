@@ -4,8 +4,9 @@ using Calcio.Data.Contexts;
 using Calcio.IntegrationTests.Data.Contexts;
 using Calcio.Services.Clubs;
 using Calcio.Shared.DTOs.Clubs;
+using Calcio.Shared.Entities;
 using Calcio.Shared.Enums;
-using Calcio.Shared.Models.Entities;
+
 using Calcio.Shared.Results;
 using Calcio.Shared.Security;
 

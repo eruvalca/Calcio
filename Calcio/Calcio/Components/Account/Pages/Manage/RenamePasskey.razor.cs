@@ -1,7 +1,7 @@
 using System.Buffers.Text;
 using System.ComponentModel.DataAnnotations;
 
-using Calcio.Shared.Models.Entities;
+using Calcio.Shared.Entities;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;

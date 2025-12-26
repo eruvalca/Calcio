@@ -1,7 +1,7 @@
 using Calcio.Data.Contexts;
 using Calcio.Shared.DTOs.Seasons;
+using Calcio.Shared.Entities;
 using Calcio.Shared.Extensions.Seasons;
-using Calcio.Shared.Models.Entities;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.Seasons;
 

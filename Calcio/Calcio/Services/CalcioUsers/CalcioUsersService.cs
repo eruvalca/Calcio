@@ -1,7 +1,7 @@
 using Calcio.Data.Contexts;
 using Calcio.Shared.DTOs.CalcioUsers;
+using Calcio.Shared.Entities;
 using Calcio.Shared.Extensions.CalcioUsers;
-using Calcio.Shared.Models.Entities;
 using Calcio.Shared.Results;
 using Calcio.Shared.Security;
 using Calcio.Shared.Services.CalcioUsers;

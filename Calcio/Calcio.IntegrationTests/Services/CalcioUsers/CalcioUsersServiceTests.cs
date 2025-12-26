@@ -3,7 +3,7 @@ using Bogus;
 using Calcio.Data.Contexts;
 using Calcio.IntegrationTests.Data.Contexts;
 using Calcio.Services.CalcioUsers;
-using Calcio.Shared.Models.Entities;
+using Calcio.Shared.Entities;
 using Calcio.Shared.Results;
 using Calcio.Shared.Security;
 

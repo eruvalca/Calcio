@@ -19,7 +19,7 @@ using Calcio.Services.Clubs;
 using Calcio.Services.Players;
 using Calcio.Services.Seasons;
 using Calcio.Services.Teams;
-using Calcio.Shared.Models.Entities;
+using Calcio.Shared.Entities;
 using Calcio.Shared.Security;
 using Calcio.Shared.Services.BlobStorage;
 using Calcio.Shared.Services.CalcioUsers;
