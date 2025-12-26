@@ -5,8 +5,7 @@
 @using Calcio.Shared.Validation
 @using Calcio.UI.Components.Shared
 @using Microsoft.AspNetCore.Components.Forms
-
-@rendermode RenderMode.InteractiveAuto
+@using Microsoft.AspNetCore.Components.Web
 
 @if (!string.IsNullOrEmpty(ErrorMessage))
 {
@@ -145,4 +144,4 @@
 </EditForm>
 
 <ImageCropperModal @bind-IsVisible="ShowCropperModal" ImageSrc="@OriginalPhotoDataUrl" OnCropApplied="OnCropApplied"
-    OnCancelled="OnCropCancelled" />
+    OnCancelled="OnCropCancelled" @rendermode="RenderMode.InteractiveAuto" />
