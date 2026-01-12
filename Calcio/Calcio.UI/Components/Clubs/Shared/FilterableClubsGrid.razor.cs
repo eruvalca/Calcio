@@ -40,8 +40,6 @@ public partial class FilterableClubsGrid(
 
     private bool HasPendingRequest => CurrentJoinRequest?.Status == RequestStatus.Pending;
 
-    private bool IsRejectedRequest => CurrentJoinRequest?.Status == RequestStatus.Rejected;
-
     private bool IsPendingClub(long clubId) => CurrentJoinRequest?.ClubId == clubId && CurrentJoinRequest?.Status == RequestStatus.Pending;
 
     private bool IsRejectedClub(long clubId) => CurrentJoinRequest?.ClubId == clubId && CurrentJoinRequest?.Status == RequestStatus.Rejected;

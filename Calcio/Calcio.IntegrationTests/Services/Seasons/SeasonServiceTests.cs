@@ -286,7 +286,7 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
             CreatedById = UserAId
         };
 
-        readWriteDbContext.Seasons.Add(pastSeason);
+        await readWriteDbContext.Seasons.AddAsync(pastSeason, cancellationToken);
         await readWriteDbContext.SaveChangesAsync(cancellationToken);
 
         // Act - Retrieve the season and verify IsComplete

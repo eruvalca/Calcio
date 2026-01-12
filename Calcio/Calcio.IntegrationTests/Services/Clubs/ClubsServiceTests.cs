@@ -340,7 +340,7 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
             Status = RequestStatus.Pending,
             CreatedById = UnaffiliatedUserId
         };
-        dbContext.ClubJoinRequests.Add(joinRequest);
+        await dbContext.ClubJoinRequests.AddAsync(joinRequest, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         var createDto = new CreateClubDto("My Club", "My City", "NY");
@@ -377,7 +377,7 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
             Status = RequestStatus.Rejected,
             CreatedById = UnaffiliatedUserId
         };
-        dbContext.ClubJoinRequests.Add(rejectedRequest);
+        await dbContext.ClubJoinRequests.AddAsync(rejectedRequest, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         var rejectedRequestId = rejectedRequest.ClubJoinRequestId;
 

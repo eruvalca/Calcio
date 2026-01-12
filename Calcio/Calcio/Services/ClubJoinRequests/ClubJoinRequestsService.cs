@@ -72,7 +72,7 @@ public partial class ClubJoinRequestsService(
             CreatedById = CurrentUserId
         };
 
-        dbContext.Add(joinRequest);
+        await dbContext.AddAsync(joinRequest, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         LogJoinRequestCreated(logger, clubId, CurrentUserId);

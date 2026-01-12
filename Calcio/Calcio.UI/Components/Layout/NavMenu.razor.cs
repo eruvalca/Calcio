@@ -3,6 +3,7 @@ using Calcio.Shared.Services.Clubs;
 using Calcio.UI.Services.Theme;
 
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Routing;
 
 namespace Calcio.UI.Components.Layout;
@@ -10,7 +11,8 @@ namespace Calcio.UI.Components.Layout;
 public partial class NavMenu(
     NavigationManager navigationManager,
     IClubsService clubsService,
-    ThemeService themeService)
+    ThemeService themeService,
+    AuthenticationStateProvider authenticationStateProvider)
 {
     private string? currentUrl;
     private bool _themeSubscribed;
@@ -22,10 +24,14 @@ public partial class NavMenu(
         currentUrl = navigationManager.ToBaseRelativePath(navigationManager.Uri);
         navigationManager.LocationChanged += OnLocationChanged;
 
-        var userClubsResult = await clubsService.GetUserClubsAsync(CancellationToken);
-        userClubsResult.Switch(
-            clubs => UserClubs = clubs,
-            problem => UserClubs = []);
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated is true)
+        {
+            var userClubsResult = await clubsService.GetUserClubsAsync(CancellationToken);
+            userClubsResult.Switch(
+                clubs => UserClubs = clubs,
+                problem => UserClubs = []);
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -60,7 +66,6 @@ public partial class NavMenu(
 
 #pragma warning disable CA1816 // Dispose methods should call SuppressFinalize
     public override void Dispose()
-#pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
     {
         navigationManager.LocationChanged -= OnLocationChanged;
         if (_themeSubscribed)
@@ -70,4 +75,5 @@ public partial class NavMenu(
 
         base.Dispose();
     }
+#pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
 }

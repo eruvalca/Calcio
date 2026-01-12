@@ -78,7 +78,7 @@ public partial class PlayersService(
             CreatedById = CurrentUserId
         };
 
-        dbContext.Players.Add(player);
+        await dbContext.Players.AddAsync(player, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         LogPlayerCreated(logger, player.PlayerId, clubId, CurrentUserId);
@@ -163,7 +163,7 @@ public partial class PlayersService(
                     CreatedById = CurrentUserId
                 };
 
-                dbContext.PlayerPhotos.Add(photoEntity);
+                await dbContext.PlayerPhotos.AddAsync(photoEntity, ct);
 
                 // Update player's primary photo reference
                 player.PrimaryPhotoBlobName = photoEntity.OriginalBlobName;

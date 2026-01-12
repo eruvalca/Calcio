@@ -127,6 +127,7 @@ public sealed class NavMenuTests : BunitContext
     public void WhenClubsServiceReturnsAClub_ShouldRenderClubNavLink()
     {
         // Arrange
+        SetupAuthenticatedUser();
         _clubsService
             .GetUserClubsAsync(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(new ServiceResult<List<BaseClubDto>>(new List<BaseClubDto>
@@ -146,6 +147,19 @@ public sealed class NavMenuTests : BunitContext
         var href = clubLink.GetAttribute("href");
         href.ShouldNotBeNull();
         (href.EndsWith("/clubs/123", StringComparison.Ordinal) || href.EndsWith("clubs/123", StringComparison.Ordinal)).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void WhenUnauthenticated_ShouldNotCallClubsService()
+    {
+        // Arrange
+        SetupUnauthenticatedUser();
+
+        // Act
+        var cut = RenderNavMenu();
+
+        // Assert
+        _clubsService.DidNotReceive().GetUserClubsAsync(Arg.Any<CancellationToken>());
     }
 
     #endregion

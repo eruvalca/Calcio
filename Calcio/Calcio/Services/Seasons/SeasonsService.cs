@@ -46,7 +46,7 @@ public partial class SeasonsService(
             CreatedById = CurrentUserId
         };
 
-        dbContext.Seasons.Add(season);
+        await dbContext.Seasons.AddAsync(season, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         LogSeasonCreated(logger, season.SeasonId, clubId, CurrentUserId);

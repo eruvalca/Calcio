@@ -384,26 +384,26 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
             };
         }
 
-        context.Add(club);
-        context.Add(season);
-        context.Add(campaign);
-        context.Add(team);
-        context.Add(player);
-        context.Add(tag);
+        await context.AddAsync(club, cancellationToken);
+        await context.AddAsync(season, cancellationToken);
+        await context.AddAsync(campaign, cancellationToken);
+        await context.AddAsync(team, cancellationToken);
+        await context.AddAsync(player, cancellationToken);
+        await context.AddAsync(tag, cancellationToken);
 
         if (note is not null)
         {
-            context.Add(note);
+            await context.AddAsync(note, cancellationToken);
         }
 
         if (photo is not null)
         {
-            context.Add(photo);
+            await context.AddAsync(photo, cancellationToken);
         }
 
         if (assignment is not null)
         {
-            context.Add(assignment);
+            await context.AddAsync(assignment, cancellationToken);
         }
 
         await context.SaveChangesAsync(cancellationToken);

@@ -407,8 +407,8 @@ public class PlayerPhotoUploadFullIntegrationTests(BlobStorageApplicationFactory
             club.Players.Add(player);
         }
 
-        dbContext.Users.Add(userA);
-        dbContext.Clubs.Add(club);
+        await dbContext.Users.AddAsync(userA);
+        await dbContext.Clubs.AddAsync(club);
 
         await dbContext.SaveChangesAsync();
     }

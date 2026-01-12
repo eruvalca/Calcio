@@ -32,7 +32,7 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
         };
 
         // Act
-        dbContext.Teams.Add(team);
+        await dbContext.Teams.AddAsync(team, TestContext.Current.CancellationToken);
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Assert - CreatedById should be preserved from what was set, not overwritten
@@ -60,7 +60,7 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
         };
 
         // Act
-        dbContext.Teams.Add(team);
+        await dbContext.Teams.AddAsync(team, TestContext.Current.CancellationToken);
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var afterSave = DateTimeOffset.UtcNow;
@@ -90,7 +90,7 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
         };
 
         // Act
-        dbContext.Teams.Add(team);
+        await dbContext.Teams.AddAsync(team, TestContext.Current.CancellationToken);
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var afterSave = DateTimeOffset.UtcNow;
@@ -119,7 +119,7 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
         };
 
         // Act
-        dbContext.Teams.Add(team);
+        await dbContext.Teams.AddAsync(team, TestContext.Current.CancellationToken);
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Assert - ModifiedById should come from HTTP context, not CreatedById
@@ -144,7 +144,7 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
             CreatedById = UserAId
         };
 
-        dbContext.Teams.Add(team);
+        await dbContext.Teams.AddAsync(team, TestContext.Current.CancellationToken);
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var originalModifiedAt = team.ModifiedAt;
@@ -182,7 +182,7 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
             CreatedById = UserAId
         };
 
-        dbContext.Teams.Add(team);
+        await dbContext.Teams.AddAsync(team, TestContext.Current.CancellationToken);
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         dbContext.ChangeTracker.Clear();
@@ -221,7 +221,7 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
             CreatedById = UserAId
         };
 
-        dbContext.Teams.Add(team);
+        await dbContext.Teams.AddAsync(team, TestContext.Current.CancellationToken);
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var originalCreatedAt = team.CreatedAt;
@@ -262,7 +262,7 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
             CreatedById = UserAId
         };
 
-        dbContext.Teams.Add(team);
+        await dbContext.Teams.AddAsync(team, TestContext.Current.CancellationToken);
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var originalCreatedById = team.CreatedById;
@@ -301,7 +301,7 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
         };
 
         // Act
-        dbContext.Teams.Add(team);
+        await dbContext.Teams.AddAsync(team, TestContext.Current.CancellationToken);
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Assert - On initial creation, CreatedAt and ModifiedAt should be equal
@@ -328,7 +328,7 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
             CreatedById = 1 // Even though we set this, interceptor will fail on no HTTP context user
         };
 
-        dbContext.Teams.Add(team);
+        await dbContext.Teams.AddAsync(team, TestContext.Current.CancellationToken);
 
         // Act & Assert
         await Should.ThrowAsync<InvalidOperationException>(async () =>

@@ -522,7 +522,7 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
             CreatedById = requestingUserId
         };
 
-        context.ClubJoinRequests.Add(joinRequest);
+        await context.ClubJoinRequests.AddAsync(joinRequest, token);
         await context.SaveChangesAsync(token);
         var requestId = joinRequest.ClubJoinRequestId;
         context.ChangeTracker.Clear();

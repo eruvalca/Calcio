@@ -45,7 +45,7 @@ public partial class TeamsService(
             CreatedById = CurrentUserId
         };
 
-        dbContext.Teams.Add(team);
+        await dbContext.Teams.AddAsync(team, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         LogTeamCreated(logger, team.TeamId, clubId, CurrentUserId);

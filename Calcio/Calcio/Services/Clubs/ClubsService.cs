@@ -23,7 +23,28 @@ public partial class ClubsService(
 {
     public async Task<ServiceResult<List<BaseClubDto>>> GetUserClubsAsync(CancellationToken cancellationToken)
     {
+        var userId = CurrentUserId;
+
         await using var dbContext = await readOnlyDbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        var user = await dbContext.Users
+            .Where(u => u.Id == userId)
+            .Include(u => u.Club)
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(cancellationToken);
+
+        var allClubs = await dbContext.Clubs.ToListAsync(cancellationToken);
+        var allClubsWithUsers = await dbContext.Clubs
+            .Include(c => c.CalcioUsers)
+            .ToListAsync(cancellationToken);
+
+        var allClubsNoFilters = await dbContext.Clubs
+            .IgnoreQueryFilters()
+            .ToListAsync(cancellationToken);
+        var allClubsWithUsersNoFilters = await dbContext.Clubs
+            .Include(c => c.CalcioUsers)
+            .IgnoreQueryFilters()
+            .ToListAsync(cancellationToken);
 
         var clubs = await dbContext.Clubs
             .OrderBy(c => c.Name)
@@ -106,17 +127,23 @@ public partial class ClubsService(
             Name = dto.Name,
             City = dto.City,
             State = dto.State,
-            CreatedById = CurrentUserId,
-            CalcioUsers = [currentUser]
+            CreatedById = CurrentUserId
         };
 
-        dbContext.Add(club);
+        await dbContext.Clubs.AddAsync(club, cancellationToken);
+
+        currentUser.Club = club;
+
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Get a fresh user instance from UserManager to avoid tracking conflicts
         var userForRole = await userManager.FindByIdAsync(CurrentUserId.ToString());
         if (userForRole is not null)
         {
+            // Keep UserManager's entity in sync with our changes; otherwise AddToRoleAsync's
+            // UpdateAsync will overwrite ClubId back to null (its stale cached value).
+            userForRole.ClubId = club.ClubId;
+
             var roleResult = await userManager.AddToRoleAsync(userForRole, Roles.ClubAdmin);
             if (!roleResult.Succeeded)
             {
@@ -129,12 +156,6 @@ public partial class ClubsService(
 
         return new ClubCreatedDto(club.ClubId, club.Name);
     }
-
-    [LoggerMessage(Level = LogLevel.Information, Message = "Club '{ClubName}' created by user {UserId}")]
-    private static partial void LogClubCreated(ILogger logger, string clubName, long userId);
-
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to add ClubAdmin role to user {UserId}: {Errors}")]
-    private static partial void LogClubAdminRoleFailed(ILogger logger, long userId, string errors);
 
     public async Task<ServiceResult<Success>> LeaveClubAsync(long clubId, CancellationToken cancellationToken)
     {
@@ -183,4 +204,10 @@ public partial class ClubsService(
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to remove {RoleName} role from user {UserId}: {Errors}")]
     private static partial void LogRoleRemovalFailed(ILogger logger, long userId, string roleName, string errors);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Club '{ClubName}' created by user {UserId}")]
+    private static partial void LogClubCreated(ILogger logger, string clubName, long userId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to add ClubAdmin role to user {UserId}: {Errors}")]
+    private static partial void LogClubAdminRoleFailed(ILogger logger, long userId, string errors);
 }

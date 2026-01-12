@@ -87,7 +87,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
             Status = RequestStatus.Pending,
             CreatedById = UnaffiliatedUserId
         };
-        dbContext.ClubJoinRequests.Add(joinRequest);
+        await dbContext.ClubJoinRequests.AddAsync(joinRequest, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Act
@@ -120,7 +120,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
             Status = RequestStatus.Rejected,
             CreatedById = UnaffiliatedUserId
         };
-        dbContext.ClubJoinRequests.Add(joinRequest);
+        await dbContext.ClubJoinRequests.AddAsync(joinRequest, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Act
@@ -204,7 +204,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
             Status = RequestStatus.Pending,
             CreatedById = UnaffiliatedUserId
         };
-        dbContext.ClubJoinRequests.Add(existingRequest);
+        await dbContext.ClubJoinRequests.AddAsync(existingRequest, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Act
@@ -256,7 +256,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
             Status = RequestStatus.Rejected,
             CreatedById = UnaffiliatedUserId
         };
-        dbContext.ClubJoinRequests.Add(existingRequest);
+        await dbContext.ClubJoinRequests.AddAsync(existingRequest, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         var oldRequestId = existingRequest.ClubJoinRequestId;
 
@@ -304,7 +304,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
             Status = RequestStatus.Pending,
             CreatedById = UnaffiliatedUserId
         };
-        dbContext.ClubJoinRequests.Add(joinRequest);
+        await dbContext.ClubJoinRequests.AddAsync(joinRequest, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Act
@@ -364,7 +364,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
             Status = RequestStatus.Pending,
             CreatedById = UnaffiliatedUserId
         };
-        dbContext.ClubJoinRequests.Add(joinRequest);
+        await dbContext.ClubJoinRequests.AddAsync(joinRequest, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Act
@@ -447,7 +447,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
             Status = RequestStatus.Pending,
             CreatedById = UnaffiliatedUserId
         };
-        dbContext.ClubJoinRequests.Add(joinRequest);
+        await dbContext.ClubJoinRequests.AddAsync(joinRequest, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         var requestId = joinRequest.ClubJoinRequestId;
 
@@ -519,7 +519,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
             Status = RequestStatus.Pending,
             CreatedById = UnaffiliatedUserId
         };
-        dbContext.ClubJoinRequests.Add(joinRequest);
+        await dbContext.ClubJoinRequests.AddAsync(joinRequest, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Act
@@ -553,7 +553,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
             Status = RequestStatus.Pending,
             CreatedById = UnaffiliatedUserId
         };
-        dbContext.ClubJoinRequests.Add(joinRequest);
+        await dbContext.ClubJoinRequests.AddAsync(joinRequest, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         var requestId = joinRequest.ClubJoinRequestId;
 
@@ -618,7 +618,7 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
             Status = RequestStatus.Pending,
             CreatedById = UnaffiliatedUserId
         };
-        dbContext.ClubJoinRequests.Add(joinRequest);
+        await dbContext.ClubJoinRequests.AddAsync(joinRequest, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Act

@@ -337,7 +337,7 @@ public class PlayersServiceTests(CustomApplicationFactory factory) : BaseDbConte
                 Club = club,
                 CreatedById = UserAId
             };
-            writeDbContext.Players.Add(player);
+            await writeDbContext.Players.AddAsync(player, cancellationToken);
             await writeDbContext.SaveChangesAsync(cancellationToken);
         }
 
