@@ -23,28 +23,7 @@ public partial class ClubsService(
 {
     public async Task<ServiceResult<List<BaseClubDto>>> GetUserClubsAsync(CancellationToken cancellationToken)
     {
-        var userId = CurrentUserId;
-
         await using var dbContext = await readOnlyDbContextFactory.CreateDbContextAsync(cancellationToken);
-
-        var user = await dbContext.Users
-            .Where(u => u.Id == userId)
-            .Include(u => u.Club)
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(cancellationToken);
-
-        var allClubs = await dbContext.Clubs.ToListAsync(cancellationToken);
-        var allClubsWithUsers = await dbContext.Clubs
-            .Include(c => c.CalcioUsers)
-            .ToListAsync(cancellationToken);
-
-        var allClubsNoFilters = await dbContext.Clubs
-            .IgnoreQueryFilters()
-            .ToListAsync(cancellationToken);
-        var allClubsWithUsersNoFilters = await dbContext.Clubs
-            .Include(c => c.CalcioUsers)
-            .IgnoreQueryFilters()
-            .ToListAsync(cancellationToken);
 
         var clubs = await dbContext.Clubs
             .OrderBy(c => c.Name)
