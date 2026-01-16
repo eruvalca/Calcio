@@ -5,6 +5,7 @@ using Calcio.Shared.Extensions.CalcioUsers;
 using Calcio.Shared.Results;
 using Calcio.Shared.Security;
 using Calcio.Shared.Services.CalcioUsers;
+using Calcio.Shared.Services.UserClubsCache;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,7 @@ public partial class CalcioUsersService(
     IDbContextFactory<ReadOnlyDbContext> readOnlyDbContextFactory,
     IDbContextFactory<ReadWriteDbContext> readWriteDbContextFactory,
     UserManager<CalcioUserEntity> userManager,
+    IUserClubsCacheService userClubsCacheService,
     IHttpContextAccessor httpContextAccessor,
     ILogger<CalcioUsersService> logger) : AuthenticatedServiceBase(httpContextAccessor), ICalcioUsersService
 {
@@ -72,6 +74,10 @@ public partial class CalcioUsersService(
         }
 
         LogMemberRemoved(logger, clubId, userId, CurrentUserId);
+
+        // Invalidate the removed user's clubs cache since they no longer belong to this club
+        await userClubsCacheService.InvalidateUserClubsCacheAsync(userId, cancellationToken);
+
         return new Success();
     }
 

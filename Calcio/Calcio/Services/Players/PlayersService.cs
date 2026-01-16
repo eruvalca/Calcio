@@ -1,6 +1,7 @@
 using System.ComponentModel;
 
 using Calcio.Data.Contexts;
+using Calcio.Shared.Caching;
 using Calcio.Shared.DTOs.Players;
 using Calcio.Shared.Entities;
 using Calcio.Shared.Extensions.Players;
@@ -193,7 +194,7 @@ public partial class PlayersService(
             }
 
             // Invalidate cache for this player's photo paths
-            await cache.RemoveAsync($"player-photo-paths-{playerId}", cancellationToken);
+            await cache.RemoveAsync(CacheDefaults.Players.GetPhotoPathsKey(playerId), cancellationToken);
 
             LogPhotoUploaded(logger, playerId, photoEntity!.PlayerPhotoId, CurrentUserId);
         }
@@ -203,7 +204,7 @@ public partial class PlayersService(
 
     public async Task<ServiceResult<OneOf<PlayerPhotoDto, None>>> GetPlayerPhotoAsync(long clubId, long playerId, CancellationToken cancellationToken)
     {
-        var cacheKey = $"player-photo-paths-{playerId}";
+        var cacheKey = CacheDefaults.Players.GetPhotoPathsKey(playerId);
 
         // Cache only the blob paths, not the SAS URLs.
         // This ensures every request gets fresh SAS URLs with full validity period.
@@ -236,6 +237,7 @@ public partial class PlayersService(
                     photo.MediumBlobName,
                     photo.LargeBlobName);
             },
+            options: CacheDefaults.Players.EntryOptions,
             cancellationToken: cancellationToken);
 
         if (cachedPaths is null)

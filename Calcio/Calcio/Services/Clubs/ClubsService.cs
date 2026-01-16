@@ -6,6 +6,7 @@ using Calcio.Shared.Extensions.Clubs;
 using Calcio.Shared.Results;
 using Calcio.Shared.Security;
 using Calcio.Shared.Services.Clubs;
+using Calcio.Shared.Services.UserClubsCache;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,19 +19,14 @@ public partial class ClubsService(
     IDbContextFactory<ReadOnlyDbContext> readOnlyDbContextFactory,
     IDbContextFactory<ReadWriteDbContext> readWriteDbContextFactory,
     UserManager<CalcioUserEntity> userManager,
+    IUserClubsCacheService userClubsCacheService,
     IHttpContextAccessor httpContextAccessor,
     ILogger<ClubsService> logger) : AuthenticatedServiceBase(httpContextAccessor), IClubsService
 {
     public async Task<ServiceResult<List<BaseClubDto>>> GetUserClubsAsync(CancellationToken cancellationToken)
     {
-        await using var dbContext = await readOnlyDbContextFactory.CreateDbContextAsync(cancellationToken);
-
-        var clubs = await dbContext.Clubs
-            .OrderBy(c => c.Name)
-            .Select(c => c.ToClubDto())
-            .ToListAsync(cancellationToken);
-
-        return clubs;
+        var clubs = await userClubsCacheService.GetClubsListAsync(CurrentUserId, cancellationToken);
+        return clubs.ToList();
     }
 
     public async Task<ServiceResult<BaseClubDto>> GetClubByIdAsync(long clubId, CancellationToken cancellationToken)
@@ -133,6 +129,9 @@ public partial class ClubsService(
 
         LogClubCreated(logger, club.Name, CurrentUserId);
 
+        // Invalidate user's clubs cache since they now belong to a new club
+        await userClubsCacheService.InvalidateUserClubsCacheAsync(CurrentUserId, cancellationToken);
+
         return new ClubCreatedDto(club.ClubId, club.Name);
     }
 
@@ -175,6 +174,10 @@ public partial class ClubsService(
         }
 
         LogUserLeftClub(logger, clubId, CurrentUserId);
+
+        // Invalidate user's clubs cache since they left a club
+        await userClubsCacheService.InvalidateUserClubsCacheAsync(CurrentUserId, cancellationToken);
+
         return new Success();
     }
 

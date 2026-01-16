@@ -19,6 +19,7 @@ using Calcio.Services.Clubs;
 using Calcio.Services.Players;
 using Calcio.Services.Seasons;
 using Calcio.Services.Teams;
+using Calcio.Services.UserClubsCache;
 using Calcio.Shared.Entities;
 using Calcio.Shared.Security;
 using Calcio.Shared.Services.BlobStorage;
@@ -28,6 +29,7 @@ using Calcio.Shared.Services.Clubs;
 using Calcio.Shared.Services.Players;
 using Calcio.Shared.Services.Seasons;
 using Calcio.Shared.Services.Teams;
+using Calcio.Shared.Services.UserClubsCache;
 using Calcio.UI.Services.Theme;
 
 using Cropper.Blazor.Extensions;
@@ -135,6 +137,7 @@ builder.Services.AddScoped<IPlayersService, PlayersService>();
 builder.Services.AddScoped<ISeasonsService, SeasonsService>();
 builder.Services.AddScoped<ITeamsService, TeamsService>();
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
+builder.Services.AddScoped<IUserClubsCacheService, UserClubsCacheService>();
 
 builder.AddAzureBlobServiceClient("blobs");
 

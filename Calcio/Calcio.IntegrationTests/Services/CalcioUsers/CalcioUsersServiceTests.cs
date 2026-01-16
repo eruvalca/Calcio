@@ -6,6 +6,7 @@ using Calcio.Services.CalcioUsers;
 using Calcio.Shared.Entities;
 using Calcio.Shared.Results;
 using Calcio.Shared.Security;
+using Calcio.Shared.Services.UserClubsCache;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -278,10 +279,11 @@ public class CalcioUsersServiceTests(CustomApplicationFactory factory) : BaseDbC
         var readOnlyFactory = services.GetRequiredService<IDbContextFactory<ReadOnlyDbContext>>();
         var readWriteFactory = services.GetRequiredService<IDbContextFactory<ReadWriteDbContext>>();
         var userManager = services.GetRequiredService<UserManager<CalcioUserEntity>>();
+        var userClubsCacheService = services.GetRequiredService<IUserClubsCacheService>();
         var httpContextAccessor = services.GetRequiredService<IHttpContextAccessor>();
         var logger = services.GetRequiredService<ILogger<CalcioUsersService>>();
 
-        return new CalcioUsersService(readOnlyFactory, readWriteFactory, userManager, httpContextAccessor, logger);
+        return new CalcioUsersService(readOnlyFactory, readWriteFactory, userManager, userClubsCacheService, httpContextAccessor, logger);
     }
 
     #endregion

@@ -1,6 +1,6 @@
-using Calcio.Data.Contexts;
+using System.Security.Claims;
 
-using Microsoft.EntityFrameworkCore;
+using Calcio.Shared.Services.UserClubsCache;
 
 namespace Calcio.Endpoints.Filters;
 
@@ -9,11 +9,10 @@ namespace Calcio.Endpoints.Filters;
 /// specified in the route's clubId parameter. Returns 403 Forbidden if not a member.
 /// </summary>
 /// <remarks>
-/// This filter relies on global query filters configured in <see cref="BaseDbContext"/>
-/// which automatically restrict club queries to those accessible by the current user.
+/// This filter uses the cached user clubs data for efficient O(1) membership checks.
 /// </remarks>
 public sealed partial class ClubMembershipFilter(
-    IDbContextFactory<ReadOnlyDbContext> dbContextFactory,
+    IUserClubsCacheService userClubsCacheService,
     ILogger<ClubMembershipFilter> logger) : IEndpointFilter
 {
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
@@ -26,11 +25,12 @@ public sealed partial class ClubMembershipFilter(
                 detail: "A valid clubId route parameter is required.");
         }
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(context.HttpContext.RequestAborted);
+        if (!long.TryParse(context.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId))
+        {
+            return TypedResults.Problem(statusCode: StatusCodes.Status401Unauthorized);
+        }
 
-        // Global query filters on Clubs automatically restrict to clubs the current user belongs to.
-        // If the club isn't found, the user either doesn't have access or it doesn't exist.
-        var isClubMember = await dbContext.Clubs.AnyAsync(c => c.ClubId == clubId, context.HttpContext.RequestAborted);
+        var isClubMember = await userClubsCacheService.IsUserMemberOfClubAsync(userId, clubId, context.HttpContext.RequestAborted);
 
         if (!isClubMember)
         {

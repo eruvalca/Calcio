@@ -6,6 +6,7 @@ using Calcio.Shared.Extensions.ClubJoinRequests;
 using Calcio.Shared.Results;
 using Calcio.Shared.Security;
 using Calcio.Shared.Services.ClubJoinRequests;
+using Calcio.Shared.Services.UserClubsCache;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ public partial class ClubJoinRequestsService(
     IDbContextFactory<ReadOnlyDbContext> readOnlyDbContextFactory,
     IDbContextFactory<ReadWriteDbContext> readWriteDbContextFactory,
     UserManager<CalcioUserEntity> userManager,
+    IUserClubsCacheService userClubsCacheService,
     IHttpContextAccessor httpContextAccessor,
     ILogger<ClubJoinRequestsService> logger) : AuthenticatedServiceBase(httpContextAccessor), IClubJoinRequestsService
 {
@@ -160,6 +162,10 @@ public partial class ClubJoinRequestsService(
         }
 
         LogJoinRequestApproved(logger, joinRequest.ClubId, requestingUserId, CurrentUserId);
+
+        // Invalidate the approved user's clubs cache since they now belong to a new club
+        await userClubsCacheService.InvalidateUserClubsCacheAsync(requestingUserId, cancellationToken);
+
         return new Success();
     }
 
