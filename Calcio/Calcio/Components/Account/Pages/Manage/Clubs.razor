@@ -73,7 +73,8 @@ else
     {
         <h5>Create a club</h5>
 
-        <EditForm Model="Input" method="post" OnValidSubmit="CreateClub" FormName="createClub" Enhance>
+        <EditForm Model="Input" method="post" OnValidSubmit="CreateClub" FormName="createClub" Enhance
+            data-enhance-loading="createClubSubmitBtn">
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" role="alert" />
             <div class="row g-3 mb-3">
@@ -107,7 +108,10 @@ else
                     <ValidationMessage For="() => Input.State" class="text-danger" />
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">Create Club</button>
+            <button type="submit" id="createClubSubmitBtn" class="btn btn-primary"
+                onclick="this.disabled=true; this.innerHTML='<span class=\'spinner-border spinner-border-sm me-2\' role=\'status\' aria-hidden=\'true\'></span>Creating...'; this.form.requestSubmit();">
+                Create Club
+            </button>
         </EditForm>
     }
 }
