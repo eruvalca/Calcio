@@ -1,0 +1,27 @@
+@page "/Account/UploadProfilePhoto"
+
+@using Calcio.UI.Components.Account.Shared
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
+
+<PageTitle>Upload Profile Photo</PageTitle>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="bi bi-camera me-2"></i>Upload Your Profile Photo</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Please upload a profile photo to complete your account setup.
+                        This photo will be visible to other users and club members.
+                    </p>
+                    <UploadProfilePhotoForm ReturnUrl="@ReturnUrl" @rendermode="InteractiveAuto" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

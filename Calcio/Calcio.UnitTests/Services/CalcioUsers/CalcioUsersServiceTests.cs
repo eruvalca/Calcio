@@ -10,6 +10,8 @@ using RichardSzalay.MockHttp;
 
 using Shouldly;
 
+using OneOf.Types;
+
 namespace Calcio.UnitTests.Services.CalcioUsers;
 
 public class CalcioUsersServiceTests
@@ -213,6 +215,302 @@ public class CalcioUsersServiceTests
 
         // Act
         var result = await service.RemoveClubMemberAsync(clubId, userId, CancellationToken.None);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.ServerError);
+    }
+
+    #endregion
+
+    #region UploadAccountPhotoAsync Tests
+
+    [Fact]
+    public async Task UploadAccountPhotoAsync_WhenOk_ReturnsCalcioUserPhotoDto()
+    {
+        // Arrange
+        var expectedResponse = new CalcioUserPhotoDto(
+            1,
+            "https://storage.blob.core.windows.net/photos/original.jpg?sas",
+            "https://storage.blob.core.windows.net/photos/small.jpg?sas",
+            "https://storage.blob.core.windows.net/photos/medium.jpg?sas",
+            "https://storage.blob.core.windows.net/photos/large.jpg?sas");
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Put, $"{BaseUrl}/{Routes.Account.ForPhoto()}")
+            .Respond(HttpStatusCode.OK, JsonContent.Create(expectedResponse));
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new CalcioUsersService(httpClient);
+
+        using var photoStream = new MemoryStream([0x00, 0x01, 0x02]);
+
+        // Act
+        var result = await service.UploadAccountPhotoAsync(photoStream, "image/jpeg", CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var photo = result.Value;
+        photo.CalcioUserPhotoId.ShouldBe(1);
+        photo.OriginalUrl.ShouldContain("original.jpg");
+        photo.SmallUrl!.ShouldContain("small.jpg");
+        photo.MediumUrl!.ShouldContain("medium.jpg");
+        photo.LargeUrl!.ShouldContain("large.jpg");
+    }
+
+    [Fact]
+    public async Task UploadAccountPhotoAsync_WhenForbidden_ReturnsForbiddenProblem()
+    {
+        // Arrange
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Put, $"{BaseUrl}/{Routes.Account.ForPhoto()}")
+            .Respond(HttpStatusCode.Forbidden);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new CalcioUsersService(httpClient);
+
+        using var photoStream = new MemoryStream([0x00, 0x01, 0x02]);
+
+        // Act
+        var result = await service.UploadAccountPhotoAsync(photoStream, "image/jpeg", CancellationToken.None);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
+    }
+
+    [Fact]
+    public async Task UploadAccountPhotoAsync_WhenBadRequest_ReturnsBadRequestProblem()
+    {
+        // Arrange
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Put, $"{BaseUrl}/{Routes.Account.ForPhoto()}")
+            .Respond(HttpStatusCode.BadRequest);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new CalcioUsersService(httpClient);
+
+        using var photoStream = new MemoryStream([0x00, 0x01, 0x02]);
+
+        // Act
+        var result = await service.UploadAccountPhotoAsync(photoStream, "image/jpeg", CancellationToken.None);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.BadRequest);
+    }
+
+    [Fact]
+    public async Task UploadAccountPhotoAsync_WhenServerError_ReturnsServerErrorProblem()
+    {
+        // Arrange
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Put, $"{BaseUrl}/{Routes.Account.ForPhoto()}")
+            .Respond(HttpStatusCode.InternalServerError);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new CalcioUsersService(httpClient);
+
+        using var photoStream = new MemoryStream([0x00, 0x01, 0x02]);
+
+        // Act
+        var result = await service.UploadAccountPhotoAsync(photoStream, "image/jpeg", CancellationToken.None);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.ServerError);
+    }
+
+    #endregion
+
+    #region GetAccountPhotoAsync Tests
+
+    [Fact]
+    public async Task GetAccountPhotoAsync_WhenOk_ReturnsCalcioUserPhotoDto()
+    {
+        // Arrange
+        var expectedResponse = new CalcioUserPhotoDto(
+            1,
+            "https://storage.blob.core.windows.net/photos/original.jpg?sas",
+            "https://storage.blob.core.windows.net/photos/small.jpg?sas",
+            "https://storage.blob.core.windows.net/photos/medium.jpg?sas",
+            "https://storage.blob.core.windows.net/photos/large.jpg?sas");
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Account.ForPhoto()}")
+            .Respond(HttpStatusCode.OK, JsonContent.Create(expectedResponse));
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new CalcioUsersService(httpClient);
+
+        // Act
+        var result = await service.GetAccountPhotoAsync(CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.IsT0.ShouldBeTrue(); // CalcioUserPhotoDto
+        var photo = result.Value.AsT0;
+        photo.CalcioUserPhotoId.ShouldBe(1);
+        photo.OriginalUrl.ShouldContain("original.jpg");
+    }
+
+    [Fact]
+    public async Task GetAccountPhotoAsync_WhenNoContent_ReturnsNone()
+    {
+        // Arrange
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Account.ForPhoto()}")
+            .Respond(HttpStatusCode.NoContent);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new CalcioUsersService(httpClient);
+
+        // Act
+        var result = await service.GetAccountPhotoAsync(CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.IsT1.ShouldBeTrue(); // None
+    }
+
+    [Fact]
+    public async Task GetAccountPhotoAsync_WhenForbidden_ReturnsForbiddenProblem()
+    {
+        // Arrange
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Account.ForPhoto()}")
+            .Respond(HttpStatusCode.Forbidden);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new CalcioUsersService(httpClient);
+
+        // Act
+        var result = await service.GetAccountPhotoAsync(CancellationToken.None);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
+    }
+
+    [Fact]
+    public async Task GetAccountPhotoAsync_WhenServerError_ReturnsServerErrorProblem()
+    {
+        // Arrange
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Account.ForPhoto()}")
+            .Respond(HttpStatusCode.InternalServerError);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new CalcioUsersService(httpClient);
+
+        // Act
+        var result = await service.GetAccountPhotoAsync(CancellationToken.None);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.ServerError);
+    }
+
+    #endregion
+
+    #region HasAccountPhotoAsync Tests
+
+    [Fact]
+    public async Task HasAccountPhotoAsync_WhenOk_ReturnsTrue()
+    {
+        // Arrange
+        var expectedResponse = new CalcioUserPhotoDto(1, "url", null, null, null);
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Account.ForPhoto()}")
+            .Respond(HttpStatusCode.OK, JsonContent.Create(expectedResponse));
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new CalcioUsersService(httpClient);
+
+        // Act
+        var result = await service.HasAccountPhotoAsync(CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task HasAccountPhotoAsync_WhenNoContent_ReturnsFalse()
+    {
+        // Arrange
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Account.ForPhoto()}")
+            .Respond(HttpStatusCode.NoContent);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new CalcioUsersService(httpClient);
+
+        // Act
+        var result = await service.HasAccountPhotoAsync(CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task HasAccountPhotoAsync_WhenForbidden_ReturnsForbiddenProblem()
+    {
+        // Arrange
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Account.ForPhoto()}")
+            .Respond(HttpStatusCode.Forbidden);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new CalcioUsersService(httpClient);
+
+        // Act
+        var result = await service.HasAccountPhotoAsync(CancellationToken.None);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
+    }
+
+    [Fact]
+    public async Task HasAccountPhotoAsync_WhenServerError_ReturnsServerErrorProblem()
+    {
+        // Arrange
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Get, $"{BaseUrl}/{Routes.Account.ForPhoto()}")
+            .Respond(HttpStatusCode.InternalServerError);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(BaseUrl);
+
+        var service = new CalcioUsersService(httpClient);
+
+        // Act
+        var result = await service.HasAccountPhotoAsync(CancellationToken.None);
 
         // Assert
         result.IsProblem.ShouldBeTrue();

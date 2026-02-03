@@ -67,14 +67,23 @@ public partial class Register(
 
         if (userManager.Options.SignIn.RequireConfirmedAccount)
         {
+            // Redirect to photo upload first, then to registration confirmation
             redirectManager.RedirectTo(
-                "Account/RegisterConfirmation",
-                new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+                "Account/UploadProfilePhoto",
+                new()
+                {
+                    ["returnUrl"] = navigationManager.GetUriWithQueryParameters(
+                        "Account/RegisterConfirmation",
+                        new Dictionary<string, object?> { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl })
+                });
         }
         else
         {
             await signInManager.SignInAsync(user, isPersistent: false);
-            redirectManager.RedirectTo(ReturnUrl);
+            // Redirect to photo upload first, then to intended destination
+            redirectManager.RedirectTo(
+                "Account/UploadProfilePhoto",
+                new() { ["returnUrl"] = ReturnUrl });
         }
     }
 

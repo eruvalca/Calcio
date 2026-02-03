@@ -1,0 +1,10 @@
+.photo-preview {
+    width: 15rem;
+    height: 15rem;
+}
+
+.photo-placeholder {
+    width: 15rem;
+    height: 15rem;
+    margin: 0 auto;
+}

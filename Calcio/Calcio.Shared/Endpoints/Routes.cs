@@ -140,4 +140,19 @@ public static class Routes
         /// <summary>Builds the URL for listing/creating teams in a club.</summary>
         public static string ForClub(long clubId) => $"{Clubs.Base}/{clubId}/teams";
     }
+
+    /// <summary>
+    /// Current user account routes.
+    /// </summary>
+    public static class Account
+    {
+        /// <summary>Base route for account operations.</summary>
+        public const string Base = Api + "/account";
+
+        /// <summary>Route group for account photo: PUT (upload), GET (retrieve).</summary>
+        public const string PhotoGroup = Base + "/photo";
+
+        /// <summary>Builds the URL for the current user's photo.</summary>
+        public static string ForPhoto() => PhotoGroup;
+    }
 }

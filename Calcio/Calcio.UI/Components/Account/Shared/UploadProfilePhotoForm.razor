@@ -1,0 +1,75 @@
+@using Calcio.Shared.Results
+@using Calcio.Shared.Services.CalcioUsers
+@using Calcio.UI.Components.Shared
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Web
+
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>@ErrorMessage
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(CroppedPhotoDataUrl))
+{
+    <div class="text-center mb-4">
+        <img src="@CroppedPhotoDataUrl" alt="Photo preview" class="photo-preview rounded-circle object-fit-cover border" />
+    </div>
+}
+else
+{
+    <div class="text-center mb-4">
+        <div class="photo-placeholder rounded-circle border d-flex align-items-center justify-content-center bg-light">
+            <i class="bi bi-person-fill text-secondary" style="font-size: 6rem;"></i>
+        </div>
+    </div>
+}
+
+<div class="mb-4">
+    <label for="photo" class="form-label">Profile Photo <span class="text-danger">*</span></label>
+    <InputFile OnChange="OnPhotoSelected" id="photo" class="form-control"
+        accept="image/jpeg,image/png,image/gif,image/webp" disabled="@(IsSubmitting || ShowCropperModal)" />
+    <div class="form-text">Max file size: 10 MB. Supported formats: JPEG, PNG, GIF, WebP.</div>
+    @if (!string.IsNullOrEmpty(CroppedPhotoDataUrl))
+    {
+        <div class="mt-2 d-flex align-items-center gap-2">
+            <span class="badge bg-success"><i class="bi bi-check me-1"></i>Photo cropped</span>
+            <button type="button" class="btn btn-sm btn-outline-danger" @onclick="ClearPhoto" disabled="@IsSubmitting">
+                <i class="bi bi-x"></i> Remove
+            </button>
+        </div>
+    }
+</div>
+
+@if (IsUploadingPhoto)
+{
+    <div class="mb-3">
+        <label class="form-label">Uploading Photo...</label>
+        <div class="progress" role="progressbar" aria-valuenow="@UploadProgressPercent" aria-valuemin="0"
+            aria-valuemax="100">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: @UploadProgressPercent%">
+                @UploadProgressPercent.ToString("F0")%
+            </div>
+        </div>
+    </div>
+}
+
+<div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-primary" @onclick="HandleSubmit"
+        disabled="@(IsSubmitting || string.IsNullOrEmpty(CroppedPhotoDataUrl))">
+        @if (IsSubmitting)
+        {
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            <span>Uploading...</span>
+        }
+        else
+        {
+            <i class="bi bi-upload me-1"></i>
+            <span>Upload Photo</span>
+        }
+    </button>
+</div>
+
+<ImageCropperModal @bind-IsVisible="ShowCropperModal" ImageSrc="@OriginalPhotoDataUrl" OnCropApplied="OnCropApplied"
+    OnCancelled="OnCropCancelled" @rendermode="RenderMode.InteractiveAuto" />

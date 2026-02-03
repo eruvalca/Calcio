@@ -67,4 +67,34 @@ public static class CacheDefaults
         /// </summary>
         public static string GetPhotoPathsKey(long playerId) => $"{PhotoPathsKeyPrefix}-{playerId}";
     }
+
+    /// <summary>
+    /// Cache settings for user-related data.
+    /// </summary>
+    public static class CalcioUsers
+    {
+        /// <summary>
+        /// Prefix for user photo paths cache keys.
+        /// </summary>
+        public const string PhotoPathsKeyPrefix = "user-photo-paths";
+
+        /// <summary>
+        /// Default cache duration for user photo paths.
+        /// </summary>
+        public static readonly TimeSpan DefaultExpiration = TimeSpan.FromMinutes(55);
+
+        /// <summary>
+        /// Cache entry options for user photo paths.
+        /// </summary>
+        public static readonly HybridCacheEntryOptions EntryOptions = new()
+        {
+            Expiration = DefaultExpiration,
+            LocalCacheExpiration = DefaultExpiration
+        };
+
+        /// <summary>
+        /// Builds a cache key for user photo paths.
+        /// </summary>
+        public static string GetPhotoPathsKey(long userId) => $"{PhotoPathsKeyPrefix}-{userId}";
+    }
 }

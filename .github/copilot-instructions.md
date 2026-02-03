@@ -171,6 +171,11 @@
 - Ensure responsiveness across different device sizes.
 - Stock bootstrap components and styles should be used wherever possible to maintain a consistent look and feel and custom implementations or styling should be avoided unless absolutely necessary.
 
+### CSS Units
+
+- Prefer `rem` over `px` for spacing, sizing, and typography to support user accessibility preferences.
+- Keep `px` for borders (e.g., `1px`), box-shadows with small values, and outlines where precise control is needed.
+
 ## Testing
 
 ### Unit Tests (Calcio.UnitTests)

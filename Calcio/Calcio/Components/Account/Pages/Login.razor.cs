@@ -1,17 +1,20 @@
 using System.ComponentModel.DataAnnotations;
 
+using Calcio.Data.Contexts;
 using Calcio.Shared.Entities;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Calcio.Components.Account.Pages;
 
 public partial class Login(
     SignInManager<CalcioUserEntity> signInManager,
     UserManager<CalcioUserEntity> userManager,
+    IDbContextFactory<ReadOnlyDbContext> dbContextFactory,
     ILogger<Login> logger,
     NavigationManager navigationManager,
     IdentityRedirectManager redirectManager)
@@ -71,6 +74,25 @@ public partial class Login(
         if (result.Succeeded)
         {
             LogUserLoggedIn(logger);
+
+            // Check if user has uploaded a profile photo
+            var user = await userManager.FindByEmailAsync(Input.Email);
+            if (user is not null)
+            {
+                await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+                var hasPhoto = await dbContext.CalcioUserPhotos
+                    .AnyAsync(p => p.CalcioUserId == user.Id);
+
+                if (!hasPhoto)
+                {
+                    // Redirect to photo upload page, then to intended destination
+                    redirectManager.RedirectTo(
+                        "Account/UploadProfilePhoto",
+                        new() { ["returnUrl"] = ReturnUrl });
+                    return;
+                }
+            }
+
             redirectManager.RedirectTo(ReturnUrl);
         }
         else if (result.RequiresTwoFactor)

@@ -1,4 +1,5 @@
-/* Add bottom padding so page content not hidden behind fixed-bottom nav (approx 48px + spacing) */
+/* Add bottom padding so page content not hidden behind fixed-bottom nav (approx 3rem + spacing) */
 .layout-body {
-    padding-bottom: 64px; /* allow space above NavMenu */
+    padding-bottom: 4rem;
+    /* allow space above NavMenu */
 }

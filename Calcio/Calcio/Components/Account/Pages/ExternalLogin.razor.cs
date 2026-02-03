@@ -3,11 +3,13 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
 
+using Calcio.Data.Contexts;
 using Calcio.Shared.Entities;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Calcio.Components.Account.Pages;
 
@@ -16,6 +18,7 @@ public partial class ExternalLogin(
     UserManager<CalcioUserEntity> userManager,
     IUserStore<CalcioUserEntity> userStore,
     IEmailSender<CalcioUserEntity> emailSender,
+    IDbContextFactory<ReadOnlyDbContext> dbContextFactory,
     NavigationManager navigationManager,
     IdentityRedirectManager redirectManager,
     ILogger<ExternalLogin> logger)
@@ -93,6 +96,25 @@ public partial class ExternalLogin(
         if (result.Succeeded)
         {
             LogUserLoggedInWithProvider(logger, externalLoginInfo.Principal.Identity?.Name, externalLoginInfo.LoginProvider);
+
+            // Check if user has uploaded a profile photo
+            var user = await userManager.FindByLoginAsync(externalLoginInfo.LoginProvider, externalLoginInfo.ProviderKey);
+            if (user is not null)
+            {
+                await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+                var hasPhoto = await dbContext.CalcioUserPhotos
+                    .AnyAsync(p => p.CalcioUserId == user.Id);
+
+                if (!hasPhoto)
+                {
+                    // Redirect to photo upload page, then to intended destination
+                    redirectManager.RedirectTo(
+                        "Account/UploadProfilePhoto",
+                        new() { ["returnUrl"] = ReturnUrl });
+                    return;
+                }
+            }
+
             redirectManager.RedirectTo(ReturnUrl);
             return;
         }
@@ -143,12 +165,23 @@ public partial class ExternalLogin(
                 // If account confirmation is required, we need to show the link if we don't have a real email sender
                 if (userManager.Options.SignIn.RequireConfirmedAccount)
                 {
-                    redirectManager.RedirectTo("Account/RegisterConfirmation", new() { ["email"] = Input.Email });
+                    // Redirect to photo upload first, then to registration confirmation
+                    redirectManager.RedirectTo(
+                        "Account/UploadProfilePhoto",
+                        new()
+                        {
+                            ["returnUrl"] = navigationManager.GetUriWithQueryParameters(
+                                "Account/RegisterConfirmation",
+                                new Dictionary<string, object?> { ["email"] = Input.Email })
+                        });
                 }
                 else
                 {
                     await signInManager.SignInAsync(user, isPersistent: false, externalLoginInfo.LoginProvider);
-                    redirectManager.RedirectTo(ReturnUrl);
+                    // Redirect to photo upload first, then to intended destination
+                    redirectManager.RedirectTo(
+                        "Account/UploadProfilePhoto",
+                        new() { ["returnUrl"] = ReturnUrl });
                 }
             }
         }
