@@ -88,4 +88,49 @@ public class PlayersService(HttpClient httpClient) : IPlayersService
                 _ => ServiceProblem.ServerError()
             });
     }
+
+    public async Task<ServiceResult<PlayerImportResultDto>> BulkImportPlayersAsync(
+        long clubId,
+        Stream fileStream,
+        string fileName,
+        string contentType,
+        CancellationToken cancellationToken)
+    {
+        using var content = new MultipartFormDataContent();
+        using var streamContent = new StreamContent(fileStream);
+        streamContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+        content.Add(streamContent, "file", fileName);
+
+        var response = await httpClient.PostAsync(Routes.Players.ForBulkImport(clubId), content, cancellationToken);
+
+        return response.IsSuccessStatusCode
+            ? (ServiceResult<PlayerImportResultDto>)(await response.Content.ReadFromJsonAsync<PlayerImportResultDto>(cancellationToken))!
+            : (ServiceResult<PlayerImportResultDto>)(response.StatusCode switch
+            {
+                HttpStatusCode.NotFound => ServiceProblem.NotFound(),
+                HttpStatusCode.Forbidden => ServiceProblem.Forbidden(),
+                HttpStatusCode.BadRequest => ServiceProblem.BadRequest(await response.Content.ReadAsStringAsync(cancellationToken)),
+                _ => ServiceProblem.ServerError()
+            });
+    }
+
+    public async Task<ServiceResult<PlayerImportStatusDto>> GetImportStatusAsync(long clubId, long importId, CancellationToken cancellationToken)
+    {
+        var response = await httpClient.GetAsync(Routes.Players.ForImportStatus(clubId, importId), cancellationToken);
+
+        return response.IsSuccessStatusCode
+            ? (ServiceResult<PlayerImportStatusDto>)(await response.Content.ReadFromJsonAsync<PlayerImportStatusDto>(cancellationToken))!
+            : (ServiceResult<PlayerImportStatusDto>)(response.StatusCode switch
+            {
+                HttpStatusCode.NotFound => ServiceProblem.NotFound(),
+                HttpStatusCode.Forbidden => ServiceProblem.Forbidden(),
+                _ => ServiceProblem.ServerError()
+            });
+    }
+
+    public Stream GenerateImportTemplate()
+    {
+        // For client-side, we'll download the template from the server
+        throw new NotSupportedException("Template generation is only supported on the server side. Use the template download endpoint instead.");
+    }
 }

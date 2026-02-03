@@ -42,6 +42,8 @@ public class BaseDbContext : IdentityDbContext<CalcioUserEntity, IdentityRole<lo
     public DbSet<ClubJoinRequestEntity> ClubJoinRequests => Set<ClubJoinRequestEntity>();
     public DbSet<PlayerPhotoEntity> PlayerPhotos => Set<PlayerPhotoEntity>();
     public DbSet<CalcioUserPhotoEntity> CalcioUserPhotos => Set<CalcioUserPhotoEntity>();
+    public DbSet<PlayerImportEntity> PlayerImports => Set<PlayerImportEntity>();
+    public DbSet<PlayerImportRowEntity> PlayerImportRows => Set<PlayerImportRowEntity>();
 #pragma warning restore CA1822 // Mark members as static
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
