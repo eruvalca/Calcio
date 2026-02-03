@@ -274,7 +274,9 @@ public partial class PlayersService
         CancellationToken cancellationToken)
     {
         var results = new List<PlayerImportRowEntity>();
+        var playersToCreate = new List<PlayerEntity>();
 
+        // First pass: validate all rows
         foreach (var row in rows)
         {
             var (isValid, errorMessage, player) = ValidateAndCreatePlayer(row, clubId);
@@ -289,17 +291,35 @@ public partial class PlayersService
                 CreatedById = CurrentUserId
             };
 
+            results.Add(rowEntity);
+
             if (isValid && player is not null)
             {
-                await dbContext.Players.AddAsync(player, cancellationToken);
-                await dbContext.SaveChangesAsync(cancellationToken);
-                rowEntity.CreatedPlayerId = player.PlayerId;
+                playersToCreate.Add(player);
             }
-
-            await dbContext.PlayerImportRows.AddAsync(rowEntity, cancellationToken);
-            results.Add(rowEntity);
         }
 
+        // Check if any validation failed
+        if (results.Any(r => !r.IsSuccess))
+        {
+            // Don't import any players if validation failed
+            // Just save the row entities with error messages
+            await dbContext.PlayerImportRows.AddRangeAsync(results, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            return results;
+        }
+
+        // Second pass: all validations passed, import all players
+        await dbContext.Players.AddRangeAsync(playersToCreate, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        // Update row entities with created player IDs
+        for (int i = 0; i < results.Count; i++)
+        {
+            results[i].CreatedPlayerId = playersToCreate[i].PlayerId;
+        }
+
+        await dbContext.PlayerImportRows.AddRangeAsync(results, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         return results;
     }
