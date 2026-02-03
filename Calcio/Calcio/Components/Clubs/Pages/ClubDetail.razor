@@ -32,7 +32,7 @@
     <ClubMembersGrid ClubId="ClubId" Members="ClubMembers" IsReadOnly="!IsClubAdmin" @rendermode="InteractiveAuto" />
 
     <h5>Players</h5>
-    <ClubPlayersGrid Players="ClubPlayers" @rendermode="InteractiveAuto" />
+    <ClubPlayersGrid ClubId="ClubId" Players="ClubPlayers" OnPlayersChanged="RefreshPlayers" @rendermode="InteractiveAuto" />
 
     <h5>Seasons</h5>
     <SeasonsGrid ClubId="ClubId" Seasons="ClubSeasons" @rendermode="InteractiveAuto" />

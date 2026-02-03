@@ -83,4 +83,12 @@ public partial class ClubDetail(
             teams => ClubTeams = teams,
             problem => ClubTeams = []);
     }
+
+    private async Task RefreshPlayers()
+    {
+        var playersResult = await playersService.GetClubPlayersAsync(ClubId, CancellationToken);
+        playersResult.Switch(
+            players => ClubPlayers = players,
+            problem => ClubPlayers = []);
+    }
 }

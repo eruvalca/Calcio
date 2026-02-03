@@ -3,12 +3,17 @@
 
 <div class="card shadow mb-4">
     <div class="card-header">
-        <form @onsubmit:preventDefault>
-            <div class="input-group" role="search">
-                <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="PlayerSearch"
-                    name="PlayerSearch" class="form-control" placeholder="Search by name" autocomplete="off" />
-            </div>
-        </form>
+        <div class="d-flex justify-content-between align-items-center">
+            <form @onsubmit:preventDefault class="flex-grow-1 me-2">
+                <div class="input-group" role="search">
+                    <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="PlayerSearch"
+                        name="PlayerSearch" class="form-control" placeholder="Search by name" autocomplete="off" />
+                </div>
+            </form>
+            <button type="button" class="btn btn-primary" @onclick="ShowImportModal">
+                <i class="bi bi-upload me-1"></i>Bulk Import
+            </button>
+        </div>
     </div>
     <div class="card-body">
         @if (Players.Count == 0)
@@ -55,3 +60,5 @@
         }
     </div>
 </div>
+
+<BulkPlayerImportModal ClubId="ClubId" IsVisible="ShowImport" OnClose="HideImportModal" OnImportComplete="HandleImportComplete" />
