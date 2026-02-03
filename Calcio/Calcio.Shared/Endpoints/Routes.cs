@@ -115,6 +115,15 @@ public static class Routes
 
         /// <summary>Builds the URL for a player's photo.</summary>
         public static string ForPlayerPhoto(long clubId, long playerId) => $"{ForPlayer(clubId, playerId)}/photo";
+
+        /// <summary>Builds the URL for bulk importing players.</summary>
+        public static string ForBulkImport(long clubId) => $"{Clubs.Base}/{clubId}/players/import";
+
+        /// <summary>Builds the URL for getting import status.</summary>
+        public static string ForImportStatus(long clubId, long importId) => $"{Clubs.Base}/{clubId}/players/imports/{importId}";
+
+        /// <summary>Builds the URL for downloading the import template.</summary>
+        public static string ForImportTemplate(long clubId) => $"{Clubs.Base}/{clubId}/players/import/template";
     }
 
     /// <summary>

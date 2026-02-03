@@ -14,6 +14,7 @@ namespace Calcio.Endpoints.Players;
 public static class PlayersEndpoints
 {
     private const long MaxPhotoSize = 10 * 1024 * 1024; // 10 MB
+    private const long MaxImportFileSize = 10 * 1024 * 1024; // 10 MB
 
     public static IEndpointRouteBuilder MapPlayersEndpoints(this IEndpointRouteBuilder endpoints)
     {
@@ -38,6 +39,17 @@ public static class PlayersEndpoints
 
         group.MapGet("{playerId:long}/photo", GetPlayerPhoto)
             .ProducesProblem(StatusCodes.Status404NotFound);
+
+        // Bulk import endpoints
+        group.MapPost("import", BulkImportPlayers)
+            .DisableAntiforgery()
+            .Accepts<IFormFile>("multipart/form-data")
+            .ProducesProblem(StatusCodes.Status400BadRequest);
+
+        group.MapGet("imports/{importId:long}", GetImportStatus)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapGet("import/template", DownloadImportTemplate);
 
         return endpoints;
     }
@@ -118,5 +130,67 @@ public static class PlayersEndpoints
                 photo => TypedResults.Ok(photo),
                 noPhoto => TypedResults.NoContent()),
             problem => TypedResults.Problem(statusCode: problem.StatusCode, detail: problem.Detail));
+    }
+
+    private static async Task<Results<Ok<PlayerImportResultDto>, ProblemHttpResult>> BulkImportPlayers(
+        [Required]
+        [Range(1, long.MaxValue)]
+        long clubId,
+        IFormFile file,
+        IPlayersService service,
+        CancellationToken cancellationToken)
+    {
+        // Validate file
+        if (file is null || file.Length == 0)
+        {
+            return TypedResults.Problem(statusCode: StatusCodes.Status400BadRequest, detail: "File is empty or missing.");
+        }
+
+        if (file.Length > MaxImportFileSize)
+        {
+            return TypedResults.Problem(statusCode: StatusCodes.Status400BadRequest, detail: $"File size exceeds maximum of {MaxImportFileSize / 1024 / 1024} MB.");
+        }
+
+        var allowedContentTypes = new[]
+        {
+            "text/csv",
+            "application/vnd.ms-excel",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        };
+
+        if (!allowedContentTypes.Contains(file.ContentType, StringComparer.OrdinalIgnoreCase))
+        {
+            return TypedResults.Problem(statusCode: StatusCodes.Status400BadRequest, detail: "File type not allowed. Allowed types: CSV, Excel (XLSX).");
+        }
+
+        await using var stream = file.OpenReadStream();
+        var result = await service.BulkImportPlayersAsync(clubId, stream, file.FileName, file.ContentType, cancellationToken);
+
+        return result.ToHttpResult(TypedResults.Ok);
+    }
+
+    private static async Task<Results<Ok<PlayerImportStatusDto>, ProblemHttpResult>> GetImportStatus(
+        [Required]
+        [Range(1, long.MaxValue)]
+        long clubId,
+        [Required]
+        [Range(1, long.MaxValue)]
+        long importId,
+        IPlayersService service,
+        CancellationToken cancellationToken)
+    {
+        var result = await service.GetImportStatusAsync(clubId, importId, cancellationToken);
+
+        return result.ToHttpResult(TypedResults.Ok);
+    }
+
+    private static IResult DownloadImportTemplate(
+        [Required]
+        [Range(1, long.MaxValue)]
+        long clubId,
+        IPlayersService service)
+    {
+        var stream = service.GenerateImportTemplate();
+        return Results.File(stream, "text/csv", "players_import_template.csv");
     }
 }

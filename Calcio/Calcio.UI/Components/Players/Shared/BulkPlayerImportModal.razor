@@ -1,0 +1,163 @@
+@using Calcio.Shared.DTOs.Players
+@using Calcio.Shared.Enums
+@using Microsoft.AspNetCore.Components.Forms
+
+<div class="modal fade @(IsVisible ? "show d-block" : "")" tabindex="-1" style="@(IsVisible ? "background-color: rgba(0,0,0,0.5);" : "")" @onclick="OnBackdropClick">
+    <div class="modal-dialog modal-lg" @onclick:stopPropagation>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bulk Import Players</h5>
+                <button type="button" class="btn-close" @onclick="Close" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @if (!string.IsNullOrEmpty(ErrorMessage))
+                {
+                    <div class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>@ErrorMessage
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(SuccessMessage))
+                {
+                    <div class="alert alert-success" role="alert">
+                        <i class="bi bi-check-circle me-2"></i>@SuccessMessage
+                    </div>
+                }
+
+                @if (ImportResult is not null)
+                {
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">Import Summary</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <div class="h2 mb-0 text-primary">@ImportResult.TotalRows</div>
+                                        <small class="text-muted">Total Rows</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <div class="h2 mb-0 text-success">@ImportResult.SuccessfulRows</div>
+                                        <small class="text-muted">Successful</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <div class="h2 mb-0 text-danger">@ImportResult.FailedRows</div>
+                                        <small class="text-muted">Failed</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (ImportStatus?.Rows.Count > 0)
+                    {
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Row Details</h6>
+                            </div>
+                            <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Row</th>
+                                            <th>Status</th>
+                                            <th>Player Name</th>
+                                            <th>Error</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var row in ImportStatus.Rows)
+                                        {
+                                            <tr class="@(row.IsSuccess ? "table-success" : "table-danger")">
+                                                <td>@row.RowNumber</td>
+                                                <td>
+                                                    @if (row.IsSuccess)
+                                                    {
+                                                        <span class="badge bg-success">Success</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-danger">Failed</span>
+                                                    }
+                                                </td>
+                                                <td>@(row.PlayerFullName ?? "—")</td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(row.ErrorMessage))
+                                                    {
+                                                        <small class="text-danger">@row.ErrorMessage</small>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+                }
+                else if (!IsProcessing)
+                {
+                    <div class="mb-3">
+                        <p>Upload a CSV or Excel file to bulk import players. The file should contain the following columns:</p>
+                        <ul>
+                            <li><strong>FirstName</strong> (required)</li>
+                            <li><strong>LastName</strong> (required)</li>
+                            <li><strong>DateOfBirth</strong> (required, format: yyyy-MM-dd)</li>
+                            <li><strong>GraduationYear</strong> (required, e.g., 2028)</li>
+                            <li><strong>Gender</strong> (optional: Male, Female, Other)</li>
+                            <li><strong>JerseyNumber</strong> (optional, 0-999)</li>
+                            <li><strong>TryoutNumber</strong> (optional, 0-9999)</li>
+                        </ul>
+                        <p>
+                            <a href="@TemplateUrl" class="btn btn-sm btn-outline-primary" download="players_import_template.csv">
+                                <i class="bi bi-download me-1"></i>Download Template
+                            </a>
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="importFile" class="form-label">Select File <span class="text-danger">*</span></label>
+                        <InputFile OnChange="OnFileSelected" id="importFile" class="form-control" accept=".csv,.xlsx" />
+                        <small class="text-muted">Maximum file size: 10MB. Maximum 1000 players per import.</small>
+                    </div>
+
+                    @if (SelectedFile is not null)
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-file-earmark me-2"></i>
+                            Selected: <strong>@SelectedFile.Name</strong> (@FormatFileSize(SelectedFile.Size))
+                        </div>
+                    }
+                }
+
+                @if (IsProcessing)
+                {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Processing...</span>
+                        </div>
+                        <p class="text-muted">Processing import... This may take a moment.</p>
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                @if (ImportResult is not null)
+                {
+                    <button type="button" class="btn btn-primary" @onclick="Close">Close</button>
+                }
+                else if (!IsProcessing)
+                {
+                    <button type="button" class="btn btn-secondary" @onclick="Close">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="HandleImport" disabled="@(SelectedFile is null || IsProcessing)">
+                        <i class="bi bi-upload me-1"></i>Import
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
