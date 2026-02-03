@@ -10,8 +10,6 @@ using RichardSzalay.MockHttp;
 
 using Shouldly;
 
-using OneOf.Types;
-
 namespace Calcio.UnitTests.Services.CalcioUsers;
 
 public class CalcioUsersServiceTests

@@ -14,8 +14,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 using NSubstitute;
 
-using OneOf.Types;
-
 using Shouldly;
 
 namespace Calcio.UnitTests.Components.Players.Shared;

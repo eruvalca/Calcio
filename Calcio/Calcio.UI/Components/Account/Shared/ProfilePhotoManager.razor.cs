@@ -1,3 +1,4 @@
+using Calcio.Shared.DTOs.CalcioUsers;
 using Calcio.Shared.Services.CalcioUsers;
 
 using Microsoft.AspNetCore.Components;
@@ -5,17 +6,15 @@ using Microsoft.AspNetCore.Components.Forms;
 
 namespace Calcio.UI.Components.Account.Shared;
 
-public partial class UploadProfilePhotoForm(
+public partial class ProfilePhotoManager(
     ICalcioUsersService calcioUsersService,
     NavigationManager navigationManager)
 {
     private const long MaxFileSize = 10 * 1024 * 1024; // 10 MB
 
-    /// <summary>
-    /// URL to navigate to after successful photo upload.
-    /// </summary>
-    [Parameter]
-    public string? ReturnUrl { get; set; }
+    private bool IsLoading { get; set; } = true;
+
+    private CalcioUserPhotoDto? CurrentPhoto { get; set; }
 
     private IBrowserFile? SelectedPhoto { get; set; }
 
@@ -32,6 +31,32 @@ public partial class UploadProfilePhotoForm(
     private bool ShowCropperModal { get; set; }
 
     private string? ErrorMessage { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCurrentPhotoAsync();
+    }
+
+    private async Task LoadCurrentPhotoAsync()
+    {
+        IsLoading = true;
+
+        try
+        {
+            var result = await calcioUsersService.GetAccountPhotoAsync(CancellationToken);
+
+            if (result.IsSuccess)
+            {
+                result.Value.Switch(
+                    photo => CurrentPhoto = photo,
+                    _ => CurrentPhoto = null);
+            }
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
 
     private async Task OnPhotoSelected(InputFileChangeEventArgs e)
     {
@@ -108,9 +133,8 @@ public partial class UploadProfilePhotoForm(
         {
             await UploadCroppedPhotoAsync();
 
-            // Success - navigate to return URL or home
-            var targetUrl = !string.IsNullOrEmpty(ReturnUrl) ? ReturnUrl : "/";
-            navigationManager.NavigateTo(targetUrl);
+            // Success - refresh the page to update navbar avatar
+            navigationManager.Refresh(forceReload: true);
         }
         catch (Exception ex)
         {
