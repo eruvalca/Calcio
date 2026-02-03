@@ -28,7 +28,7 @@ public partial class RenamePasskey(
     {
         Input ??= new();
 
-        user = (await userManager.GetUserAsync(HttpContext.User))!;
+        user = await userManager.GetUserAsync(HttpContext.User);
         if (user is null)
         {
             redirectManager.RedirectToInvalidUser(userManager, HttpContext);

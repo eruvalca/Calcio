@@ -4,7 +4,7 @@ namespace Calcio.Shared.Entities;
 
 public class NoteEntity : BaseEntity
 {
-    public long NoteId { get; set; } = default!;
+    public long NoteId { get; set; } = default;
     public required string Content { get; set; }
 
     public required long PlayerId { get; set; }

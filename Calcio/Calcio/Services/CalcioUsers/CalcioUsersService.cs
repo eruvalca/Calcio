@@ -217,31 +217,34 @@ public partial class CalcioUsersService(
 
     public async Task<ServiceResult<OneOf<CalcioUserPhotoDto, None>>> GetAccountPhotoAsync(CancellationToken cancellationToken)
     {
-        var cacheKey = CacheDefaults.CalcioUsers.GetPhotoPathsKey(CurrentUserId);
+        // Capture CurrentUserId before entering cache callback to avoid HttpContext access issues
+        // when the callback executes asynchronously or on a different context (e.g., SSR prerender).
+        var userId = CurrentUserId;
+        var cacheKey = CacheDefaults.CalcioUsers.GetPhotoPathsKey(userId);
 
         // Cache only the blob paths, not the SAS URLs.
         var cachedPaths = await cache.GetOrCreateAsync(
             cacheKey,
             async ct =>
-            {
-                await using var dbContext = await readOnlyDbContextFactory.CreateDbContextAsync(ct);
-
-                var photo = await dbContext.CalcioUserPhotos
-                    .Where(p => p.CalcioUserId == CurrentUserId)
-                    .FirstOrDefaultAsync(ct);
-
-                if (photo is null)
                 {
-                    return null;
-                }
+                    await using var dbContext = await readOnlyDbContextFactory.CreateDbContextAsync(ct);
 
-                return new CachedUserPhotoPaths(
-                    photo.CalcioUserPhotoId,
-                    photo.OriginalBlobName,
-                    photo.SmallBlobName,
-                    photo.MediumBlobName,
-                    photo.LargeBlobName);
-            },
+                    var photo = await dbContext.CalcioUserPhotos
+                        .Where(p => p.CalcioUserId == userId)
+                        .FirstOrDefaultAsync(ct);
+
+                    if (photo is null)
+                    {
+                        return null;
+                    }
+
+                    return new CachedUserPhotoPaths(
+                        photo.CalcioUserPhotoId,
+                        photo.OriginalBlobName,
+                        photo.SmallBlobName,
+                        photo.MediumBlobName,
+                        photo.LargeBlobName);
+                },
             options: CacheDefaults.CalcioUsers.EntryOptions,
             cancellationToken: cancellationToken);
 

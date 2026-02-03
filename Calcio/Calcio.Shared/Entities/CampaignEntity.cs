@@ -4,7 +4,7 @@ namespace Calcio.Shared.Entities;
 
 public class CampaignEntity : BaseEntity
 {
-    public long CampaignId { get; set; } = default!;
+    public long CampaignId { get; set; } = default;
     public required string Name { get; set; }
     public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
     public DateOnly? EndDate { get; set; } = null;

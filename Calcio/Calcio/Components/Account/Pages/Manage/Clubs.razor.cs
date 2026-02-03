@@ -38,7 +38,7 @@ public partial class Clubs(
     [SupplyParameterFromForm]
     private LeaveClubInputModel LeaveClubInput { get; set; } = default!;
 
-    private long UserId { get; set; } = default!;
+    private long UserId { get; set; } = default;
     private List<BaseClubDto> UserClubs { get; set; } = [];
     private List<BaseClubDto> AllClubs { get; set; } = [];
     private ClubJoinRequestDto? CurrentJoinRequest { get; set; }

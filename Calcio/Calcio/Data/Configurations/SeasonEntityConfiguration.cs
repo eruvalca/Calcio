@@ -21,7 +21,7 @@ public class SeasonEntityConfiguration : IEntityTypeConfiguration<SeasonEntity>
 
         builder
             .HasMany(e => e.Campaigns)
-            .WithOne(c => c.Season!)
+            .WithOne(c => c.Season)
             .HasForeignKey(c => c.SeasonId)
             .OnDelete(DeleteBehavior.Cascade);
 

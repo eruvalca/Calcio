@@ -152,7 +152,7 @@ public class PlayerPhotoUploadFullIntegrationTests(BlobStorageApplicationFactory
             .FirstAsync(p => p.PlayerPhotoId == result.Value.PlayerPhotoId, cancellationToken);
 
         // Download and verify small image (128x128)
-        var smallBlob = containerClient.GetBlobClient(persistedPhoto.SmallBlobName!);
+        var smallBlob = containerClient.GetBlobClient(persistedPhoto.SmallBlobName);
         using var smallStream = new MemoryStream();
         await smallBlob.DownloadToAsync(smallStream, cancellationToken);
         smallStream.Position = 0;
@@ -161,7 +161,7 @@ public class PlayerPhotoUploadFullIntegrationTests(BlobStorageApplicationFactory
         smallBitmap.Height.ShouldBeLessThanOrEqualTo(128);
 
         // Download and verify medium image (512x512)
-        var mediumBlob = containerClient.GetBlobClient(persistedPhoto.MediumBlobName!);
+        var mediumBlob = containerClient.GetBlobClient(persistedPhoto.MediumBlobName);
         using var mediumStream = new MemoryStream();
         await mediumBlob.DownloadToAsync(mediumStream, cancellationToken);
         mediumStream.Position = 0;
@@ -170,7 +170,7 @@ public class PlayerPhotoUploadFullIntegrationTests(BlobStorageApplicationFactory
         mediumBitmap.Height.ShouldBeLessThanOrEqualTo(512);
 
         // Download and verify large image (1024x1024)
-        var largeBlob = containerClient.GetBlobClient(persistedPhoto.LargeBlobName!);
+        var largeBlob = containerClient.GetBlobClient(persistedPhoto.LargeBlobName);
         using var largeStream = new MemoryStream();
         await largeBlob.DownloadToAsync(largeStream, cancellationToken);
         largeStream.Position = 0;

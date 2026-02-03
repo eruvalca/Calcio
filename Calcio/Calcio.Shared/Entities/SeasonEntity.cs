@@ -4,7 +4,7 @@ namespace Calcio.Shared.Entities;
 
 public class SeasonEntity : BaseEntity
 {
-    public long SeasonId { get; set; } = default!;
+    public long SeasonId { get; set; } = default;
     public required string Name { get; set; }
     public required DateOnly StartDate { get; set; }
     public DateOnly? EndDate { get; set; }

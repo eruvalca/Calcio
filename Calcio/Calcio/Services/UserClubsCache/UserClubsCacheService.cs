@@ -47,7 +47,7 @@ public partial class UserClubsCacheService(
             options: CacheDefaults.Clubs.EntryOptions,
             cancellationToken: cancellationToken);
 
-        return result!;
+        return result;
     }
 
     public async Task<bool> IsUserMemberOfClubAsync(long userId, long clubId, CancellationToken cancellationToken)

@@ -4,7 +4,7 @@ namespace Calcio.Shared.Entities;
 
 public class PlayerCampaignAssignmentEntity : BaseEntity
 {
-    public long PlayerCampaignAssignmentId { get; set; } = default!;
+    public long PlayerCampaignAssignmentId { get; set; } = default;
 
     public required long PlayerId { get; set; }
     public PlayerEntity Player { get; set; } = null!;

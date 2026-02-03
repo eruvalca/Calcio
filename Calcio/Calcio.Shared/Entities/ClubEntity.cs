@@ -4,7 +4,7 @@ namespace Calcio.Shared.Entities;
 
 public class ClubEntity : BaseEntity
 {
-    public long ClubId { get; set; } = default!;
+    public long ClubId { get; set; } = default;
     public required string Name { get; set; }
     public required string City { get; set; }
     public required string State { get; set; }

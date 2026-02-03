@@ -5,7 +5,7 @@ namespace Calcio.Shared.Entities;
 
 public class PlayerEntity : BaseEntity
 {
-    public long PlayerId { get; set; } = default!;
+    public long PlayerId { get; set; } = default;
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
     public string FullName => $"{FirstName} {LastName}";

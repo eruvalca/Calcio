@@ -1,0 +1,16 @@
+.avatar-img {
+    width: 1.75rem;
+    height: 1.75rem;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+.avatar-spinner {
+    width: 1.75rem;
+    height: 1.75rem;
+    margin: 0.5rem;
+}

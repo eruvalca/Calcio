@@ -5,7 +5,7 @@ namespace Calcio.Shared.Entities;
 
 public class ClubJoinRequestEntity : BaseEntity
 {
-    public long ClubJoinRequestId { get; set; } = default!;
+    public long ClubJoinRequestId { get; set; } = default;
 
     public required long ClubId { get; set; }
     public ClubEntity Club { get; set; } = null!;

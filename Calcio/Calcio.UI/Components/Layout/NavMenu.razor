@@ -18,7 +18,7 @@
                     </NavLink>
                 </li>
 
-                @if (UserClubs.Count > 0)
+                @if (UserClubs?.Count > 0)
                 {
                     var userClubDetailUrl = $"/clubs/{UserClubs[0].Id}";
                     <li class="nav-item">
@@ -70,12 +70,27 @@
                 @* Auth section - visible on all screen sizes *@
                 <AuthorizeView>
                     <Authorized>
-                        <ul class="navbar-nav flex-column flex-sm-row">
+                        <ul class="navbar-nav flex-column flex-sm-row align-items-sm-center">
                             <li class="nav-item">
-                                <NavLink class="nav-link" href="Account/Manage">
-                                    <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span>
-                                    @context.User.Identity?.Name
-                                </NavLink>
+                                @if (IsLoadingPhoto)
+                                {
+                                    <span class="avatar-spinner spinner-border spinner-border-sm" role="status"
+                                        aria-label="Loading profile photo"></span>
+                                }
+                                else if (!string.IsNullOrEmpty(UserPhotoUrl))
+                                {
+                                    <NavLink class="nav-link d-flex align-items-center" href="Account/Manage">
+                                        <img src="@UserPhotoUrl" alt="Profile photo" class="avatar-img rounded-circle" />
+                                        <span class="d-none d-sm-inline ms-2">@context.User.Identity?.Name</span>
+                                    </NavLink>
+                                }
+                                else
+                                {
+                                    <NavLink class="nav-link d-flex align-items-center" href="Account/UploadProfilePhoto">
+                                        <span class="bi bi-person-circle avatar-placeholder" aria-hidden="true"></span>
+                                        <span class="d-none d-sm-inline ms-2">@context.User.Identity?.Name</span>
+                                    </NavLink>
+                                }
                             </li>
                             <li class="nav-item">
                                 <form class="d-inline" action="Account/Logout" method="post">

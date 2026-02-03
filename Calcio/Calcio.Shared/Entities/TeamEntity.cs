@@ -4,7 +4,7 @@ namespace Calcio.Shared.Entities;
 
 public class TeamEntity : BaseEntity
 {
-    public long TeamId { get; set; } = default!;
+    public long TeamId { get; set; } = default;
     public required string Name { get; set; }
     public required int GraduationYear { get; set; }
 

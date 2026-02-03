@@ -4,7 +4,7 @@ namespace Calcio.Shared.Entities;
 
 public class PlayerPhotoEntity : BaseEntity
 {
-    public long PlayerPhotoId { get; set; } = default!;
+    public long PlayerPhotoId { get; set; } = default;
     public required string OriginalBlobName { get; set; }
     public string? SmallBlobName { get; set; }
     public string? MediumBlobName { get; set; }

@@ -1,8 +1,12 @@
+using System.Security.Claims;
+
 using Bunit;
 using Bunit.TestDoubles;
 
+using Calcio.Shared.DTOs.CalcioUsers;
 using Calcio.Shared.DTOs.Clubs;
 using Calcio.Shared.Results;
+using Calcio.Shared.Services.CalcioUsers;
 using Calcio.Shared.Services.Clubs;
 using Calcio.UI.Components.Layout;
 using Calcio.UI.Services.Theme;
@@ -11,6 +15,9 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 
 using NSubstitute;
+
+using OneOf;
+using OneOf.Types;
 
 using Shouldly;
 
@@ -34,6 +41,7 @@ public sealed class NavMenuTests : BunitContext
 {
     private readonly BunitAuthorizationContext _authContext;
     private readonly IClubsService _clubsService;
+    private readonly ICalcioUsersService _calcioUsersService;
 
     public NavMenuTests()
     {
@@ -53,6 +61,13 @@ public sealed class NavMenuTests : BunitContext
             .Returns(Task.FromResult(new ServiceResult<List<BaseClubDto>>(new List<BaseClubDto>())));
         Services.AddSingleton(_clubsService);
 
+        // Register ICalcioUsersService required by NavMenu for photo
+        _calcioUsersService = Substitute.For<ICalcioUsersService>();
+        _calcioUsersService
+            .GetAccountPhotoAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ServiceResult<OneOf<CalcioUserPhotoDto, None>>(OneOf<CalcioUserPhotoDto, None>.FromT1(new None()))));
+        Services.AddSingleton(_calcioUsersService);
+
         // Add authorization services with a default unauthenticated state
         // bUnit provides AddAuthorization() for easy auth mocking
         _authContext = AddAuthorization();
@@ -70,6 +85,8 @@ public sealed class NavMenuTests : BunitContext
     private void SetupAuthenticatedUser(string username = "testuser@example.com", params string[] roles)
     {
         _authContext.SetAuthorized(username);
+        // Add NameIdentifier claim required by NavMenu's auth check
+        _authContext.SetClaims(new Claim(ClaimTypes.NameIdentifier, "1"));
         if (roles.Length > 0)
         {
             _authContext.SetRoles(roles);
@@ -80,6 +97,34 @@ public sealed class NavMenuTests : BunitContext
     {
         // Default state after AddAuthorization() is unauthenticated
         // No additional setup needed, but we can explicitly set it
+    }
+
+    private void SetupUserWithPhoto(string smallUrl = "https://example.com/photo-small.jpg")
+    {
+        var photoDto = new CalcioUserPhotoDto(
+            CalcioUserPhotoId: 1,
+            OriginalUrl: "https://example.com/photo-original.jpg",
+            SmallUrl: smallUrl,
+            MediumUrl: "https://example.com/photo-medium.jpg",
+            LargeUrl: "https://example.com/photo-large.jpg");
+
+        _calcioUsersService
+            .GetAccountPhotoAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ServiceResult<OneOf<CalcioUserPhotoDto, None>>(OneOf<CalcioUserPhotoDto, None>.FromT0(photoDto))));
+    }
+
+    private void SetupUserWithoutPhoto()
+    {
+        _calcioUsersService
+            .GetAccountPhotoAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ServiceResult<OneOf<CalcioUserPhotoDto, None>>(OneOf<CalcioUserPhotoDto, None>.FromT1(new None()))));
+    }
+
+    private void SetupPhotoServiceError()
+    {
+        _calcioUsersService
+            .GetAccountPhotoAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ServiceResult<OneOf<CalcioUserPhotoDto, None>>(ServiceProblem.ServerError())));
     }
 
     #endregion
@@ -162,6 +207,140 @@ public sealed class NavMenuTests : BunitContext
         _clubsService.DidNotReceive().GetUserClubsAsync(Arg.Any<CancellationToken>());
     }
 
+    [Fact]
+    public void WhenUnauthenticated_ShouldNotCallCalcioUsersService()
+    {
+        // Arrange
+        SetupUnauthenticatedUser();
+
+        // Act
+        var cut = RenderNavMenu();
+
+        // Assert
+        _calcioUsersService.DidNotReceive().GetAccountPhotoAsync(Arg.Any<CancellationToken>());
+    }
+
+    #endregion
+
+    #region Profile Photo Avatar Tests
+
+    [Fact]
+    public void WhenAuthenticated_WithPhoto_ShouldDisplayAvatarImage()
+    {
+        // Arrange
+        SetupAuthenticatedUser("user@test.com");
+        SetupUserWithPhoto("https://example.com/avatar.jpg");
+
+        // Act
+        var cut = RenderNavMenu();
+
+        // Assert
+        var avatarImg = cut.Find("img.avatar-img");
+        avatarImg.ShouldNotBeNull();
+        avatarImg.GetAttribute("src").ShouldBe("https://example.com/avatar.jpg");
+        avatarImg.GetAttribute("alt").ShouldBe("Profile photo");
+        avatarImg.ClassList.ShouldContain("rounded-circle");
+    }
+
+    [Fact]
+    public void WhenAuthenticated_WithPhoto_AvatarShouldLinkToManageAccount()
+    {
+        // Arrange
+        SetupAuthenticatedUser("user@test.com");
+        SetupUserWithPhoto();
+
+        // Act
+        var cut = RenderNavMenu();
+
+        // Assert
+        var avatarLink = cut.Find("img.avatar-img").ParentElement;
+        avatarLink.ShouldNotBeNull();
+        var href = avatarLink.GetAttribute("href");
+        href.ShouldNotBeNull();
+        href.ShouldContain("Account/Manage");
+    }
+
+    [Fact]
+    public void WhenAuthenticated_WithoutPhoto_ShouldDisplayPlaceholderIcon()
+    {
+        // Arrange
+        SetupAuthenticatedUser("user@test.com");
+        SetupUserWithoutPhoto();
+
+        // Act
+        var cut = RenderNavMenu();
+
+        // Assert
+        var placeholder = cut.Find(".bi-person-circle.avatar-placeholder");
+        placeholder.ShouldNotBeNull();
+        cut.FindAll("img.avatar-img").Count.ShouldBe(0);
+    }
+
+    [Fact]
+    public void WhenAuthenticated_WithoutPhoto_PlaceholderShouldLinkToUploadPage()
+    {
+        // Arrange
+        SetupAuthenticatedUser("user@test.com");
+        SetupUserWithoutPhoto();
+
+        // Act
+        var cut = RenderNavMenu();
+
+        // Assert
+        var placeholderLink = cut.Find(".bi-person-circle.avatar-placeholder").ParentElement;
+        placeholderLink.ShouldNotBeNull();
+        var href = placeholderLink.GetAttribute("href");
+        href.ShouldNotBeNull();
+        href.ShouldContain("Account/UploadProfilePhoto");
+    }
+
+    [Fact]
+    public void WhenAuthenticated_PhotoServiceReturnsError_ShouldFallbackToPlaceholder()
+    {
+        // Arrange
+        SetupAuthenticatedUser("user@test.com");
+        SetupPhotoServiceError();
+
+        // Act
+        var cut = RenderNavMenu();
+
+        // Assert
+        var placeholder = cut.Find(".bi-person-circle.avatar-placeholder");
+        placeholder.ShouldNotBeNull();
+        cut.FindAll("img.avatar-img").Count.ShouldBe(0);
+    }
+
+    [Fact]
+    public void WhenAuthenticated_WithPhoto_ShouldDisplayUsernameOnLargerScreens()
+    {
+        // Arrange
+        SetupAuthenticatedUser("user@test.com");
+        SetupUserWithPhoto();
+
+        // Act
+        var cut = RenderNavMenu();
+
+        // Assert
+        var usernameSpan = cut.Find("img.avatar-img").ParentElement?.QuerySelector(".d-none.d-sm-inline");
+        usernameSpan.ShouldNotBeNull();
+        usernameSpan.TextContent.ShouldContain("user@test.com");
+    }
+
+    [Fact]
+    public void WhenUnauthenticated_ShouldNotDisplayAvatarOrPlaceholder()
+    {
+        // Arrange
+        SetupUnauthenticatedUser();
+
+        // Act
+        var cut = RenderNavMenu();
+
+        // Assert
+        cut.FindAll("img.avatar-img").Count.ShouldBe(0);
+        cut.FindAll(".bi-person-circle.avatar-placeholder").Count.ShouldBe(0);
+        cut.FindAll(".avatar-spinner").Count.ShouldBe(0);
+    }
+
     #endregion
 
     #region Authentication State Tests
@@ -202,6 +381,7 @@ public sealed class NavMenuTests : BunitContext
     {
         // Arrange
         SetupAuthenticatedUser("user@test.com");
+        SetupUserWithPhoto();
 
         // Act
         var cut = RenderNavMenu();
