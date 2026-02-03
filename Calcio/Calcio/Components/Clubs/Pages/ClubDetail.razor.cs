@@ -61,26 +61,26 @@ public partial class ClubDetail(
             pendingRequestsResult.Switch(
                 requests => ClubJoinRequests = requests,
                 problem => ClubJoinRequests = []);
-
-            var membersResult = await calcioUsersService.GetClubMembersAsync(ClubId, CancellationToken);
-            membersResult.Switch(
-                members => ClubMembers = members,
-                problem => ClubMembers = []);
-
-            var playersResult = await playersService.GetClubPlayersAsync(ClubId, CancellationToken);
-            playersResult.Switch(
-                players => ClubPlayers = players,
-                problem => ClubPlayers = []);
-
-            var seasonsResult = await seasonsService.GetSeasonsAsync(ClubId, CancellationToken);
-            seasonsResult.Switch(
-                seasons => ClubSeasons = seasons,
-                problem => ClubSeasons = []);
-
-            var teamsResult = await teamsService.GetTeamsAsync(ClubId, CancellationToken);
-            teamsResult.Switch(
-                teams => ClubTeams = teams,
-                problem => ClubTeams = []);
         }
+
+        var membersResult = await calcioUsersService.GetClubMembersAsync(ClubId, CancellationToken);
+        membersResult.Switch(
+            members => ClubMembers = members,
+            problem => ClubMembers = []);
+
+        var playersResult = await playersService.GetClubPlayersAsync(ClubId, CancellationToken);
+        playersResult.Switch(
+            players => ClubPlayers = players,
+            problem => ClubPlayers = []);
+
+        var seasonsResult = await seasonsService.GetSeasonsAsync(ClubId, CancellationToken);
+        seasonsResult.Switch(
+            seasons => ClubSeasons = seasons,
+            problem => ClubSeasons = []);
+
+        var teamsResult = await teamsService.GetTeamsAsync(ClubId, CancellationToken);
+        teamsResult.Switch(
+            teams => ClubTeams = teams,
+            problem => ClubTeams = []);
     }
 }

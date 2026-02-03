@@ -1,10 +1,9 @@
 @page "/clubs/{ClubId:long}/players/create"
 
-@using Calcio.Shared.Security
 @using Calcio.UI.Components.Players.Shared
 @using Microsoft.AspNetCore.Authorization
 
-@attribute [Authorize(Roles = Roles.ClubAdmin)]
+@attribute [Authorize]
 
 <PageTitle>Create Player</PageTitle>
 

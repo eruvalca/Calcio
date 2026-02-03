@@ -1,10 +1,14 @@
+using Bogus;
+
 using Calcio.Data.Contexts;
 using Calcio.IntegrationTests.Data.Contexts;
 using Calcio.Services.Players;
 using Calcio.Shared.Entities;
+using Calcio.Shared.Security;
 using Calcio.Shared.Services.BlobStorage;
 
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +22,50 @@ namespace Calcio.IntegrationTests.Services.Players;
 
 public class PlayersServiceTests(CustomApplicationFactory factory) : BaseDbContextTests(factory)
 {
+    private const long StandardMemberUserId = 300;
+
+    public override async ValueTask InitializeAsync()
+    {
+        await base.InitializeAsync();
+
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<CalcioUserEntity>>();
+
+        var club = await dbContext.Clubs.FirstAsync();
+
+        // Create or reset the standard member user in UserA's club for testing
+        var existingUser = await dbContext.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Id == StandardMemberUserId);
+        if (existingUser is null)
+        {
+            var userFaker = new Faker<CalcioUserEntity>()
+                .RuleFor(u => u.FirstName, f => f.Name.FirstName())
+                .RuleFor(u => u.LastName, f => f.Name.LastName())
+                .RuleFor(u => u.UserName, f => f.Internet.Email())
+                .RuleFor(u => u.Email, (f, u) => u.UserName);
+
+            var standardMember = userFaker.Generate();
+            standardMember.Id = StandardMemberUserId;
+            standardMember.ClubId = club.ClubId;
+
+            var result = await userManager.CreateAsync(standardMember, "TestPassword123!");
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException($"Failed to create standard member user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
+
+            // Add StandardUser role only (not ClubAdmin)
+            await userManager.AddToRoleAsync(standardMember, Roles.StandardUser);
+        }
+        else if (existingUser.ClubId != club.ClubId)
+        {
+            // Reset the user's club membership if needed
+            existingUser.ClubId = club.ClubId;
+            await dbContext.SaveChangesAsync();
+        }
+    }
     #region GetClubPlayersAsync Tests
 
     [Fact]
@@ -297,6 +345,47 @@ public class PlayersServiceTests(CustomApplicationFactory factory) : BaseDbConte
         persistedPlayer.TryoutNumber.ShouldBe(42);
         persistedPlayer.ClubId.ShouldBe(club.ClubId);
         persistedPlayer.CreatedById.ShouldBe(UserAId);
+    }
+
+    [Fact]
+    public async Task CreatePlayerAsync_WhenRegularMemberNotAdmin_ReturnsCreatedPlayer()
+    {
+        // Arrange - Use non-admin member to verify authorization changes allow regular members to create players
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, StandardMemberUserId);
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<ReadOnlyDbContext>();
+        var service = CreateService(scope.ServiceProvider);
+
+        var club = await dbContext.Clubs.FirstAsync(cancellationToken);
+
+        var dto = new Shared.DTOs.Players.CreatePlayerDto(
+            FirstName: "MemberCreated",
+            LastName: "Player",
+            DateOfBirth: DateOnly.FromDateTime(DateTime.Today.AddYears(-13)),
+            GraduationYear: DateTime.Today.Year + 5);
+
+        // Act
+        var result = await service.CreatePlayerAsync(club.ClubId, dto, cancellationToken);
+
+        // Assert - Regular members can now create players
+        result.IsSuccess.ShouldBeTrue();
+        var created = result.Value;
+        created.PlayerId.ShouldBeGreaterThan(0);
+        created.FirstName.ShouldBe("MemberCreated");
+        created.LastName.ShouldBe("Player");
+
+        // Verify the CreatedById is the non-admin member
+        await using var verifyContext = await scope.ServiceProvider
+            .GetRequiredService<IDbContextFactory<ReadOnlyDbContext>>()
+            .CreateDbContextAsync(cancellationToken);
+
+        var persistedPlayer = await verifyContext.Players
+            .FirstOrDefaultAsync(p => p.PlayerId == created.PlayerId, cancellationToken);
+
+        persistedPlayer.ShouldNotBeNull();
+        persistedPlayer.CreatedById.ShouldBe(StandardMemberUserId);
     }
 
     #endregion

@@ -18,14 +18,16 @@ public static class CalcioUsersEndpoints
     public static IEndpointRouteBuilder MapCalcioUsersEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var clubMembersGroup = endpoints.MapGroup(Routes.ClubMembers.Group)
-            .RequireAuthorization(policy => policy.RequireRole(Roles.ClubAdmin))
+            .RequireAuthorization()
             .AddEndpointFilter<ClubMembershipFilter>()
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status403Forbidden)
             .ProducesProblem(StatusCodes.Status500InternalServerError);
 
         clubMembersGroup.MapGet("", GetClubMembers);
+
         clubMembersGroup.MapDelete("{userId:long}", RemoveClubMember)
+            .RequireAuthorization(policy => policy.RequireRole(Roles.ClubAdmin))
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         // Account photo endpoints - requires only authentication, no club membership

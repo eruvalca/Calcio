@@ -24,14 +24,7 @@ public static class TeamsEndpoints
 
         group.MapGet("", GetTeams);
 
-        var clubAdminGroup = endpoints.MapGroup(Routes.Teams.Group)
-            .RequireAuthorization(policy => policy.RequireRole(Roles.ClubAdmin))
-            .AddEndpointFilter<ClubMembershipFilter>()
-            .ProducesProblem(StatusCodes.Status401Unauthorized)
-            .ProducesProblem(StatusCodes.Status403Forbidden)
-            .ProducesProblem(StatusCodes.Status500InternalServerError);
-
-        clubAdminGroup.MapPost("", CreateTeam);
+        group.MapPost("", CreateTeam);
 
         return endpoints;
     }

@@ -1,15 +1,12 @@
 using Calcio.Shared.DTOs.CalcioUsers;
 using Calcio.Shared.Extensions.Shared;
 using Calcio.Shared.Results;
-using Calcio.Shared.Security;
 using Calcio.Shared.Services.CalcioUsers;
 
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 
 namespace Calcio.UI.Components.CalcioUsers.Shared;
 
-[Authorize(Roles = Roles.ClubAdmin)]
 public partial class ClubMembersGrid(ICalcioUsersService calcioUsersService)
 {
     [Parameter]
@@ -17,6 +14,9 @@ public partial class ClubMembersGrid(ICalcioUsersService calcioUsersService)
 
     [Parameter]
     public List<ClubMemberDto> Members { get; set; } = [];
+
+    [Parameter]
+    public bool IsReadOnly { get; set; }
 
     private string SearchTerm { get; set; } = string.Empty;
 

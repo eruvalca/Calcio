@@ -22,24 +22,21 @@
     <h3>@Club.Name</h3>
     <p class="text-muted">@Club.City, @Club.State</p>
 
-    @if (IsClubAdmin)
+    @if (IsClubAdmin && ClubJoinRequests.Count > 0)
     {
-        @if (ClubJoinRequests.Count > 0)
-        {
-            <h5>Manage Join Requests</h5>
-            <ClubJoinRequestsGrid ClubId="ClubId" JoinRequests="ClubJoinRequests" @rendermode="InteractiveAuto" />
-        }
-
-        <h5>Manage Club Members</h5>
-        <ClubMembersGrid ClubId="ClubId" Members="ClubMembers" @rendermode="InteractiveAuto" />
-
-        <h5>Manage Club Players</h5>
-        <ClubPlayersGrid Players="ClubPlayers" @rendermode="InteractiveAuto" />
-
-        <h5>Manage Seasons</h5>
-        <SeasonsGrid ClubId="ClubId" Seasons="ClubSeasons" @rendermode="InteractiveAuto" />
-
-        <h5>Manage Teams</h5>
-        <TeamsGrid ClubId="ClubId" Teams="ClubTeams" @rendermode="InteractiveAuto" />
+        <h5>Club Join Requests</h5>
+        <ClubJoinRequestsGrid ClubId="ClubId" JoinRequests="ClubJoinRequests" @rendermode="InteractiveAuto" />
     }
+
+    <h5>Members</h5>
+    <ClubMembersGrid ClubId="ClubId" Members="ClubMembers" IsReadOnly="!IsClubAdmin" @rendermode="InteractiveAuto" />
+
+    <h5>Players</h5>
+    <ClubPlayersGrid Players="ClubPlayers" @rendermode="InteractiveAuto" />
+
+    <h5>Seasons</h5>
+    <SeasonsGrid ClubId="ClubId" Seasons="ClubSeasons" @rendermode="InteractiveAuto" />
+
+    <h5>Teams</h5>
+    <TeamsGrid ClubId="ClubId" Teams="ClubTeams" @rendermode="InteractiveAuto" />
 }

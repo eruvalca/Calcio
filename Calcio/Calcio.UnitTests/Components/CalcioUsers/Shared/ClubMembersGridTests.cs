@@ -62,10 +62,11 @@ public sealed class ClubMembersGridTests : BunitContext
         return members;
     }
 
-    private IRenderedComponent<ClubMembersGrid> RenderGrid(long clubId = 100, List<ClubMemberDto>? members = null)
+    private IRenderedComponent<ClubMembersGrid> RenderGrid(long clubId = 100, List<ClubMemberDto>? members = null, bool isReadOnly = false)
         => Render<ClubMembersGrid>(parameters => parameters
             .Add(p => p.ClubId, clubId)
-            .Add(p => p.Members, members ?? []));
+            .Add(p => p.Members, members ?? [])
+            .Add(p => p.IsReadOnly, isReadOnly));
 
     #endregion
 
@@ -536,6 +537,91 @@ public sealed class ClubMembersGridTests : BunitContext
         // Cleanup
         tcs.SetResult(new ServiceResult<Success>(new Success()));
         await clickTask;
+    }
+
+    #endregion
+
+    #region Read-Only Mode Tests
+
+    [Fact]
+    public void WhenIsReadOnlyTrue_ShouldNotDisplayActionsColumn()
+    {
+        // Arrange
+        var members = CreateTestMembers(2);
+
+        // Act
+        var cut = RenderGrid(members: members, isReadOnly: true);
+
+        // Assert
+        cut.FindAll("button.btn-outline-danger").ShouldBeEmpty();
+        cut.Markup.ShouldNotContain("Actions");
+    }
+
+    [Fact]
+    public void WhenIsReadOnlyTrue_ShouldStillDisplayMemberData()
+    {
+        // Arrange
+        var members = CreateTestMembers(2);
+
+        // Act
+        var cut = RenderGrid(members: members, isReadOnly: true);
+
+        // Assert
+        cut.Find("table").ShouldNotBeNull();
+        cut.Markup.ShouldContain("Admin User");
+        cut.Markup.ShouldContain("Member 1");
+        cut.Markup.ShouldContain("Member 2");
+    }
+
+    [Fact]
+    public void WhenIsReadOnlyTrue_ShouldStillDisplayRoleBadges()
+    {
+        // Arrange
+        var members = CreateTestMembers(1);
+
+        // Act
+        var cut = RenderGrid(members: members, isReadOnly: true);
+
+        // Assert
+        var adminBadge = cut.Find(".badge.bg-primary");
+        adminBadge.TextContent.ShouldBe("Club Admin");
+
+        var memberBadge = cut.Find(".badge.bg-secondary");
+        memberBadge.TextContent.ShouldBe("Member");
+    }
+
+    [Fact]
+    public void WhenIsReadOnlyTrue_ShouldStillSupportSearch()
+    {
+        // Arrange
+        var members = CreateTestMembers(3);
+        var cut = RenderGrid(members: members, isReadOnly: true);
+
+        // Act
+        var searchInput = cut.Find("#MemberSearch");
+        searchInput.Input("Member 1");
+
+        // Assert
+        cut.WaitForAssertion(() =>
+        {
+            var rows = cut.FindAll("tbody tr");
+            rows.Count.ShouldBe(1);
+            cut.Markup.ShouldContain("Member 1");
+        });
+    }
+
+    [Fact]
+    public void WhenIsReadOnlyFalse_ShouldDisplayActionsColumn()
+    {
+        // Arrange
+        var members = CreateTestMembers(2);
+
+        // Act
+        var cut = RenderGrid(members: members, isReadOnly: false);
+
+        // Assert
+        var removeButtons = cut.FindAll("button.btn-outline-danger");
+        removeButtons.Count.ShouldBe(2); // 2 non-admin members
     }
 
     #endregion

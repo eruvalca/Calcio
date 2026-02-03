@@ -1,9 +1,14 @@
+using Bogus;
+
 using Calcio.Data.Contexts;
 using Calcio.IntegrationTests.Data.Contexts;
 using Calcio.Services.Teams;
 using Calcio.Shared.DTOs.Teams;
+using Calcio.Shared.Entities;
+using Calcio.Shared.Security;
 
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -14,6 +19,50 @@ namespace Calcio.IntegrationTests.Services.Teams;
 
 public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextTests(factory)
 {
+    private const long StandardMemberUserId = 400;
+
+    public override async ValueTask InitializeAsync()
+    {
+        await base.InitializeAsync();
+
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<CalcioUserEntity>>();
+
+        var club = await dbContext.Clubs.FirstAsync();
+
+        // Create or reset the standard member user in UserA's club for testing
+        var existingUser = await dbContext.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Id == StandardMemberUserId);
+        if (existingUser is null)
+        {
+            var userFaker = new Faker<CalcioUserEntity>()
+                .RuleFor(u => u.FirstName, f => f.Name.FirstName())
+                .RuleFor(u => u.LastName, f => f.Name.LastName())
+                .RuleFor(u => u.UserName, f => f.Internet.Email())
+                .RuleFor(u => u.Email, (f, u) => u.UserName);
+
+            var standardMember = userFaker.Generate();
+            standardMember.Id = StandardMemberUserId;
+            standardMember.ClubId = club.ClubId;
+
+            var result = await userManager.CreateAsync(standardMember, "TestPassword123!");
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException($"Failed to create standard member user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
+
+            // Add StandardUser role only (not ClubAdmin)
+            await userManager.AddToRoleAsync(standardMember, Roles.StandardUser);
+        }
+        else if (existingUser.ClubId != club.ClubId)
+        {
+            // Reset the user's club membership if needed
+            existingUser.ClubId = club.ClubId;
+            await dbContext.SaveChangesAsync();
+        }
+    }
     #region GetTeamsAsync Tests
 
     [Fact]
@@ -257,6 +306,35 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
 
         createdTeam.ShouldNotBeNull();
         createdTeam.GraduationYear.ShouldBe(graduationYear);
+    }
+
+    [Fact]
+    public async Task CreateTeamAsync_WhenRegularMemberNotAdmin_ReturnsCreatedTeam()
+    {
+        // Arrange - Use non-admin member to verify authorization changes allow regular members to create teams
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, StandardMemberUserId);
+
+        var readOnlyDbContext = scope.ServiceProvider.GetRequiredService<ReadOnlyDbContext>();
+        var service = CreateService(scope.ServiceProvider);
+
+        var club = await readOnlyDbContext.Clubs.FirstAsync(cancellationToken);
+        var dto = new CreateTeamDto("Member Created Team", 2029);
+
+        // Act
+        var result = await service.CreateTeamAsync(club.ClubId, dto, cancellationToken);
+
+        // Assert - Regular members can now create teams
+        result.IsSuccess.ShouldBeTrue();
+
+        var createdTeam = await readOnlyDbContext.Teams
+            .FirstOrDefaultAsync(t => t.Name == "Member Created Team" && t.ClubId == club.ClubId, cancellationToken);
+
+        createdTeam.ShouldNotBeNull();
+        createdTeam.Name.ShouldBe(dto.Name);
+        createdTeam.GraduationYear.ShouldBe(dto.GraduationYear);
+        createdTeam.CreatedById.ShouldBe(StandardMemberUserId);
     }
 
     #endregion

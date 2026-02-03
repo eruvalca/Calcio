@@ -18,7 +18,7 @@ public static class PlayersEndpoints
     public static IEndpointRouteBuilder MapPlayersEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup(Routes.Players.Group)
-            .RequireAuthorization(policy => policy.RequireRole(Roles.ClubAdmin))
+            .RequireAuthorization()
             .AddEndpointFilter<ClubMembershipFilter>()
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status403Forbidden)

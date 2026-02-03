@@ -31,22 +31,25 @@
                         <span class="badge bg-secondary">Member</span>
                     }
                 </TemplateColumn>
-                <TemplateColumn Title="Actions">
-                    @if (!context.IsClubAdmin)
-                    {
-                        <button type="button" class="btn btn-outline-danger btn-sm"
-                            @onclick="() => ShowRemoveConfirmation(context)" disabled="@IsProcessing">
-                            Remove
-                        </button>
-                    }
-                </TemplateColumn>
+                @if (!IsReadOnly)
+                {
+                    <TemplateColumn Title="Actions">
+                        @if (!context.IsClubAdmin)
+                        {
+                            <button type="button" class="btn btn-outline-danger btn-sm"
+                                @onclick="() => ShowRemoveConfirmation(context)" disabled="@IsProcessing">
+                                Remove
+                            </button>
+                        }
+                    </TemplateColumn>
+                }
             </QuickGrid>
         }
     </div>
 </div>
 
 @* Confirmation dialog for removing a member *@
-@if (ConfirmingRemoveMember is not null)
+@if (!IsReadOnly && ConfirmingRemoveMember is not null)
 {
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-dialog-centered">
