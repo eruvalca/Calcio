@@ -115,6 +115,36 @@ public static class Routes
 
         /// <summary>Builds the URL for a player's photo.</summary>
         public static string ForPlayerPhoto(long clubId, long playerId) => $"{ForPlayer(clubId, playerId)}/photo";
+
+        /// <summary>
+        /// Bulk import routes for players.
+        /// </summary>
+        public static class BulkImport
+        {
+            /// <summary>Route for validating a bulk import file: POST.</summary>
+            public const string ValidateGroup = Group + "/bulk/validate";
+
+            /// <summary>Route for re-validating edited import rows: POST.</summary>
+            public const string RevalidateGroup = Group + "/bulk/revalidate";
+
+            /// <summary>Route for executing bulk import: POST.</summary>
+            public const string ImportGroup = Group + "/bulk";
+
+            /// <summary>Route for downloading import template: GET.</summary>
+            public const string TemplateGroup = Group + "/bulk/template";
+
+            /// <summary>Builds the URL for validating a bulk import file.</summary>
+            public static string ForValidate(long clubId) => $"{Clubs.Base}/{clubId}/players/bulk/validate";
+
+            /// <summary>Builds the URL for re-validating edited import rows.</summary>
+            public static string ForRevalidate(long clubId) => $"{Clubs.Base}/{clubId}/players/bulk/revalidate";
+
+            /// <summary>Builds the URL for executing bulk import.</summary>
+            public static string ForImport(long clubId) => $"{Clubs.Base}/{clubId}/players/bulk";
+
+            /// <summary>Builds the URL for downloading import template.</summary>
+            public static string ForTemplate(long clubId) => $"{Clubs.Base}/{clubId}/players/bulk/template";
+        }
     }
 
     /// <summary>

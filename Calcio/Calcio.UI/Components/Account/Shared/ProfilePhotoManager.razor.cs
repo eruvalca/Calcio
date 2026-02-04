@@ -32,10 +32,7 @@ public partial class ProfilePhotoManager(
 
     private string? ErrorMessage { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadCurrentPhotoAsync();
-    }
+    protected override async Task OnInitializedAsync() => await LoadCurrentPhotoAsync();
 
     private async Task LoadCurrentPhotoAsync()
     {

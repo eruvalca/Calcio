@@ -529,10 +529,7 @@ public sealed class ClubMembersGridTests : BunitContext
         var clickTask = cut.Find(".modal-footer button.btn-danger").ClickAsync(new());
 
         // Assert
-        cut.WaitForAssertion(() =>
-        {
-            cut.FindAll(".modal .spinner-border").Count.ShouldBe(1);
-        });
+        cut.WaitForAssertion(() => cut.FindAll(".modal .spinner-border").Count.ShouldBe(1));
 
         // Cleanup
         tcs.SetResult(new ServiceResult<Success>(new Success()));

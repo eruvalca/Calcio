@@ -70,11 +70,8 @@ public sealed class ProfilePhotoManagerTests : BunitContext
             .Returns(Task.FromResult<ServiceResult<OneOf<CalcioUserPhotoDto, None>>>(photoResult));
     }
 
-    private void SetupPhotoLoadNeverCompletes()
-    {
-        _mockCalcioUsersService.GetAccountPhotoAsync(Arg.Any<CancellationToken>())
+    private void SetupPhotoLoadNeverCompletes() => _mockCalcioUsersService.GetAccountPhotoAsync(Arg.Any<CancellationToken>())
             .Returns(new TaskCompletionSource<ServiceResult<OneOf<CalcioUserPhotoDto, None>>>().Task);
-    }
 
     #endregion
 

@@ -1,0 +1,25 @@
+.player-import-grid ::deep .col-checkbox,
+.player-import-grid ::deep .col-actions {
+    width: 3rem;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.player-import-grid ::deep .col-row-number {
+    width: 3rem;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.player-import-grid ::deep .col-grad-year {
+    width: 8rem;
+}
+
+.player-import-grid ::deep .col-grad-year input {
+    max-width: 5rem;
+}
+
+/* Ensure vertical alignment for all cells */
+.player-import-grid ::deep td {
+    vertical-align: middle;
+}

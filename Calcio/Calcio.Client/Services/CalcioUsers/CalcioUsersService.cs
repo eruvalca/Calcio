@@ -18,36 +18,18 @@ public class CalcioUsersService(HttpClient httpClient) : ICalcioUsersService
     {
         var response = await httpClient.GetAsync(Routes.ClubMembers.ForClub(clubId), cancellationToken);
 
-        if (response.IsSuccessStatusCode)
-        {
-            return await response.Content.ReadFromJsonAsync<List<ClubMemberDto>>(cancellationToken) ?? [];
-        }
-
-        return response.StatusCode switch
-        {
-            HttpStatusCode.NotFound => ServiceProblem.NotFound(),
-            HttpStatusCode.Forbidden => ServiceProblem.Forbidden(),
-            HttpStatusCode.Conflict => ServiceProblem.Conflict(),
-            _ => ServiceProblem.ServerError()
-        };
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<List<ClubMemberDto>>(cancellationToken) ?? []
+            : await response.ToServiceProblemAsync(cancellationToken);
     }
 
     public async Task<ServiceResult<Success>> RemoveClubMemberAsync(long clubId, long userId, CancellationToken cancellationToken)
     {
         var response = await httpClient.DeleteAsync(Routes.ClubMembers.ForMember(clubId, userId), cancellationToken);
 
-        if (response.IsSuccessStatusCode)
-        {
-            return new Success();
-        }
-
-        return response.StatusCode switch
-        {
-            HttpStatusCode.NotFound => ServiceProblem.NotFound(),
-            HttpStatusCode.Forbidden => ServiceProblem.Forbidden(),
-            HttpStatusCode.Conflict => ServiceProblem.Conflict(),
-            _ => ServiceProblem.ServerError()
-        };
+        return response.IsSuccessStatusCode
+            ? new Success()
+            : await response.ToServiceProblemAsync(cancellationToken);
     }
 
     public async Task<ServiceResult<CalcioUserPhotoDto>> UploadAccountPhotoAsync(
@@ -64,13 +46,7 @@ public class CalcioUsersService(HttpClient httpClient) : ICalcioUsersService
 
         return response.IsSuccessStatusCode
             ? (ServiceResult<CalcioUserPhotoDto>)(await response.Content.ReadFromJsonAsync<CalcioUserPhotoDto>(cancellationToken))!
-            : (ServiceResult<CalcioUserPhotoDto>)(response.StatusCode switch
-            {
-                HttpStatusCode.NotFound => ServiceProblem.NotFound(),
-                HttpStatusCode.Forbidden => ServiceProblem.Forbidden(),
-                HttpStatusCode.BadRequest => ServiceProblem.BadRequest(),
-                _ => ServiceProblem.ServerError()
-            });
+            : await response.ToServiceProblemAsync(cancellationToken);
     }
 
     public async Task<ServiceResult<OneOf<CalcioUserPhotoDto, None>>> GetAccountPhotoAsync(CancellationToken cancellationToken)
@@ -84,17 +60,11 @@ public class CalcioUsersService(HttpClient httpClient) : ICalcioUsersService
 
         return response.IsSuccessStatusCode
             ? (ServiceResult<OneOf<CalcioUserPhotoDto, None>>)(OneOf<CalcioUserPhotoDto, None>)(await response.Content.ReadFromJsonAsync<CalcioUserPhotoDto>(cancellationToken))!
-            : (ServiceResult<OneOf<CalcioUserPhotoDto, None>>)(response.StatusCode switch
-            {
-                HttpStatusCode.NotFound => ServiceProblem.NotFound(),
-                HttpStatusCode.Forbidden => ServiceProblem.Forbidden(),
-                _ => ServiceProblem.ServerError()
-            });
+            : await response.ToServiceProblemAsync(cancellationToken);
     }
 
     public async Task<ServiceResult<bool>> HasAccountPhotoAsync(CancellationToken cancellationToken)
     {
-        // Use a HEAD request or just check if GET returns NoContent vs Ok
         var response = await httpClient.GetAsync(Routes.Account.ForPhoto(), cancellationToken);
 
         if (response.StatusCode == HttpStatusCode.NoContent)
@@ -102,16 +72,8 @@ public class CalcioUsersService(HttpClient httpClient) : ICalcioUsersService
             return false;
         }
 
-        if (response.IsSuccessStatusCode)
-        {
-            return true;
-        }
-
-        return response.StatusCode switch
-        {
-            HttpStatusCode.NotFound => ServiceProblem.NotFound(),
-            HttpStatusCode.Forbidden => ServiceProblem.Forbidden(),
-            _ => ServiceProblem.ServerError()
-        };
+        return response.IsSuccessStatusCode
+            ? true
+            : await response.ToServiceProblemAsync(cancellationToken);
     }
 }

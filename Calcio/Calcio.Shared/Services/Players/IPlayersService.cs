@@ -1,4 +1,5 @@
 using Calcio.Shared.DTOs.Players;
+using Calcio.Shared.DTOs.Players.BulkImport;
 using Calcio.Shared.Results;
 
 using OneOf;
@@ -53,4 +54,43 @@ public interface IPlayersService
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The photo information with SAS URLs, or None if no photo exists.</returns>
     Task<ServiceResult<OneOf<PlayerPhotoDto, None>>> GetPlayerPhotoAsync(long clubId, long playerId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Validates a player import file (CSV or Excel) and returns parsed rows with validation results.
+    /// </summary>
+    /// <param name="clubId">The club identifier.</param>
+    /// <param name="fileStream">The file stream to validate.</param>
+    /// <param name="fileName">The file name (used to detect format).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The validation result with parsed rows and column mappings.</returns>
+    Task<ServiceResult<BulkValidateResultDto>> ValidateBulkImportAsync(
+        long clubId,
+        Stream fileStream,
+        string fileName,
+        CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Re-validates a list of import rows after user edits, checking for duplicates against the database.
+    /// </summary>
+    /// <param name="clubId">The club identifier.</param>
+    /// <param name="rows">The rows to re-validate.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The re-validated rows.</returns>
+    Task<ServiceResult<BulkValidateResultDto>> RevalidateBulkImportAsync(
+        long clubId,
+        List<PlayerImportRowDto> rows,
+        CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Creates multiple players from validated import rows.
+    /// Only rows marked for import (IsMarkedForImport=true) and valid (IsValid=true) will be created.
+    /// </summary>
+    /// <param name="clubId">The club identifier.</param>
+    /// <param name="rows">The validated import rows.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The import result with created and skipped counts.</returns>
+    Task<ServiceResult<BulkImportResultDto>> BulkCreatePlayersAsync(
+        long clubId,
+        List<PlayerImportRowDto> rows,
+        CancellationToken cancellationToken);
 }

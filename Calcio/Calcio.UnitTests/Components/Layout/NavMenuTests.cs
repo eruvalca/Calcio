@@ -113,19 +113,13 @@ public sealed class NavMenuTests : BunitContext
             .Returns(Task.FromResult(new ServiceResult<OneOf<CalcioUserPhotoDto, None>>(OneOf<CalcioUserPhotoDto, None>.FromT0(photoDto))));
     }
 
-    private void SetupUserWithoutPhoto()
-    {
-        _calcioUsersService
+    private void SetupUserWithoutPhoto() => _calcioUsersService
             .GetAccountPhotoAsync(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(new ServiceResult<OneOf<CalcioUserPhotoDto, None>>(OneOf<CalcioUserPhotoDto, None>.FromT1(new None()))));
-    }
 
-    private void SetupPhotoServiceError()
-    {
-        _calcioUsersService
+    private void SetupPhotoServiceError() => _calcioUsersService
             .GetAccountPhotoAsync(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(new ServiceResult<OneOf<CalcioUserPhotoDto, None>>(ServiceProblem.ServerError())));
-    }
 
     #endregion
 

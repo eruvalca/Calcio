@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
 using Calcio.Shared.DTOs.Players;
+using Calcio.Shared.DTOs.Players.BulkImport;
 using Calcio.Shared.Endpoints;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.Players;
@@ -20,13 +21,7 @@ public class PlayersService(HttpClient httpClient) : IPlayersService
 
         return response.IsSuccessStatusCode
             ? (ServiceResult<List<ClubPlayerDto>>)(await response.Content.ReadFromJsonAsync<List<ClubPlayerDto>>(cancellationToken) ?? [])
-            : (ServiceResult<List<ClubPlayerDto>>)(response.StatusCode switch
-            {
-                HttpStatusCode.NotFound => ServiceProblem.NotFound(),
-                HttpStatusCode.Forbidden => ServiceProblem.Forbidden(),
-                HttpStatusCode.Conflict => ServiceProblem.Conflict(),
-                _ => ServiceProblem.ServerError()
-            });
+            : await response.ToServiceProblemAsync(cancellationToken);
     }
 
     public async Task<ServiceResult<PlayerCreatedDto>> CreatePlayerAsync(long clubId, CreatePlayerDto dto, CancellationToken cancellationToken)
@@ -35,14 +30,7 @@ public class PlayersService(HttpClient httpClient) : IPlayersService
 
         return response.IsSuccessStatusCode
             ? (ServiceResult<PlayerCreatedDto>)(await response.Content.ReadFromJsonAsync<PlayerCreatedDto>(cancellationToken))!
-            : (ServiceResult<PlayerCreatedDto>)(response.StatusCode switch
-            {
-                HttpStatusCode.NotFound => ServiceProblem.NotFound(),
-                HttpStatusCode.Forbidden => ServiceProblem.Forbidden(),
-                HttpStatusCode.Conflict => ServiceProblem.Conflict(),
-                HttpStatusCode.BadRequest => ServiceProblem.BadRequest(),
-                _ => ServiceProblem.ServerError()
-            });
+            : await response.ToServiceProblemAsync(cancellationToken);
     }
 
     public async Task<ServiceResult<PlayerPhotoDto>> UploadPlayerPhotoAsync(
@@ -61,13 +49,7 @@ public class PlayersService(HttpClient httpClient) : IPlayersService
 
         return response.IsSuccessStatusCode
             ? (ServiceResult<PlayerPhotoDto>)(await response.Content.ReadFromJsonAsync<PlayerPhotoDto>(cancellationToken))!
-            : (ServiceResult<PlayerPhotoDto>)(response.StatusCode switch
-            {
-                HttpStatusCode.NotFound => ServiceProblem.NotFound(),
-                HttpStatusCode.Forbidden => ServiceProblem.Forbidden(),
-                HttpStatusCode.BadRequest => ServiceProblem.BadRequest(),
-                _ => ServiceProblem.ServerError()
-            });
+            : await response.ToServiceProblemAsync(cancellationToken);
     }
 
     public async Task<ServiceResult<OneOf<PlayerPhotoDto, None>>> GetPlayerPhotoAsync(long clubId, long playerId, CancellationToken cancellationToken)
@@ -81,11 +63,60 @@ public class PlayersService(HttpClient httpClient) : IPlayersService
 
         return response.IsSuccessStatusCode
             ? (ServiceResult<OneOf<PlayerPhotoDto, None>>)(OneOf<PlayerPhotoDto, None>)(await response.Content.ReadFromJsonAsync<PlayerPhotoDto>(cancellationToken))!
-            : (ServiceResult<OneOf<PlayerPhotoDto, None>>)(response.StatusCode switch
-            {
-                HttpStatusCode.NotFound => ServiceProblem.NotFound(),
-                HttpStatusCode.Forbidden => ServiceProblem.Forbidden(),
-                _ => ServiceProblem.ServerError()
-            });
+            : await response.ToServiceProblemAsync(cancellationToken);
+    }
+
+    public async Task<ServiceResult<BulkValidateResultDto>> ValidateBulkImportAsync(
+        long clubId,
+        Stream fileStream,
+        string fileName,
+        CancellationToken cancellationToken)
+    {
+        using var content = new MultipartFormDataContent();
+        using var streamContent = new StreamContent(fileStream);
+
+        // Determine content type from file extension
+        var extension = Path.GetExtension(fileName).ToLowerInvariant();
+        var contentType = extension switch
+        {
+            ".csv" => "text/csv",
+            ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            ".xls" => "application/vnd.ms-excel",
+            _ => "application/octet-stream"
+        };
+
+        streamContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+        content.Add(streamContent, "file", fileName);
+
+        var response = await httpClient.PostAsync(Routes.Players.BulkImport.ForValidate(clubId), content, cancellationToken);
+
+        return response.IsSuccessStatusCode
+            ? (ServiceResult<BulkValidateResultDto>)(await response.Content.ReadFromJsonAsync<BulkValidateResultDto>(cancellationToken))!
+            : await response.ToServiceProblemAsync(cancellationToken);
+    }
+
+    public async Task<ServiceResult<BulkValidateResultDto>> RevalidateBulkImportAsync(
+        long clubId,
+        List<PlayerImportRowDto> rows,
+        CancellationToken cancellationToken)
+    {
+        var response = await httpClient.PostAsJsonAsync(Routes.Players.BulkImport.ForRevalidate(clubId), rows, cancellationToken);
+
+        return response.IsSuccessStatusCode
+            ? (ServiceResult<BulkValidateResultDto>)(await response.Content.ReadFromJsonAsync<BulkValidateResultDto>(cancellationToken))!
+            : await response.ToServiceProblemAsync(cancellationToken);
+    }
+
+    public async Task<ServiceResult<BulkImportResultDto>> BulkCreatePlayersAsync(
+        long clubId,
+        List<PlayerImportRowDto> rows,
+        CancellationToken cancellationToken)
+    {
+        var request = new BulkImportPlayersRequest(rows);
+        var response = await httpClient.PostAsJsonAsync(Routes.Players.BulkImport.ForImport(clubId), request, cancellationToken);
+
+        return response.IsSuccessStatusCode
+            ? (ServiceResult<BulkImportResultDto>)(await response.Content.ReadFromJsonAsync<BulkImportResultDto>(cancellationToken))!
+            : await response.ToServiceProblemAsync(cancellationToken);
     }
 }

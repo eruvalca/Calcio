@@ -357,10 +357,7 @@ public sealed class CreatePlayerFormTests : BunitContext
         await cut.Find("form").SubmitAsync();
 
         // Assert
-        cut.WaitForAssertion(() =>
-        {
-            cut.Markup.ShouldContain("First name is required");
-        });
+        cut.WaitForAssertion(() => cut.Markup.ShouldContain("First name is required"));
     }
 
     [Fact]
@@ -376,10 +373,7 @@ public sealed class CreatePlayerFormTests : BunitContext
         await cut.Find("form").SubmitAsync();
 
         // Assert
-        cut.WaitForAssertion(() =>
-        {
-            cut.Markup.ShouldContain("Last name is required");
-        });
+        cut.WaitForAssertion(() => cut.Markup.ShouldContain("Last name is required"));
     }
 
     #endregion

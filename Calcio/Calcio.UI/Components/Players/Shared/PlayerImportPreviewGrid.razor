@@ -1,0 +1,126 @@
+@using Calcio.Shared.DTOs.Players.BulkImport
+@using Calcio.Shared.Enums
+@using Microsoft.AspNetCore.Components.QuickGrid
+
+<div class="table-responsive">
+    <QuickGrid TGridItem="PlayerImportRowDto" Items="Rows.AsQueryable()" ItemKey="@(row => row.Id)"
+        class="table table-sm table-bordered player-import-grid">
+
+        @* Row selection checkbox *@
+        <TemplateColumn Title="" Class="text-center align-middle col-checkbox">
+            <input type="checkbox" class="form-check-input" checked="@context.IsMarkedForImport"
+                disabled="@(!context.IsValid)"
+                @onchange="e => OnRowSelectionChanged(context, (bool)(e.Value ?? false))" />
+        </TemplateColumn>
+
+        @* Row number *@
+        <PropertyColumn Title="#" Property="r => r.RowNumber" Class="col-row-number" />
+
+        @* First Name - Editable *@
+        <TemplateColumn Title="First Name">
+            <input type="text" @bind="context.FirstName" @bind:event="oninput" @onblur="() => ValidateRow(context)"
+                class="form-control form-control-sm @(HasFieldError(context, "First name") ? "is-invalid" : "")"
+                placeholder="First name" />
+        </TemplateColumn>
+
+        @* Last Name - Editable *@
+        <TemplateColumn Title="Last Name">
+            <input type="text" @bind="context.LastName" @bind:event="oninput" @onblur="() => ValidateRow(context)"
+                class="form-control form-control-sm @(HasFieldError(context, "Last name") ? "is-invalid" : "")"
+                placeholder="Last name" />
+        </TemplateColumn>
+
+        @* Date of Birth - Editable *@
+        <TemplateColumn Title="Date of Birth">
+            <input type="date" value="@context.DateOfBirth?.ToString("yyyy-MM-dd")"
+                @onchange="e => OnDateOfBirthChanged(context, e.Value?.ToString())"
+                class="form-control form-control-sm @(HasFieldError(context, "Date of birth") ? "is-invalid" : "")" />
+        </TemplateColumn>
+
+        @* Gender - Editable select *@
+        <TemplateColumn Title="Gender">
+            <select @bind="context.Gender" @onblur="() => ValidateRow(context)"
+                class="form-select form-select-sm @(HasFieldError(context, "Gender") ? "is-invalid" : "")">
+                <option value="">Select...</option>
+                <option value="@Gender.Male">Male</option>
+                <option value="@Gender.Female">Female</option>
+                <option value="@Gender.Other">Other</option>
+            </select>
+        </TemplateColumn>
+
+        @* Graduation Year - Editable *@
+        <TemplateColumn Title="Grad Year" Class="col-grad-year">
+            <div class="input-group input-group-sm flex-nowrap">
+                <input type="number" @bind="context.GraduationYear" @bind:event="oninput"
+                    @onblur="() => ValidateRow(context)"
+                    class="form-control form-control-sm @(HasFieldError(context, "Graduation year") ? "is-invalid" : "")"
+                    min="2000" max="2050" />
+                @if (context.IsGraduationYearComputed)
+                {
+                    <span class="input-group-text" title="Computed from date of birth">
+                        <i class="bi bi-calculator text-info"></i>
+                    </span>
+                }
+            </div>
+        </TemplateColumn>
+
+        @* Jersey Number - Editable *@
+        <TemplateColumn Title="Jersey #">
+            <input type="number" @bind="context.JerseyNumber" @bind:event="oninput" @onblur="() => ValidateRow(context)"
+                class="form-control form-control-sm @(HasFieldError(context, "Jersey number") ? "is-invalid" : "")"
+                min="0" max="999" placeholder="—" />
+        </TemplateColumn>
+
+        @* Tryout Number - Editable *@
+        <TemplateColumn Title="Tryout #">
+            <input type="number" @bind="context.TryoutNumber" @bind:event="oninput" @onblur="() => ValidateRow(context)"
+                class="form-control form-control-sm @(HasFieldError(context, "Tryout number") ? "is-invalid" : "")"
+                min="0" max="9999" placeholder="—" />
+        </TemplateColumn>
+
+        @* Status column *@
+        <TemplateColumn Title="Status" Class="text-nowrap col-status">
+            @if (context.Errors.Count > 0)
+            {
+                <span class="badge bg-danger" role="button" title="@string.Join(" • ", context.Errors)">
+                    <i class="bi bi-x-circle me-1"></i>@context.Errors.Count error(s)
+                </span>
+            }
+            else if (context.Warnings.Count > 0)
+            {
+                <span class="badge bg-warning text-dark" role="button" title="@string.Join(" • ", context.Warnings)">
+                    <i class="bi bi-exclamation-triangle me-1"></i>@context.Warnings.Count warning(s)
+                </span>
+            }
+            else
+            {
+                <span class="badge bg-success">
+                    <i class="bi bi-check-circle me-1"></i>Valid
+                </span>
+            }
+
+            @if (context.IsDuplicateInDatabase)
+            {
+                <span class="badge bg-info ms-1" title="A player with this name and DOB already exists">
+                    <i class="bi bi-copy"></i>
+                </span>
+            }
+
+            @if (context.IsDuplicateInFile)
+            {
+                <span class="badge bg-secondary ms-1" title="Duplicate in this file">
+                    <i class="bi bi-files"></i>
+                </span>
+            }
+        </TemplateColumn>
+
+        @* Delete row action *@
+        <TemplateColumn Title="" Class="text-center align-middle col-actions">
+            <button type="button" class="btn btn-sm btn-outline-danger" title="Remove row"
+                @onclick="() => RemoveRow(context)">
+                <i class="bi bi-trash"></i>
+            </button>
+        </TemplateColumn>
+
+    </QuickGrid>
+</div>

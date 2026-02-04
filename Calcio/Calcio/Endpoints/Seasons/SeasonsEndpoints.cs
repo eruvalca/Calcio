@@ -4,7 +4,6 @@ using Calcio.Endpoints.Extensions;
 using Calcio.Endpoints.Filters;
 using Calcio.Shared.DTOs.Seasons;
 using Calcio.Shared.Endpoints;
-using Calcio.Shared.Security;
 using Calcio.Shared.Services.Seasons;
 
 using Microsoft.AspNetCore.Http.HttpResults;

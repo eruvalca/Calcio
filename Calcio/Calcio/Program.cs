@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 
 using Calcio.Components;
 using Calcio.Components.Account;
@@ -43,6 +44,9 @@ using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.OpenApi;
 
 using Scalar.AspNetCore;
+
+// Register encoding provider for ExcelDataReader
+Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -133,6 +137,8 @@ builder.Services.AddScoped<ThemeService>();
 builder.Services.AddScoped<IClubJoinRequestsService, ClubJoinRequestsService>();
 builder.Services.AddScoped<IClubsService, ClubsService>();
 builder.Services.AddScoped<ICalcioUsersService, CalcioUsersService>();
+builder.Services.AddScoped<IPlayerImportParserService, PlayerImportParserService>();
+builder.Services.AddScoped<IPlayerImportTemplateService, PlayerImportTemplateService>();
 builder.Services.AddScoped<IPlayersService, PlayersService>();
 builder.Services.AddScoped<ISeasonsService, SeasonsService>();
 builder.Services.AddScoped<ITeamsService, TeamsService>();

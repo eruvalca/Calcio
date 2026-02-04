@@ -331,9 +331,6 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
         await dbContext.Teams.AddAsync(team, TestContext.Current.CancellationToken);
 
         // Act & Assert
-        await Should.ThrowAsync<InvalidOperationException>(async () =>
-        {
-            await dbContext.SaveChangesAsync();
-        });
+        await Should.ThrowAsync<InvalidOperationException>(async () => await dbContext.SaveChangesAsync());
     }
 }

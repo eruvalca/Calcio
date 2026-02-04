@@ -6,6 +6,7 @@ using Calcio.Services.Players;
 using Calcio.Shared.Entities;
 using Calcio.Shared.Security;
 using Calcio.Shared.Services.BlobStorage;
+using Calcio.Shared.Services.Players;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -677,11 +678,12 @@ public class PlayersServiceTests(CustomApplicationFactory factory) : BaseDbConte
         var readOnlyFactory = services.GetRequiredService<IDbContextFactory<ReadOnlyDbContext>>();
         var readWriteFactory = services.GetRequiredService<IDbContextFactory<ReadWriteDbContext>>();
         var blobStorageService = services.GetRequiredService<IBlobStorageService>();
+        var importParserService = services.GetRequiredService<IPlayerImportParserService>();
         var cache = services.GetRequiredService<HybridCache>();
         var httpContextAccessor = services.GetRequiredService<IHttpContextAccessor>();
         var logger = services.GetRequiredService<ILogger<PlayersService>>();
 
-        return new PlayersService(readOnlyFactory, readWriteFactory, blobStorageService, cache, httpContextAccessor, logger);
+        return new PlayersService(readOnlyFactory, readWriteFactory, blobStorageService, importParserService, cache, httpContextAccessor, logger);
     }
 
     /// <summary>

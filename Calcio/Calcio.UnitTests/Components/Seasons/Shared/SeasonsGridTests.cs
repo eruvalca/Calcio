@@ -382,10 +382,7 @@ public sealed class SeasonsGridTests : BunitContext
         var submitTask = cut.Find(".card-body form").SubmitAsync();
 
         // Assert
-        cut.WaitForAssertion(() =>
-        {
-            cut.FindAll(".spinner-border").Count.ShouldBe(1);
-        });
+        cut.WaitForAssertion(() => cut.FindAll(".spinner-border").Count.ShouldBe(1));
 
         // Cleanup
         tcs.SetResult(new ServiceResult<Success>(new Success()));

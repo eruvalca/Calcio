@@ -112,9 +112,10 @@
 ### Client-side Services (Blazor WASM)
 
 - Implement shared service interfaces (from `Calcio.Shared`) using `HttpClient`.
-- Map HTTP status codes to `ServiceProblem` using switch expressions.
 - Register services via `AddHttpClient<TInterface, TImplementation>()` with base address.
-- Return `ServiceProblem.NotFound()` for 404, `ServiceProblem.Forbidden()` for 403, `ServiceProblem.Conflict()` for 409, `ServiceProblem.ServerError()` as fallback.
+- Use `HttpResponseMessage.ToServiceProblemAsync()` extension (from `Calcio.Shared.Results`) to convert error responses to `ServiceProblem`.
+- This extension maps HTTP status codes to `ServiceProblemKind` (404→NotFound, 403→Forbidden, 409→Conflict, 400→BadRequest, others→ServerError) and extracts `detail` from RFC 7807 ProblemDetails JSON.
+- Pattern: `return response.IsSuccessStatusCode ? successResult : await response.ToServiceProblemAsync(cancellationToken);`
 
 ## API Routes
 

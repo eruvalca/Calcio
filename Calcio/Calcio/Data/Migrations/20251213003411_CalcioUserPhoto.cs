@@ -47,9 +47,6 @@ public partial class CalcioUserPhoto : Migration
     }
 
     /// <inheritdoc />
-    protected override void Down(MigrationBuilder migrationBuilder)
-    {
-        migrationBuilder.DropTable(
+    protected override void Down(MigrationBuilder migrationBuilder) => migrationBuilder.DropTable(
             name: "CalcioUserPhotos");
-    }
 }

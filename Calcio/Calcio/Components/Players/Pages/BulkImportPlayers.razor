@@ -1,0 +1,25 @@
+@page "/clubs/{ClubId:long}/players/bulk-import"
+
+@using Calcio.UI.Components.Players.Shared
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
+
+<PageTitle>Bulk Import Players</PageTitle>
+
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/account/manage/clubs">Clubs</a></li>
+            <li class="breadcrumb-item"><a href="/clubs/@ClubId/players">Players</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Bulk Import</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-xxl-10">
+            <BulkImportPlayersForm ClubId="ClubId" CancelUrl="@($"/clubs/{ClubId}/players")"
+                @rendermode="InteractiveAuto" />
+        </div>
+    </div>
+</div>

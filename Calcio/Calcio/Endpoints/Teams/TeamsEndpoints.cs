@@ -4,7 +4,6 @@ using Calcio.Endpoints.Extensions;
 using Calcio.Endpoints.Filters;
 using Calcio.Shared.DTOs.Teams;
 using Calcio.Shared.Endpoints;
-using Calcio.Shared.Security;
 using Calcio.Shared.Services.Teams;
 
 using Microsoft.AspNetCore.Http.HttpResults;

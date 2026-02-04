@@ -3,6 +3,7 @@ using System.ComponentModel;
 using Calcio.Data.Contexts;
 using Calcio.Shared.Caching;
 using Calcio.Shared.DTOs.Players;
+using Calcio.Shared.DTOs.Players.BulkImport;
 using Calcio.Shared.Entities;
 using Calcio.Shared.Extensions.Players;
 using Calcio.Shared.Results;
@@ -36,6 +37,7 @@ public partial class PlayersService(
     IDbContextFactory<ReadOnlyDbContext> readOnlyDbContextFactory,
     IDbContextFactory<ReadWriteDbContext> readWriteDbContextFactory,
     IBlobStorageService blobStorageService,
+    IPlayerImportParserService importParserService,
     HybridCache cache,
     IHttpContextAccessor httpContextAccessor,
     ILogger<PlayersService> logger) : AuthenticatedServiceBase(httpContextAccessor), IPlayersService
@@ -370,6 +372,72 @@ public partial class PlayersService(
         return parts.Length >= 3 ? parts[2] : string.Empty;
     }
 
+    public async Task<ServiceResult<BulkValidateResultDto>> ValidateBulkImportAsync(
+        long clubId,
+        Stream fileStream,
+        string fileName,
+        CancellationToken cancellationToken)
+    {
+        // Club membership is validated by ClubMembershipFilter before this service is called.
+        LogBulkImportValidationStarted(logger, clubId, fileName, CurrentUserId);
+        return await importParserService.ParseAndValidateAsync(fileStream, fileName, clubId, cancellationToken);
+    }
+
+    public async Task<ServiceResult<BulkValidateResultDto>> RevalidateBulkImportAsync(
+        long clubId,
+        List<PlayerImportRowDto> rows,
+        CancellationToken cancellationToken)
+    {
+        // Club membership is validated by ClubMembershipFilter before this service is called.
+        LogBulkImportRevalidationStarted(logger, clubId, rows.Count, CurrentUserId);
+        return await importParserService.RevalidateRowsAsync(rows, clubId, cancellationToken);
+    }
+
+    public async Task<ServiceResult<BulkImportResultDto>> BulkCreatePlayersAsync(
+        long clubId,
+        List<PlayerImportRowDto> rows,
+        CancellationToken cancellationToken)
+    {
+        // Club membership is validated by ClubMembershipFilter before this service is called.
+        // Filter to only valid rows that are marked for import
+        var rowsToImport = rows
+            .Where(r => r.IsMarkedForImport && r.IsValid)
+            .ToList();
+
+        var skippedCount = rows.Count - rowsToImport.Count;
+
+        if (rowsToImport.Count == 0)
+        {
+            LogBulkImportNoValidRows(logger, clubId, CurrentUserId);
+            return new BulkImportResultDto(CreatedCount: 0, SkippedCount: skippedCount);
+        }
+
+        await using var dbContext = await readWriteDbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        var players = rowsToImport.Select(row => new PlayerEntity
+        {
+            FirstName = row.FirstName,
+            LastName = row.LastName,
+            DateOfBirth = row.DateOfBirth!.Value,
+            Gender = row.Gender,
+            GraduationYear = row.GraduationYear!.Value,
+            JerseyNumber = row.JerseyNumber,
+            TryoutNumber = row.TryoutNumber,
+            ClubId = clubId,
+            CreatedById = CurrentUserId
+        }).ToList();
+
+        // Use AddRange for efficient batch insert (EF Core auto-batches)
+        await dbContext.Players.AddRangeAsync(players, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        LogBulkImportCompleted(logger, clubId, players.Count, skippedCount, CurrentUserId);
+
+        return new BulkImportResultDto(
+            CreatedCount: players.Count,
+            SkippedCount: skippedCount);
+    }
+
     [LoggerMessage(Level = LogLevel.Debug, Message = "Retrieved {PlayerCount} players for club {ClubId} by user {UserId}")]
     private static partial void LogPlayersRetrieved(ILogger logger, long clubId, int playerCount, long userId);
 
@@ -381,4 +449,16 @@ public partial class PlayersService(
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Deleted existing photo for player {PlayerId} by user {UserId}")]
     private static partial void LogExistingPhotoDeleted(ILogger logger, long playerId, long userId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Bulk import validation started for club {ClubId}, file: {FileName}, by user {UserId}")]
+    private static partial void LogBulkImportValidationStarted(ILogger logger, long clubId, string fileName, long userId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Bulk import re-validation started for club {ClubId}, {RowCount} rows, by user {UserId}")]
+    private static partial void LogBulkImportRevalidationStarted(ILogger logger, long clubId, int rowCount, long userId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Bulk import for club {ClubId} had no valid rows to import, by user {UserId}")]
+    private static partial void LogBulkImportNoValidRows(ILogger logger, long clubId, long userId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Bulk import completed for club {ClubId}: {CreatedCount} created, {SkippedCount} skipped, by user {UserId}")]
+    private static partial void LogBulkImportCompleted(ILogger logger, long clubId, int createdCount, int skippedCount, long userId);
 }
