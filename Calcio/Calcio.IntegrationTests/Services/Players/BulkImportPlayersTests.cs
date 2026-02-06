@@ -5,6 +5,7 @@ using Calcio.IntegrationTests.Data.Contexts;
 using Calcio.Services.Players;
 using Calcio.Shared.DTOs.Players.BulkImport;
 using Calcio.Shared.Enums;
+using Calcio.Shared.Results;
 using Calcio.Shared.Services.BlobStorage;
 using Calcio.Shared.Services.Players;
 
@@ -88,6 +89,32 @@ public class BulkImportPlayersTests(CustomApplicationFactory factory) : BaseDbCo
         result.IsSuccess.ShouldBeTrue();
         var validation = result.Value;
         validation.MissingRequiredColumns.ShouldContain("Gender");
+    }
+
+    [Fact]
+    public async Task ValidateBulkImportAsync_WithUnsupportedExtension_ReturnsBadRequest()
+    {
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<ReadOnlyDbContext>();
+        var service = CreateService(scope.ServiceProvider);
+        var club = await dbContext.Clubs.FirstAsync(cancellationToken);
+
+        var csvContent = """
+            first_name,last_name,date_of_birth,gender,graduation_year
+            John,Doe,2010-05-15,Male,2028
+            """;
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(csvContent));
+
+        // Act
+        var result = await service.ValidateBulkImportAsync(club.ClubId, stream, "players.xlsx", cancellationToken);
+
+        // Assert
+        result.IsProblem.ShouldBeTrue();
+        result.Problem.Kind.ShouldBe(ServiceProblemKind.BadRequest);
     }
 
     [Fact]

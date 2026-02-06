@@ -77,13 +77,9 @@ public class PlayersService(HttpClient httpClient) : IPlayersService
 
         // Determine content type from file extension
         var extension = Path.GetExtension(fileName).ToLowerInvariant();
-        var contentType = extension switch
-        {
-            ".csv" => "text/csv",
-            ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            ".xls" => "application/vnd.ms-excel",
-            _ => "application/octet-stream"
-        };
+        var contentType = extension == ".csv"
+            ? "text/csv"
+            : "application/octet-stream";
 
         streamContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
         content.Add(streamContent, "file", fileName);

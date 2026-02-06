@@ -1,5 +1,6 @@
 using System.Data;
 using System.Globalization;
+using System.Text;
 
 using Calcio.Data.Contexts;
 using Calcio.Shared.DTOs.Players.BulkImport;
@@ -9,20 +10,20 @@ using Calcio.Shared.Results;
 using Calcio.Shared.Services.Players;
 using Calcio.Shared.Validation;
 
-using ExcelDataReader;
+using Microsoft.VisualBasic.FileIO;
 
 using Microsoft.EntityFrameworkCore;
 
 namespace Calcio.Services.Players;
 
 /// <summary>
-/// Service for parsing and validating player import files using ExcelDataReader.
+/// Service for parsing and validating player import files using CSV parsing.
 /// </summary>
 public partial class PlayerImportParserService(
     IDbContextFactory<ReadOnlyDbContext> readOnlyDbContextFactory,
     ILogger<PlayerImportParserService> logger) : IPlayerImportParserService
 {
-    private static readonly string[] SupportedExtensions = [".csv", ".xlsx", ".xls"];
+    private static readonly string[] SupportedExtensions = [".csv"];
     private static readonly string[] DateFormats =
     [
         "yyyy-MM-dd", "M/d/yyyy", "MM/dd/yyyy", "d/M/yyyy", "dd/MM/yyyy",
@@ -39,12 +40,12 @@ public partial class PlayerImportParserService(
 
         if (!SupportedExtensions.Contains(extension))
         {
-            return ServiceProblem.BadRequest($"Unsupported file format. Please upload a CSV or Excel file (.csv, .xlsx, .xls).");
+            return ServiceProblem.BadRequest("Unsupported file format. Please upload a CSV file (.csv). Save Excel or Google Sheets files as CSV before uploading.");
         }
 
         try
         {
-            // ExcelDataReader requires a seekable stream, so copy to MemoryStream if needed
+            // Ensure a seekable stream for CSV parsing
             Stream workingStream = fileStream;
             MemoryStream? memoryStream = null;
 
@@ -58,21 +59,12 @@ public partial class PlayerImportParserService(
 
             try
             {
-                using var reader = CreateReader(workingStream, extension);
-                var dataSet = reader.AsDataSet(new ExcelDataSetConfiguration
-                {
-                    ConfigureDataTable = _ => new ExcelDataTableConfiguration
-                    {
-                        UseHeaderRow = true
-                    }
-                });
+                var table = ReadCsvDataTable(workingStream, cancellationToken);
 
-                if (dataSet.Tables.Count == 0 || dataSet.Tables[0].Rows.Count == 0)
+                if (table.Rows.Count == 0)
                 {
                     return ServiceProblem.BadRequest("The file is empty or contains no data rows.");
                 }
-
-                var table = dataSet.Tables[0];
 
                 // Map columns
                 var columnMappings = MapColumns(table.Columns);
@@ -144,10 +136,68 @@ public partial class PlayerImportParserService(
         return CreateResult(validatedRows, []);
     }
 
-    private static IExcelDataReader CreateReader(Stream stream, string extension)
-        => extension == ".csv"
-            ? ExcelReaderFactory.CreateCsvReader(stream)
-            : ExcelReaderFactory.CreateReader(stream);
+    private static DataTable ReadCsvDataTable(Stream stream, CancellationToken cancellationToken)
+    {
+        if (stream.CanSeek)
+        {
+            stream.Position = 0;
+        }
+
+        using var reader = new StreamReader(stream, Encoding.UTF8, true, leaveOpen: true);
+        using var parser = new TextFieldParser(reader)
+        {
+            TextFieldType = FieldType.Delimited,
+            HasFieldsEnclosedInQuotes = true,
+            TrimWhiteSpace = true
+        };
+
+        parser.SetDelimiters(",");
+
+        var table = new DataTable();
+
+        if (parser.EndOfData)
+        {
+            return table;
+        }
+
+        var headers = parser.ReadFields() ?? [];
+        foreach (var header in headers)
+        {
+            var baseName = header?.Trim() ?? string.Empty;
+            var columnName = baseName;
+            var index = 1;
+
+            while (table.Columns.Contains(columnName))
+            {
+                columnName = string.IsNullOrWhiteSpace(baseName)
+                    ? $"Column{index}"
+                    : $"{baseName}_{index}";
+                index++;
+            }
+
+            table.Columns.Add(columnName);
+        }
+
+        while (!parser.EndOfData)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var fields = parser.ReadFields();
+            if (fields is null)
+            {
+                continue;
+            }
+
+            var row = table.NewRow();
+            for (var i = 0; i < table.Columns.Count; i++)
+            {
+                row[i] = i < fields.Length ? fields[i] ?? string.Empty : string.Empty;
+            }
+
+            table.Rows.Add(row);
+        }
+
+        return table;
+    }
 
     private static List<ColumnMappingResultDto> MapColumns(DataColumnCollection columns)
     {
@@ -291,7 +341,7 @@ public partial class PlayerImportParserService(
             return null;
         }
 
-        // Handle DateTime directly from Excel
+        // Handle DateTime values that may already be parsed
         if (value is DateTime dt)
         {
             return DateOnly.FromDateTime(dt);
@@ -334,7 +384,7 @@ public partial class PlayerImportParserService(
             return null;
         }
 
-        // Handle numeric types directly from Excel
+        // Handle numeric types that may already be parsed
         if (value is double d)
         {
             return (int)d;

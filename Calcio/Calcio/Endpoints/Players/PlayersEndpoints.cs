@@ -8,7 +8,6 @@ using Calcio.Shared.Endpoints;
 using Calcio.Shared.Services.Players;
 
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Calcio.Endpoints.Players;
 
@@ -154,11 +153,11 @@ public static class PlayersEndpoints
             return TypedResults.Problem(statusCode: StatusCodes.Status400BadRequest, detail: $"File size exceeds maximum of {MaxImportFileSize / 1024 / 1024} MB.");
         }
 
-        var allowedExtensions = new[] { ".csv", ".xlsx", ".xls" };
+        var allowedExtensions = new[] { ".csv" };
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (!allowedExtensions.Contains(extension))
         {
-            return TypedResults.Problem(statusCode: StatusCodes.Status400BadRequest, detail: "File type not allowed. Please upload a CSV or Excel file (.csv, .xlsx, .xls).");
+            return TypedResults.Problem(statusCode: StatusCodes.Status400BadRequest, detail: "File type not allowed. Please upload a CSV file (.csv). Save Excel or Google Sheets files as CSV before uploading.");
         }
 
         await using var stream = file.OpenReadStream();
@@ -207,16 +206,8 @@ public static class PlayersEndpoints
         [Required]
         [Range(1, long.MaxValue)]
         long clubId,
-        [FromQuery] string format,
-        IPlayerImportTemplateService templateService) => format?.ToLowerInvariant() switch
-        {
-            "xlsx" or "excel" => TypedResults.File(
-                templateService.GenerateExcelTemplate(),
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                "player_import_template.xlsx"),
-            _ => TypedResults.File(
-                templateService.GenerateCsvTemplate(),
-                "text/csv",
-                "player_import_template.csv")
-        };
+        IPlayerImportTemplateService templateService) => TypedResults.File(
+            templateService.GenerateCsvTemplate(),
+            "text/csv",
+            "player_import_template.csv");
 }

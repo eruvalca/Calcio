@@ -12,11 +12,7 @@
     <PackageReference Include="Aspire.Azure.Storage.Blobs" Version="13.1.0" />
     <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.1.0" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.26.0" />
-    <PackageReference Include="ClosedXML" Version="0.105.0" />
-    <PackageReference Include="ExcelDataReader" Version="3.8.0" />
-    <PackageReference Include="ExcelDataReader.DataSet" Version="3.8.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="10.0.1" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
     <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="10.1.0" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.11.8" />

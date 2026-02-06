@@ -11,9 +11,4 @@ public interface IPlayerImportTemplateService
     /// <returns>The CSV template content as bytes.</returns>
     byte[] GenerateCsvTemplate();
 
-    /// <summary>
-    /// Generates an Excel (.xlsx) template for player import.
-    /// </summary>
-    /// <returns>The Excel template content as bytes.</returns>
-    byte[] GenerateExcelTemplate();
 }

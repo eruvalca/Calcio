@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Text;
 
 using Calcio.Components;
 using Calcio.Components.Account;
@@ -44,9 +43,6 @@ using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.OpenApi;
 
 using Scalar.AspNetCore;
-
-// Register encoding provider for ExcelDataReader
-Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 var builder = WebApplication.CreateBuilder(args);
 

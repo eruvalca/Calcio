@@ -196,7 +196,7 @@ public class PlayerImportColumnMappingTests
     [Fact]
     public void TemplateHeaders_ContainsAllRequiredAndOptionalFields()
     {
-        // Assert - these are snake_case for CSV/Excel compatibility
+        // Assert - these are snake_case for CSV compatibility
         PlayerImportColumnMapping.TemplateHeaders.ShouldContain("first_name");
         PlayerImportColumnMapping.TemplateHeaders.ShouldContain("last_name");
         PlayerImportColumnMapping.TemplateHeaders.ShouldContain("date_of_birth");
