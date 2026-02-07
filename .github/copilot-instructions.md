@@ -151,6 +151,8 @@
 
 ## Blazor Components
 
+- Prefer static server-rendered pages and components by default. Only introduce interactive components (e.g., `@rendermode InteractiveAuto`) when interactivity is explicitly required.
+
 ### Page vs Component Placement
 
 - **Pages** (components with `@page` directive) should live in the server project (`Calcio/Components/Pages/`) organized by feature.
