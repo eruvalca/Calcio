@@ -1,9 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-using Calcio.Shared.DTOs.ClubJoinRequests;
+﻿using Calcio.Shared.DTOs.ClubJoinRequests;
 using Calcio.Shared.DTOs.Clubs;
 using Calcio.Shared.Entities;
-using Calcio.Shared.Enums;
 using Calcio.Shared.Results;
 using Calcio.Shared.Security;
 using Calcio.Shared.Services.ClubJoinRequests;
@@ -24,16 +21,8 @@ public partial class Clubs(
     SignInManager<CalcioUserEntity> signInManager,
     IdentityRedirectManager redirectManager)
 {
-    private static readonly string[] UsStateAbbreviations =
-    [
-        "AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"
-    ];
-
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
-
-    [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = default!;
 
     [SupplyParameterFromForm]
     private LeaveClubInputModel LeaveClubInput { get; set; } = default!;
@@ -50,7 +39,6 @@ public partial class Clubs(
             ? userId
             : throw new InvalidOperationException("Current user cannot be null.");
 
-        Input ??= new();
         LeaveClubInput ??= new();
 
         var user = await userManager.FindByIdAsync(UserId.ToString());
@@ -73,36 +61,6 @@ public partial class Clubs(
                 clubs => AllClubs = clubs,
                 problem => AllClubs = []);
         }
-    }
-
-    public async Task CreateClub(EditContext editContext)
-    {
-        if (UserClubs.Count != 0 || CurrentJoinRequest?.Status == RequestStatus.Pending)
-        {
-            return;
-        }
-
-        var createDto = new CreateClubDto(Input.Name, Input.City, Input.State);
-        var result = await clubsService.CreateClubAsync(createDto, CancellationToken);
-
-        await result.Match(
-            async club =>
-            {
-                // Refresh the sign-in to update the user's roles/claims
-                var user = await userManager.FindByIdAsync(UserId.ToString());
-                if (user is not null)
-                {
-                    await signInManager.RefreshSignInAsync(user);
-                }
-
-                redirectManager.RedirectToWithStatus("Account/Manage/Clubs", $"Club '{club.Name}' created.", HttpContext);
-            },
-            problem =>
-            {
-                // Handle error - for now, just redirect without success message
-                redirectManager.RedirectTo("Account/Manage/Clubs");
-                return Task.CompletedTask;
-            });
     }
 
     public async Task LeaveClub(EditContext editContext)
@@ -148,29 +106,8 @@ public partial class Clubs(
             });
     }
 
-    private sealed class InputModel
-    {
-        [Required]
-        [Display(Name = "Club Name")]
-        public string Name { get; set; } = string.Empty;
-
-        [Required]
-        [Display(Name = "City")]
-        public string City { get; set; } = string.Empty;
-
-        [Required]
-        [RegularExpression("^(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY)$", ErrorMessage = "Invalid state abbreviation.")]
-        [Display(Name = "State")]
-        public string State { get; set; } = string.Empty;
-    }
-
     private sealed class LeaveClubInputModel
     {
         public long ClubId { get; set; }
-    }
-
-    private sealed class SearchModel
-    {
-        public string ClubSearch { get; set; } = string.Empty;
     }
 }

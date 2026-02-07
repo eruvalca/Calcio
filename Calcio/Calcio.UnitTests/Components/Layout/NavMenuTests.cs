@@ -10,9 +10,11 @@ using Calcio.Shared.Services.CalcioUsers;
 using Calcio.Shared.Services.Clubs;
 using Calcio.UI.Components.Layout;
 using Calcio.UI.Services.CalcioUsers;
+using Calcio.UI.Services.Clubs;
 using Calcio.UI.Services.Theme;
 
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 
 using NSubstitute;
@@ -70,6 +72,7 @@ public sealed class NavMenuTests : BunitContext
         Services.AddSingleton(_calcioUsersService);
         Services.AddSingleton(TimeProvider.System);
         Services.AddSingleton<UserPhotoStateService>();
+        Services.AddSingleton<UserClubStateService>();
         Services.AddLogging();
 
         // Add authorization services with a default unauthenticated state
@@ -124,6 +127,30 @@ public sealed class NavMenuTests : BunitContext
     private void SetupPhotoServiceError() => _calcioUsersService
             .GetAccountPhotoAsync(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(new ServiceResult<OneOf<CalcioUserPhotoDto, None>>(ServiceProblem.ServerError())));
+
+    private sealed class SequenceAuthStateProvider : AuthenticationStateProvider
+    {
+        private readonly Queue<AuthenticationState> _states;
+        private AuthenticationState _current;
+
+        public SequenceAuthStateProvider(IEnumerable<AuthenticationState> states)
+        {
+            _states = new Queue<AuthenticationState>(states);
+            _current = _states.Count > 0
+                ? _states.Dequeue()
+                : new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+        }
+
+        public override Task<AuthenticationState> GetAuthenticationStateAsync()
+        {
+            if (_states.Count > 0)
+            {
+                _current = _states.Dequeue();
+            }
+
+            return Task.FromResult(_current);
+        }
+    }
 
     #endregion
 
@@ -193,6 +220,35 @@ public sealed class NavMenuTests : BunitContext
     }
 
     [Fact]
+    public void WhenClubStateChanges_ShouldRenderClubNavLink()
+    {
+        // Arrange
+        SetupAuthenticatedUser();
+        _clubsService
+            .GetUserClubsAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ServiceResult<List<BaseClubDto>>(new List<BaseClubDto>())));
+
+        var cut = RenderNavMenu();
+        var clubStateService = Services.GetRequiredService<UserClubStateService>();
+
+        // Act
+        clubStateService.SetUserClubs(
+        [
+            new BaseClubDto(321, "State Club", "City", "ST")
+        ]);
+
+        // Assert
+        cut.WaitForAssertion(() =>
+        {
+            var clubLink = cut.FindAll("a.nav-link").FirstOrDefault(a => a.TextContent.Contains("State Club"));
+            clubLink.ShouldNotBeNull();
+            var href = clubLink.GetAttribute("href");
+            href.ShouldNotBeNull();
+            (href.EndsWith("/clubs/321", StringComparison.Ordinal) || href.EndsWith("clubs/321", StringComparison.Ordinal)).ShouldBeTrue();
+        });
+    }
+
+    [Fact]
     public void WhenUnauthenticated_ShouldNotCallClubsService()
     {
         // Arrange
@@ -216,6 +272,64 @@ public sealed class NavMenuTests : BunitContext
 
         // Assert
         _calcioUsersService.DidNotReceive().GetAccountPhotoAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task WhenAuthClaimsHydrateAfterInteractiveRender_ShouldRenderClubNavLink()
+    {
+        await using var context = new BunitContext();
+
+        context.JSInterop.Mode = JSRuntimeMode.Loose;
+        context.JSInterop.SetupModule("./_content/Calcio.UI/theme.js");
+
+        var clubsService = Substitute.For<IClubsService>();
+        clubsService
+            .GetUserClubsAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ServiceResult<List<BaseClubDto>>(new List<BaseClubDto>
+            {
+                new(555, "Hydrated Club", "City", "State")
+            })));
+
+        var calcioUsersService = Substitute.For<ICalcioUsersService>();
+        calcioUsersService
+            .GetAccountPhotoAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ServiceResult<OneOf<CalcioUserPhotoDto, None>>(OneOf<CalcioUserPhotoDto, None>.FromT1(new None()))));
+
+        var hydratedStates = new SequenceAuthStateProvider(
+        [
+            new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(
+            [
+                new Claim(ClaimTypes.Name, "user@test.com")
+            ], "test"))),
+            new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(
+            [
+                new Claim(ClaimTypes.Name, "user@test.com"),
+                new Claim(ClaimTypes.NameIdentifier, "1")
+            ], "test")))
+        ]);
+
+        context.AddAuthorization();
+        context.Services.AddSingleton<AuthenticationStateProvider>(hydratedStates);
+        context.Services.AddSingleton<ThemeService>();
+        context.Services.AddSingleton(clubsService);
+        context.Services.AddSingleton(calcioUsersService);
+        context.Services.AddSingleton(TimeProvider.System);
+        context.Services.AddSingleton<UserPhotoStateService>();
+        context.Services.AddSingleton<UserClubStateService>();
+        context.Services.AddLogging();
+
+        context.SetRendererInfo(new RendererInfo("Server", isInteractive: true));
+
+        var cut = context.Render<CascadingAuthenticationState>(parameters =>
+            parameters.AddChildContent<NavMenu>());
+
+        cut.WaitForAssertion(() =>
+        {
+            var clubLink = cut.FindAll("a.nav-link").FirstOrDefault(a => a.TextContent.Contains("Hydrated Club"));
+            clubLink.ShouldNotBeNull();
+        });
+
+        await Task.CompletedTask;
     }
 
     #endregion

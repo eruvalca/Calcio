@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Threading;
 
 using Calcio.Shared.DTOs.CalcioUsers;
 using Calcio.Shared.Results;

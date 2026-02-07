@@ -1,0 +1,33 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "build calcio",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"Calcio.slnx"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build"
+		},
+		{
+			"label": "clean calcio",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"clean",
+				"Calcio.slnx"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build"
+		}
+	]
+}

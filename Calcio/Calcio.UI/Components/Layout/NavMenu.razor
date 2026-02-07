@@ -7,7 +7,7 @@
     <div class="container-fluid">
         <a class="navbar-brand" href="/">Calcio</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
-            aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="mainNavbar">
@@ -32,93 +32,93 @@
                 <li class="nav-item d-sm-none">
                     <div class="dropdown dropup">
                         <button class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
+                                aria-expanded="false">
                             @GetThemeLabel() Theme
                         </button>
                         <ul class="dropdown-menu py-1 small">
                             <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.Light))" type="button"
-                                    @onclick="() => ChangeTheme(ThemePreference.Light)">☀️ Light</button></li>
-                            <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.Dark))" type="button"
-                                    @onclick="() => ChangeTheme(ThemePreference.Dark)">🌙 Dark</button></li>
-                            <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.System))"
-                                    type="button" @onclick="() => ChangeTheme(ThemePreference.System)">🌗 Auto</button>
-                            </li>
-                        </ul>
+                                            @onclick="() => ChangeTheme(ThemePreference.Light)">☀️ Light</button></li>
+                                <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.Dark))" type="button"
+                                                @onclick="() => ChangeTheme(ThemePreference.Dark)">🌙 Dark</button></li>
+                                    <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.System))"
+                                                    type="button" @onclick="() => ChangeTheme(ThemePreference.System)">🌗 Auto</button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                    @* Right-aligned section for larger screens: theme picker + auth *@
+                    <div class="d-flex flex-column flex-sm-row ms-sm-auto align-items-sm-center">
+                        @* Theme picker for larger screens only *@
+                        <div class="d-none d-sm-flex align-items-center me-2">
+                            <div class="dropdown dropup">
+                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle py-1 px-2" type="button"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                    @GetThemeLabel()
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end py-1 small">
+                                    <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.Light))" type="button"
+                                                    @onclick="() => ChangeTheme(ThemePreference.Light)">☀️ Light</button></li>
+                                        <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.Dark))" type="button"
+                                                        @onclick="() => ChangeTheme(ThemePreference.Dark)">🌙 Dark</button></li>
+                                            <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.System))"
+                                                            type="button" @onclick="() => ChangeTheme(ThemePreference.System)">🌗 Auto</button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                @* Auth section - visible on all screen sizes *@
+                                <AuthorizeView>
+                                    <Authorized>
+                                        <ul class="navbar-nav flex-column flex-sm-row align-items-sm-center">
+                                            <li class="nav-item">
+                                                @if (IsLoadingPhoto)
+                                                {
+                                                    <span class="avatar-spinner spinner-border spinner-border-sm" role="status"
+                                                          aria-label="Loading profile photo"></span>
+                                                }
+                                                else if (!string.IsNullOrEmpty(UserPhotoUrl))
+                                                {
+                                                    <NavLink class="nav-link d-flex align-items-center" href="Account/Manage">
+                                                        <img src="@UserPhotoUrl" alt="Profile photo" class="avatar-img rounded-circle" />
+                                                        <span class="d-none d-sm-inline ms-2">@context.User.Identity?.Name</span>
+                                                    </NavLink>
+                                                }
+                                                else
+                                                {
+                                                    <NavLink class="nav-link d-flex align-items-center" href="Account/UploadProfilePhoto">
+                                                        <span class="bi bi-person-circle avatar-placeholder" aria-hidden="true"></span>
+                                                        <span class="d-none d-sm-inline ms-2">@context.User.Identity?.Name</span>
+                                                    </NavLink>
+                                                }
+                                            </li>
+                                            <li class="nav-item">
+                                                <form class="d-inline" action="Account/Logout" method="post">
+                                                    <AntiforgeryToken />
+                                                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                                                    <button type="submit" class="btn btn-link nav-link">
+                                                        <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </Authorized>
+                                    <NotAuthorized>
+                                        <ul class="navbar-nav flex-row">
+                                            <li class="nav-item">
+                                                <NavLink class="nav-link" href="Account/Register">
+                                                    <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
+                                                </NavLink>
+                                            </li>
+                                            <li class="nav-item">
+                                                <NavLink class="nav-link" href="Account/Login">
+                                                    <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+                                                </NavLink>
+                                            </li>
+                                        </ul>
+                                    </NotAuthorized>
+                                </AuthorizeView>
+                            </div>
+                        </div>
                     </div>
-                </li>
-            </ul>
-            @* Right-aligned section for larger screens: theme picker + auth *@
-            <div class="d-flex flex-column flex-sm-row ms-sm-auto align-items-sm-center">
-                @* Theme picker for larger screens only *@
-                <div class="d-none d-sm-flex align-items-center me-2">
-                    <div class="dropdown dropup">
-                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle py-1 px-2" type="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            @GetThemeLabel()
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end py-1 small">
-                            <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.Light))" type="button"
-                                    @onclick="() => ChangeTheme(ThemePreference.Light)">☀️ Light</button></li>
-                            <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.Dark))" type="button"
-                                    @onclick="() => ChangeTheme(ThemePreference.Dark)">🌙 Dark</button></li>
-                            <li><button class="dropdown-item py-1 px-2 @(IsActive(ThemePreference.System))"
-                                    type="button" @onclick="() => ChangeTheme(ThemePreference.System)">🌗 Auto</button>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                @* Auth section - visible on all screen sizes *@
-                <AuthorizeView>
-                    <Authorized>
-                        <ul class="navbar-nav flex-column flex-sm-row align-items-sm-center">
-                            <li class="nav-item">
-                                @if (IsLoadingPhoto)
-                                {
-                                    <span class="avatar-spinner spinner-border spinner-border-sm" role="status"
-                                        aria-label="Loading profile photo"></span>
-                                }
-                                else if (!string.IsNullOrEmpty(UserPhotoUrl))
-                                {
-                                    <NavLink class="nav-link d-flex align-items-center" href="Account/Manage">
-                                        <img src="@UserPhotoUrl" alt="Profile photo" class="avatar-img rounded-circle" />
-                                        <span class="d-none d-sm-inline ms-2">@context.User.Identity?.Name</span>
-                                    </NavLink>
-                                }
-                                else
-                                {
-                                    <NavLink class="nav-link d-flex align-items-center" href="Account/UploadProfilePhoto">
-                                        <span class="bi bi-person-circle avatar-placeholder" aria-hidden="true"></span>
-                                        <span class="d-none d-sm-inline ms-2">@context.User.Identity?.Name</span>
-                                    </NavLink>
-                                }
-                            </li>
-                            <li class="nav-item">
-                                <form class="d-inline" action="Account/Logout" method="post">
-                                    <AntiforgeryToken />
-                                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                                    <button type="submit" class="btn btn-link nav-link">
-                                        <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </Authorized>
-                    <NotAuthorized>
-                        <ul class="navbar-nav flex-row">
-                            <li class="nav-item">
-                                <NavLink class="nav-link" href="Account/Register">
-                                    <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
-                                </NavLink>
-                            </li>
-                            <li class="nav-item">
-                                <NavLink class="nav-link" href="Account/Login">
-                                    <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
-                                </NavLink>
-                            </li>
-                        </ul>
-                    </NotAuthorized>
-                </AuthorizeView>
-            </div>
-        </div>
-    </div>
-</nav>
+                </nav>

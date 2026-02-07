@@ -182,7 +182,13 @@ public static class Routes
         /// <summary>Route group for account photo: PUT (upload), GET (retrieve).</summary>
         public const string PhotoGroup = Base + "/photo";
 
+        /// <summary>Route for refreshing the current user's sign-in.</summary>
+        public const string RefreshSignIn = Base + "/refresh-signin";
+
         /// <summary>Builds the URL for the current user's photo.</summary>
         public static string ForPhoto() => PhotoGroup;
+
+        /// <summary>Builds the URL for refreshing the current user's sign-in.</summary>
+        public static string ForRefreshSignIn() => RefreshSignIn;
     }
 }
