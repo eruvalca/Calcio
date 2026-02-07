@@ -159,7 +159,8 @@ public sealed class ClubPlayersGridTests : BunitContext
 
         // Assert
         // Gender column should have a dash
-        cut.Markup.ShouldContain("<span class=\"text-muted\">—</span>");
+        var mutedSpans = cut.FindAll("span.text-muted");
+        mutedSpans.ShouldContain(span => span.TextContent == "—");
     }
 
     #endregion
