@@ -1,0 +1,4 @@
+.players-grid-scroll {
+    max-height: 45vh;
+    overflow: auto;
+}

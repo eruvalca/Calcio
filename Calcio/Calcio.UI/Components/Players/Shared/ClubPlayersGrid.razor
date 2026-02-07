@@ -17,41 +17,43 @@
         }
         else
         {
-            <QuickGrid TGridItem="ClubPlayerDto" Items="FilteredPlayers.AsQueryable()"
-                class="table table-responsive table-borderless table-hover">
-                <PropertyColumn Title="Name" Property="p => p.FullName" Sortable="true" IsDefaultSortColumn="true" />
-                <PropertyColumn Title="Date of Birth" Property="p => p.DateOfBirth" Format="yyyy-MM-dd" Sortable="true" />
-                <TemplateColumn Title="Gender">
-                    @if (context.Gender.HasValue)
-                    {
-                        <span>@context.Gender.Value</span>
-                    }
-                    else
-                    {
-                        <span class="text-muted">—</span>
-                    }
-                </TemplateColumn>
-                <TemplateColumn Title="Jersey #">
-                    @if (context.JerseyNumber.HasValue)
-                    {
-                        <span class="badge bg-primary">@context.JerseyNumber</span>
-                    }
-                    else
-                    {
-                        <span class="text-muted">—</span>
-                    }
-                </TemplateColumn>
-                <TemplateColumn Title="Tryout #">
-                    @if (context.TryoutNumber.HasValue)
-                    {
-                        <span class="badge bg-secondary">@context.TryoutNumber</span>
-                    }
-                    else
-                    {
-                        <span class="text-muted">—</span>
-                    }
-                </TemplateColumn>
-            </QuickGrid>
+            <div class="players-grid-scroll">
+                <QuickGrid TGridItem="ClubPlayerDto" Items="FilteredPlayers.AsQueryable()"
+                    class="table table-responsive table-borderless table-hover">
+                    <PropertyColumn Title="Name" Property="p => p.FullName" Sortable="true" IsDefaultSortColumn="true" />
+                    <PropertyColumn Title="Date of Birth" Property="p => p.DateOfBirth" Format="yyyy-MM-dd" Sortable="true" />
+                    <TemplateColumn Title="Gender">
+                        @if (context.Gender.HasValue)
+                        {
+                            <span>@context.Gender.Value</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">—</span>
+                        }
+                    </TemplateColumn>
+                    <TemplateColumn Title="Jersey #">
+                        @if (context.JerseyNumber.HasValue)
+                        {
+                            <span class="badge bg-primary">@context.JerseyNumber</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">—</span>
+                        }
+                    </TemplateColumn>
+                    <TemplateColumn Title="Tryout #">
+                        @if (context.TryoutNumber.HasValue)
+                        {
+                            <span class="badge bg-secondary">@context.TryoutNumber</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">—</span>
+                        }
+                    </TemplateColumn>
+                </QuickGrid>
+            </div>
         }
     </div>
 </div>
