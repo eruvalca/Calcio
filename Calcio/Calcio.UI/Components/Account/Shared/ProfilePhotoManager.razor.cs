@@ -1,5 +1,6 @@
 using Calcio.Shared.DTOs.CalcioUsers;
 using Calcio.Shared.Services.CalcioUsers;
+using Calcio.UI.Services.CalcioUsers;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -8,6 +9,7 @@ namespace Calcio.UI.Components.Account.Shared;
 
 public partial class ProfilePhotoManager(
     ICalcioUsersService calcioUsersService,
+    UserPhotoStateService userPhotoStateService,
     NavigationManager navigationManager)
 {
     private const long MaxFileSize = 10 * 1024 * 1024; // 10 MB
@@ -128,10 +130,9 @@ public partial class ProfilePhotoManager(
 
         try
         {
-            await UploadCroppedPhotoAsync();
-
-            // Success - refresh the page to update navbar avatar
-            navigationManager.Refresh(forceReload: true);
+            var uploadedPhoto = await UploadCroppedPhotoAsync();
+            userPhotoStateService.UpdateFromPhoto(uploadedPhoto);
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: false);
         }
         catch (Exception ex)
         {
@@ -144,11 +145,11 @@ public partial class ProfilePhotoManager(
         }
     }
 
-    private async Task UploadCroppedPhotoAsync()
+    private async Task<CalcioUserPhotoDto> UploadCroppedPhotoAsync()
     {
         if (string.IsNullOrEmpty(CroppedPhotoDataUrl))
         {
-            return;
+            throw new InvalidOperationException("No cropped photo is available.");
         }
 
         // Parse the data URL to extract base64 data
@@ -179,6 +180,8 @@ public partial class ProfilePhotoManager(
 
         UploadProgressPercent = 100;
         StateHasChanged();
+        CurrentPhoto = uploadResult.Value;
+        return uploadResult.Value;
     }
 
     private static string FormatFileSize(long bytes)

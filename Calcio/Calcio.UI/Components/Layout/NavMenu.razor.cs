@@ -1,25 +1,30 @@
 using System.Security.Claims;
 
 using Calcio.Shared.DTOs.Clubs;
-using Calcio.Shared.Services.CalcioUsers;
 using Calcio.Shared.Services.Clubs;
+using Calcio.UI.Services.CalcioUsers;
 using Calcio.UI.Services.Theme;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Routing;
+using Microsoft.Extensions.Logging;
 
 namespace Calcio.UI.Components.Layout;
 
 public partial class NavMenu(
     NavigationManager navigationManager,
     IClubsService clubsService,
-    ICalcioUsersService calcioUsersService,
+    UserPhotoStateService userPhotoStateService,
     ThemeService themeService,
-    AuthenticationStateProvider authenticationStateProvider)
+    AuthenticationStateProvider authenticationStateProvider,
+    ILogger<NavMenu> logger)
 {
     private string? currentUrl;
     private bool _themeSubscribed;
+    private AuthenticationState? _authState;
+    private bool _authSubscribed;
+    private string? _currentUserId;
 
     [PersistentState]
     public List<BaseClubDto>? UserClubs { get; set; }
@@ -33,59 +38,37 @@ public partial class NavMenu(
     {
         currentUrl = navigationManager.ToBaseRelativePath(navigationManager.Uri);
         navigationManager.LocationChanged += OnLocationChanged;
+        userPhotoStateService.PhotoChanged += OnPhotoChanged;
 
-        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
-
-        // Guard: ensure user is authenticated AND has a valid NameIdentifier claim
-        // This can be false during SSR prerender right after registration before claims are hydrated
-        var hasValidUserId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value is not null;
-        if (authState.User.Identity?.IsAuthenticated is not true || !hasValidUserId)
+        if (!_authSubscribed)
         {
-            IsLoadingPhoto = false;
-            return;
+            authenticationStateProvider.AuthenticationStateChanged += HandleAuthenticationStateChanged;
+            _authSubscribed = true;
         }
 
-        // If state was restored from prerender, skip fetching
-        if (UserClubs is not null)
-        {
-            IsLoadingPhoto = false;
-            return;
-        }
-
-        // No persisted state (SSR prerender) - fetch from services
-        var userClubsResult = await clubsService.GetUserClubsAsync(CancellationToken);
-        userClubsResult.Switch(
-            fetchedClubs => UserClubs = fetchedClubs,
-            problem => UserClubs = []);
-
-        // Wrap in try-catch because HttpContext.User may differ from Blazor's AuthenticationState
-        // during SSR prerender immediately after authentication changes
-        try
-        {
-            var photoResult = await calcioUsersService.GetAccountPhotoAsync(CancellationToken);
-            photoResult.Switch(
-                photoOrNone => photoOrNone.Switch(
-                    photo => UserPhotoUrl = photo.SmallUrl,
-                    _ => UserPhotoUrl = null),
-                _ => UserPhotoUrl = null);
-        }
-        catch (Exception ex) when (ex is UnauthorizedAccessException or InvalidOperationException)
-        {
-            // User claims not yet available in HttpContext - fall back to no photo
-            UserPhotoUrl = null;
-        }
-
-        IsLoadingPhoto = false;
+        _authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        await HandleAuthStateAsync(_authState);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && RendererInfo.IsInteractive && !_themeSubscribed)
+        if (firstRender && RendererInfo.IsInteractive)
         {
-            await themeService.InitializeAsync();
-            themeService.ThemeChanged += OnThemeChanged;
-            _themeSubscribed = true;
-            StateHasChanged();
+            if (!_themeSubscribed)
+            {
+                await themeService.InitializeAsync();
+                themeService.ThemeChanged += OnThemeChanged;
+                _themeSubscribed = true;
+                StateHasChanged();
+            }
+
+            if (_authState?.User.Identity?.IsAuthenticated is true)
+            {
+                userPhotoStateService.StartAutoRefresh();
+                await userPhotoStateService.EnsureFreshAsync(CancellationToken);
+                UserPhotoUrl = userPhotoStateService.PhotoUrl;
+                StateHasChanged();
+            }
         }
     }
 
@@ -102,6 +85,98 @@ public partial class NavMenu(
 
     private async Task ChangeTheme(ThemePreference pref) => await themeService.SetThemeAsync(pref);
 
+    private void OnPhotoChanged()
+    {
+        UserPhotoUrl = userPhotoStateService.PhotoUrl;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void HandleAuthenticationStateChanged(Task<AuthenticationState> authStateTask)
+        => _ = HandleAuthenticationStateChangedAsync(authStateTask);
+
+    private async Task HandleAuthenticationStateChangedAsync(Task<AuthenticationState> authStateTask)
+    {
+        try
+        {
+            IsLoadingPhoto = true;
+            var authState = await authStateTask;
+            await HandleAuthStateAsync(authState);
+        }
+        catch (Exception ex)
+        {
+            LogAuthStateChangedFailed(logger, ex);
+        }
+        finally
+        {
+            IsLoadingPhoto = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task HandleAuthStateAsync(AuthenticationState authState)
+    {
+        _authState = authState;
+
+        // Guard: ensure user is authenticated AND has a valid NameIdentifier claim
+        // This can be false during SSR prerender right after registration before claims are hydrated
+        var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (authState.User.Identity?.IsAuthenticated is not true || userId is null)
+        {
+            userPhotoStateService.StopAutoRefresh();
+            userPhotoStateService.ClearPhoto();
+            UserPhotoUrl = null;
+            UserClubs = null;
+            _currentUserId = null;
+            IsLoadingPhoto = false;
+            return;
+        }
+
+        if (_currentUserId is not null && !string.Equals(_currentUserId, userId, StringComparison.Ordinal))
+        {
+            userPhotoStateService.ClearPhoto();
+            UserPhotoUrl = null;
+            UserClubs = null;
+        }
+
+        _currentUserId = userId;
+
+        if (RendererInfo.IsInteractive)
+        {
+            userPhotoStateService.StartAutoRefresh();
+        }
+        else
+        {
+            userPhotoStateService.StopAutoRefresh();
+        }
+
+        if (UserClubs is null)
+        {
+            var userClubsResult = await clubsService.GetUserClubsAsync(CancellationToken);
+            userClubsResult.Switch(
+                fetchedClubs => UserClubs = fetchedClubs,
+                problem => UserClubs = []);
+        }
+
+        // Wrap in try-catch because HttpContext.User may differ from Blazor's AuthenticationState
+        // during SSR prerender immediately after authentication changes
+        UserPhotoUrl = userPhotoStateService.PhotoUrl ?? UserPhotoUrl;
+        if (string.IsNullOrEmpty(UserPhotoUrl))
+        {
+            try
+            {
+                await userPhotoStateService.EnsureFreshAsync(CancellationToken);
+                UserPhotoUrl = userPhotoStateService.PhotoUrl;
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException or InvalidOperationException)
+            {
+                // User claims not yet available in HttpContext - fall back to no photo
+                UserPhotoUrl = null;
+            }
+        }
+
+        IsLoadingPhoto = false;
+    }
+
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         currentUrl = navigationManager.ToBaseRelativePath(e.Location);
@@ -112,6 +187,12 @@ public partial class NavMenu(
     public override void Dispose()
     {
         navigationManager.LocationChanged -= OnLocationChanged;
+        userPhotoStateService.PhotoChanged -= OnPhotoChanged;
+        if (_authSubscribed)
+        {
+            authenticationStateProvider.AuthenticationStateChanged -= HandleAuthenticationStateChanged;
+        }
+
         if (_themeSubscribed)
         {
             themeService.ThemeChanged -= OnThemeChanged;
@@ -120,4 +201,7 @@ public partial class NavMenu(
         base.Dispose();
     }
 #pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
+
+    [LoggerMessage(1, LogLevel.Warning, "Authentication state change handling failed.")]
+    private static partial void LogAuthStateChangedFailed(ILogger logger, Exception exception);
 }

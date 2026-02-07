@@ -9,6 +9,7 @@ using Calcio.Shared.Results;
 using Calcio.Shared.Services.CalcioUsers;
 using Calcio.Shared.Services.Clubs;
 using Calcio.UI.Components.Layout;
+using Calcio.UI.Services.CalcioUsers;
 using Calcio.UI.Services.Theme;
 
 using Microsoft.AspNetCore.Components;
@@ -67,6 +68,9 @@ public sealed class NavMenuTests : BunitContext
             .GetAccountPhotoAsync(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(new ServiceResult<OneOf<CalcioUserPhotoDto, None>>(OneOf<CalcioUserPhotoDto, None>.FromT1(new None()))));
         Services.AddSingleton(_calcioUsersService);
+        Services.AddSingleton(TimeProvider.System);
+        Services.AddSingleton<UserPhotoStateService>();
+        Services.AddLogging();
 
         // Add authorization services with a default unauthenticated state
         // bUnit provides AddAuthorization() for easy auth mocking
@@ -318,6 +322,78 @@ public sealed class NavMenuTests : BunitContext
         var usernameSpan = cut.Find("img.avatar-img").ParentElement?.QuerySelector(".d-none.d-sm-inline");
         usernameSpan.ShouldNotBeNull();
         usernameSpan.TextContent.ShouldContain("user@test.com");
+    }
+
+    [Fact]
+    public void WhenPhotoStateChanges_ShouldUpdateAvatarImage()
+    {
+        // Arrange
+        SetupAuthenticatedUser("user@test.com");
+        SetupUserWithoutPhoto();
+        var cut = RenderNavMenu();
+        var photoStateService = Services.GetRequiredService<UserPhotoStateService>();
+
+        // Act
+        photoStateService.SetPhotoUrl("https://example.com/updated-avatar.jpg");
+
+        // Assert
+        cut.WaitForAssertion(() =>
+        {
+            var avatarImg = cut.Find("img.avatar-img");
+            avatarImg.GetAttribute("src").ShouldBe("https://example.com/updated-avatar.jpg");
+        });
+    }
+
+    [Fact]
+    public void WhenAuthStateChangesToAuthenticated_ShouldFetchPhoto()
+    {
+        // Arrange
+        SetupUnauthenticatedUser();
+        SetupUserWithPhoto("https://example.com/avatar.jpg");
+        var cut = RenderNavMenu();
+
+        // Act
+        _authContext.SetAuthorized("user@test.com");
+        _authContext.SetClaims(new Claim(ClaimTypes.NameIdentifier, "1"));
+
+        // Assert
+        cut.WaitForAssertion(() =>
+        {
+            _calcioUsersService.Received(1).GetAccountPhotoAsync(Arg.Any<CancellationToken>());
+            var avatarImg = cut.Find("img.avatar-img");
+            avatarImg.GetAttribute("src").ShouldBe("https://example.com/avatar.jpg");
+        });
+    }
+
+    [Fact]
+    public void WhenAuthenticatedUserIdChanges_ShouldRefreshPhoto()
+    {
+        // Arrange
+        SetupAuthenticatedUser("user1@test.com");
+        var firstPhoto = new CalcioUserPhotoDto(1, "https://example.com/original-1.jpg", "https://example.com/first.jpg", null, null);
+        var secondPhoto = new CalcioUserPhotoDto(2, "https://example.com/original-2.jpg", "https://example.com/second.jpg", null, null);
+
+        _calcioUsersService.GetAccountPhotoAsync(Arg.Any<CancellationToken>())
+            .Returns(
+                Task.FromResult<ServiceResult<OneOf<CalcioUserPhotoDto, None>>>(OneOf<CalcioUserPhotoDto, None>.FromT0(firstPhoto)),
+                Task.FromResult<ServiceResult<OneOf<CalcioUserPhotoDto, None>>>(OneOf<CalcioUserPhotoDto, None>.FromT0(secondPhoto)));
+
+        var cut = RenderNavMenu();
+
+        // Assert
+        var avatarImg = cut.Find("img.avatar-img");
+        avatarImg.GetAttribute("src").ShouldBe("https://example.com/first.jpg");
+
+        // Act
+        _authContext.SetAuthorized("user2@test.com");
+        _authContext.SetClaims(new Claim(ClaimTypes.NameIdentifier, "2"));
+
+        // Assert
+        cut.WaitForAssertion(() =>
+        {
+            var updatedAvatar = cut.Find("img.avatar-img");
+            updatedAvatar.GetAttribute("src").ShouldBe("https://example.com/second.jpg");
+        });
     }
 
     [Fact]

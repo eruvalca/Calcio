@@ -1,4 +1,6 @@
+using Calcio.Shared.DTOs.CalcioUsers;
 using Calcio.Shared.Services.CalcioUsers;
+using Calcio.UI.Services.CalcioUsers;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -7,6 +9,7 @@ namespace Calcio.UI.Components.Account.Shared;
 
 public partial class UploadProfilePhotoForm(
     ICalcioUsersService calcioUsersService,
+    UserPhotoStateService userPhotoStateService,
     NavigationManager navigationManager)
 {
     private const long MaxFileSize = 10 * 1024 * 1024; // 10 MB
@@ -106,7 +109,8 @@ public partial class UploadProfilePhotoForm(
 
         try
         {
-            await UploadCroppedPhotoAsync();
+            var uploadedPhoto = await UploadCroppedPhotoAsync();
+            userPhotoStateService.UpdateFromPhoto(uploadedPhoto);
 
             // Success - navigate to return URL or home
             var targetUrl = !string.IsNullOrEmpty(ReturnUrl) ? ReturnUrl : "/";
@@ -123,11 +127,11 @@ public partial class UploadProfilePhotoForm(
         }
     }
 
-    private async Task UploadCroppedPhotoAsync()
+    private async Task<CalcioUserPhotoDto> UploadCroppedPhotoAsync()
     {
         if (string.IsNullOrEmpty(CroppedPhotoDataUrl))
         {
-            return;
+            throw new InvalidOperationException("No cropped photo is available.");
         }
 
         // Parse the data URL to extract base64 data
@@ -158,6 +162,7 @@ public partial class UploadProfilePhotoForm(
 
         UploadProgressPercent = 100;
         StateHasChanged();
+        return uploadResult.Value;
     }
 
     private static string FormatFileSize(long bytes)

@@ -10,6 +10,7 @@ using Calcio.Shared.Services.Clubs;
 using Calcio.Shared.Services.Players;
 using Calcio.Shared.Services.Seasons;
 using Calcio.Shared.Services.Teams;
+using Calcio.UI.Services.CalcioUsers;
 using Calcio.UI.Services.Theme;
 
 using Cropper.Blazor.Extensions;
@@ -23,6 +24,7 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthenticationStateDeserialization();
 
 builder.Services.AddCropper();
+builder.Services.AddSingleton(TimeProvider.System);
 
 builder.Services.AddHttpClient<IClubJoinRequestsService, ClubJoinRequestsService>(client =>
     client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
@@ -43,5 +45,6 @@ builder.Services.AddHttpClient<IPlayersService, PlayersService>(client =>
     client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
 builder.Services.AddScoped<ThemeService>();
+builder.Services.AddScoped<UserPhotoStateService>();
 
 await builder.Build().RunAsync();
