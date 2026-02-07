@@ -206,7 +206,7 @@ public sealed class UserPhotoStateServiceTests
             var deadline = DateTime.UtcNow.AddMilliseconds(500);
             while (DateTime.UtcNow < deadline && callCount == 0)
             {
-                await Task.Delay(10);
+                await Task.Delay(10, TestContext.Current.CancellationToken);
             }
         }
         finally
