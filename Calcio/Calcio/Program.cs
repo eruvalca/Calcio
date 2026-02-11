@@ -228,7 +228,7 @@ app.MapRazorComponents<App>()
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
 
-app.MapHub<UserPhotoHub>(UserPhotoHubRoutes.HubPath);
+app.MapHub<UserPhotoHub>(UserPhotoHubRoutes.HubPath).RequireAuthorization();
 
 app.MapClubJoinRequestsEndpoints();
 app.MapClubsEndpoints();

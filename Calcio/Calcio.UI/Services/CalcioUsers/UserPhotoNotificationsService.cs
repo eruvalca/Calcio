@@ -63,6 +63,12 @@ public sealed class UserPhotoNotificationsService(NavigationManager navigationMa
             return Task.CompletedTask;
         });
 
+        connection.Reconnected += _ =>
+        {
+            PhotoChanged?.Invoke();
+            return Task.CompletedTask;
+        };
+
         return connection;
     }
 }

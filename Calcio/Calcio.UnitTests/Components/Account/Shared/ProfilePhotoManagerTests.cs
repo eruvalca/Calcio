@@ -416,6 +416,5 @@ public sealed class ProfilePhotoManagerTests : BunitContext
         await _mockCalcioUsersService.Received(1).GetAccountPhotoAsync(Arg.Any<CancellationToken>());
     }
 
-    [Fact]
     #endregion
 }

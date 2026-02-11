@@ -110,7 +110,7 @@ public static class CalcioUsersEndpoints
             if (userId is not null)
             {
                 await hubContext.Clients.User(userId)
-                    .SendAsync(UserPhotoHubMessages.PhotoChanged, Array.Empty<object?>(), cancellationToken);
+                    .SendAsync(UserPhotoHubMessages.PhotoChanged, cancellationToken);
             }
         }
 

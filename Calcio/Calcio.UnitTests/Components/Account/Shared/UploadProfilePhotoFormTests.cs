@@ -181,7 +181,6 @@ public sealed class UploadProfilePhotoFormTests : BunitContext
         cut.ShouldNotBeNull();
     }
 
-    [Fact]
     #endregion
 
     #region Error State Tests

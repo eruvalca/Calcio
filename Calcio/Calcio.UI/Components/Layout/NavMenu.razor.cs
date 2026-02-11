@@ -20,7 +20,7 @@ public partial class NavMenu(
     UserClubStateService userClubStateService,
     ThemeService themeService,
     AuthenticationStateProvider authenticationStateProvider,
-    ILogger<NavMenu> logger)
+    ILogger<NavMenu> logger) : IAsyncDisposable
 {
     private string? currentUrl;
     private bool _themeSubscribed;
@@ -33,6 +33,7 @@ public partial class NavMenu(
     [PersistentState]
     public List<BaseClubDto>? UserClubs { get; set; }
 
+    [PersistentState]
     public string? UserPhotoUrl { get; set; }
 
     private bool IsLoadingPhoto { get; set; } = true;
@@ -74,7 +75,7 @@ public partial class NavMenu(
             var userId = _authState?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (_authState?.User.Identity?.IsAuthenticated is true && userId is not null)
             {
-                await StartPhotoNotificationsAsync();
+                await userPhotoNotifications.StartAsync(CancellationToken);
                 if (!_photoLoaded)
                 {
                     await RefreshUserPhotoAsync();
@@ -152,7 +153,7 @@ public partial class NavMenu(
         var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (authState.User.Identity?.IsAuthenticated is not true)
         {
-            await StopPhotoNotificationsAsync();
+            await userPhotoNotifications.StopAsync(CancellationToken);
             userClubStateService.ClearUserClubs();
             UserPhotoUrl = null;
             UserClubs = null;
@@ -165,7 +166,7 @@ public partial class NavMenu(
         if (userId is null)
         {
             _pendingAuthRefresh = true;
-            await StopPhotoNotificationsAsync();
+            await userPhotoNotifications.StopAsync(CancellationToken);
             _photoLoaded = false;
             IsLoadingPhoto = false;
             return;
@@ -186,11 +187,11 @@ public partial class NavMenu(
         var shouldFetchPhoto = RendererInfo.IsInteractive;
         if (shouldFetchPhoto)
         {
-            await StartPhotoNotificationsAsync();
+            await userPhotoNotifications.StartAsync(CancellationToken);
         }
         else
         {
-            await StopPhotoNotificationsAsync();
+            await userPhotoNotifications.StopAsync(CancellationToken);
             UserPhotoUrl = null;
             _photoLoaded = false;
             IsLoadingPhoto = false;
@@ -243,12 +244,6 @@ public partial class NavMenu(
         }
     }
 
-    private async Task StartPhotoNotificationsAsync()
-        => await userPhotoNotifications.StartAsync(CancellationToken);
-
-    private async Task StopPhotoNotificationsAsync()
-        => await userPhotoNotifications.StopAsync(CancellationToken);
-
     private async Task EnsureAuthStateHydratedAsync()
     {
         try
@@ -272,8 +267,7 @@ public partial class NavMenu(
         StateHasChanged();
     }
 
-#pragma warning disable CA1816 // Dispose methods should call SuppressFinalize
-    public override void Dispose()
+    public async ValueTask DisposeAsync()
     {
         navigationManager.LocationChanged -= OnLocationChanged;
         userPhotoNotifications.PhotoChanged -= OnPhotoChanged;
@@ -288,9 +282,9 @@ public partial class NavMenu(
             themeService.ThemeChanged -= OnThemeChanged;
         }
 
+        await userPhotoNotifications.DisposeAsync();
         base.Dispose();
     }
-#pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
 
     [LoggerMessage(1, LogLevel.Warning, "Authentication state change handling failed.")]
     private static partial void LogAuthStateChangedFailed(ILogger logger, Exception exception);
