@@ -5,7 +5,6 @@ using Calcio.Shared.DTOs.Clubs;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.Account;
 using Calcio.Shared.Services.Clubs;
-using Calcio.UI.Services.Clubs;
 
 using Microsoft.AspNetCore.Components;
 
@@ -13,8 +12,7 @@ namespace Calcio.UI.Components.Clubs.Shared;
 
 public partial class ClubMembershipPanel(
     IClubsService clubsService,
-    IAccountService accountService,
-    UserClubStateService userClubStateService)
+    IAccountService accountService)
 {
     private static readonly string[] UsStateAbbreviations =
     [
@@ -51,7 +49,6 @@ public partial class ClubMembershipPanel(
                 club =>
                 {
                     CreatedClub = new BaseClubDto(club.ClubId, club.Name, Input.City, Input.State);
-                    userClubStateService.SetUserClubs([CreatedClub]);
                     StatusMessageClass = "success";
                     StatusMessage = $"Club '{club.Name}' created.";
                 },

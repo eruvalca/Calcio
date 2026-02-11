@@ -1,12 +1,9 @@
-using System.Reflection;
-
 using Bunit;
 
 using Calcio.Shared.DTOs.CalcioUsers;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.CalcioUsers;
 using Calcio.UI.Components.Account.Shared;
-using Calcio.UI.Services.CalcioUsers;
 
 using Cropper.Blazor.Extensions;
 
@@ -43,7 +40,6 @@ public sealed class ProfilePhotoManagerTests : BunitContext
         _mockCalcioUsersService = Substitute.For<ICalcioUsersService>();
         Services.AddSingleton(_mockCalcioUsersService);
         Services.AddSingleton(TimeProvider.System);
-        Services.AddSingleton<UserPhotoStateService>();
         Services.AddLogging();
 
         // Register Cropper.Blazor services for ImageCropperModal
@@ -418,34 +414,6 @@ public sealed class ProfilePhotoManagerTests : BunitContext
 
         // Assert
         await _mockCalcioUsersService.Received(1).GetAccountPhotoAsync(Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task WhenUploadSucceeds_ShouldUpdatePhotoStateService()
-    {
-        // Arrange
-        SetupNoPhoto();
-        var expectedPhoto = new CalcioUserPhotoDto(1, "https://example.com/original.jpg", "https://example.com/small.jpg", null, null);
-        _mockCalcioUsersService.UploadAccountPhotoAsync(Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<ServiceResult<CalcioUserPhotoDto>>(expectedPhoto));
-
-        var cut = RenderComponent();
-        await cut.InvokeAsync(() => Task.CompletedTask);
-
-        var croppedDataUrl = "data:image/png;base64," + Convert.ToBase64String(new byte[] { 1, 2, 3 });
-        var croppedProperty = typeof(ProfilePhotoManager).GetProperty("CroppedPhotoDataUrl", BindingFlags.Instance | BindingFlags.NonPublic);
-        croppedProperty.ShouldNotBeNull();
-        croppedProperty.SetValue(cut.Instance, croppedDataUrl);
-
-        var submitMethod = typeof(ProfilePhotoManager).GetMethod("HandleSubmit", BindingFlags.Instance | BindingFlags.NonPublic);
-        submitMethod.ShouldNotBeNull();
-
-        // Act
-        await cut.InvokeAsync(() => (Task)submitMethod.Invoke(cut.Instance, [])!);
-
-        // Assert
-        var photoStateService = Services.GetRequiredService<UserPhotoStateService>();
-        photoStateService.PhotoUrl.ShouldBe("https://example.com/small.jpg");
     }
 
     #endregion

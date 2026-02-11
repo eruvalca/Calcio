@@ -5,10 +5,8 @@ using Calcio.Shared.Results;
 using Calcio.Shared.Services.Account;
 using Calcio.Shared.Services.Clubs;
 using Calcio.UI.Components.Clubs.Shared;
-using Calcio.UI.Services.Clubs;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
 
 using NSubstitute;
 
@@ -20,7 +18,6 @@ public sealed class ClubMembershipPanelTests : BunitContext
 {
     private readonly IClubsService _clubsService;
     private readonly IAccountService _accountService;
-    private readonly UserClubStateService _clubStateService;
 
     public ClubMembershipPanelTests()
     {
@@ -32,9 +29,6 @@ public sealed class ClubMembershipPanelTests : BunitContext
         _accountService.RefreshSignInAsync(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(new ServiceResult<OneOf.Types.Success>(new OneOf.Types.Success())));
         Services.AddSingleton(_accountService);
-
-        _clubStateService = new UserClubStateService(_clubsService, TimeProvider.System, NullLogger<UserClubStateService>.Instance);
-        Services.AddSingleton(_clubStateService);
     }
 
     [Fact]
@@ -59,9 +53,6 @@ public sealed class ClubMembershipPanelTests : BunitContext
         // Assert
         cut.WaitForAssertion(() =>
         {
-            _clubStateService.UserClubs.ShouldNotBeNull();
-            _clubStateService.UserClubs!.Count.ShouldBe(1);
-            _clubStateService.UserClubs[0].Id.ShouldBe(42);
             cut.Find(".alert.alert-success").TextContent.ShouldContain("Club 'New Club' created.");
             cut.Find("a.btn.btn-primary").GetAttribute("href").ShouldBe("/clubs/42");
         });

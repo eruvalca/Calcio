@@ -1,8 +1,8 @@
 using System.Security.Claims;
 
 using Calcio.Shared.DTOs.Clubs;
-using Calcio.UI.Services.CalcioUsers;
-using Calcio.UI.Services.Clubs;
+using Calcio.Shared.Services.CalcioUsers;
+using Calcio.Shared.Services.Clubs;
 using Calcio.UI.Services.Theme;
 
 using Microsoft.AspNetCore.Components;
@@ -14,15 +14,14 @@ namespace Calcio.UI.Components.Layout;
 
 public partial class NavMenu(
     NavigationManager navigationManager,
-    UserPhotoStateService userPhotoStateService,
-    UserClubStateService userClubStateService,
+    ICalcioUsersService calcioUsersService,
+    IClubsService clubsService,
     ThemeService themeService,
     AuthenticationStateProvider authenticationStateProvider,
     ILogger<NavMenu> logger)
 {
     private string? currentUrl;
     private bool _themeSubscribed;
-    private AuthenticationState? _authState;
     private bool _authSubscribed;
     private string? _currentUserId;
     private bool _pendingAuthRefresh;
@@ -39,8 +38,6 @@ public partial class NavMenu(
     {
         currentUrl = navigationManager.ToBaseRelativePath(navigationManager.Uri);
         navigationManager.LocationChanged += OnLocationChanged;
-        userPhotoStateService.PhotoChanged += OnPhotoChanged;
-        userClubStateService.ClubsChanged += OnClubsChanged;
 
         if (!_authSubscribed)
         {
@@ -48,8 +45,8 @@ public partial class NavMenu(
             _authSubscribed = true;
         }
 
-        _authState = await authenticationStateProvider.GetAuthenticationStateAsync();
-        await HandleAuthStateAsync(_authState);
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        await HandleAuthStateAsync(authState);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -68,22 +65,6 @@ public partial class NavMenu(
             {
                 await EnsureAuthStateHydratedAsync();
             }
-
-            var userId = _authState?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (_authState?.User.Identity?.IsAuthenticated is true && userId is not null)
-            {
-                userPhotoStateService.StartAutoRefresh();
-                await userPhotoStateService.EnsureFreshAsync(CancellationToken);
-                UserPhotoUrl = userPhotoStateService.PhotoUrl;
-
-                if (UserClubs is null || UserClubs.Count == 0)
-                {
-                    await userClubStateService.EnsureFreshAsync(CancellationToken);
-                    UserClubs = userClubStateService.UserClubs?.ToList() ?? UserClubs;
-                }
-
-                StateHasChanged();
-            }
         }
     }
 
@@ -99,18 +80,6 @@ public partial class NavMenu(
     };
 
     private async Task ChangeTheme(ThemePreference pref) => await themeService.SetThemeAsync(pref);
-
-    private void OnPhotoChanged()
-    {
-        UserPhotoUrl = userPhotoStateService.PhotoUrl;
-        InvokeAsync(StateHasChanged);
-    }
-
-    private void OnClubsChanged()
-    {
-        UserClubs = userClubStateService.UserClubs?.ToList();
-        InvokeAsync(StateHasChanged);
-    }
 
     private void HandleAuthenticationStateChanged(Task<AuthenticationState> authStateTask)
         => _ = HandleAuthenticationStateChangedAsync(authStateTask);
@@ -141,16 +110,11 @@ public partial class NavMenu(
 
     private async Task HandleAuthStateAsync(AuthenticationState authState)
     {
-        _authState = authState;
-
         // Guard: ensure user is authenticated AND has a valid NameIdentifier claim
         // This can be false during SSR prerender right after registration before claims are hydrated
         var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (authState.User.Identity?.IsAuthenticated is not true)
         {
-            userPhotoStateService.StopAutoRefresh();
-            userPhotoStateService.ClearPhoto();
-            userClubStateService.ClearUserClubs();
             UserPhotoUrl = null;
             UserClubs = null;
             _currentUserId = null;
@@ -161,7 +125,8 @@ public partial class NavMenu(
         if (userId is null)
         {
             _pendingAuthRefresh = true;
-            userPhotoStateService.StopAutoRefresh();
+            UserPhotoUrl = null;
+            UserClubs = null;
             IsLoadingPhoto = false;
             return;
         }
@@ -170,43 +135,24 @@ public partial class NavMenu(
 
         if (_currentUserId is not null && !string.Equals(_currentUserId, userId, StringComparison.Ordinal))
         {
-            userPhotoStateService.ClearPhoto();
             UserPhotoUrl = null;
             UserClubs = null;
-            userClubStateService.ClearUserClubs();
         }
 
         _currentUserId = userId;
 
-        if (RendererInfo.IsInteractive)
+        if (UserClubs is null || UserClubs.Count == 0)
         {
-            userPhotoStateService.StartAutoRefresh();
-        }
-        else
-        {
-            userPhotoStateService.StopAutoRefresh();
-        }
-
-        if (UserClubs is not null && userClubStateService.UserClubs is null)
-        {
-            userClubStateService.SetUserClubs(UserClubs);
-        }
-
-        if (UserClubs is null)
-        {
-            await userClubStateService.EnsureFreshAsync(CancellationToken);
-            UserClubs = userClubStateService.UserClubs?.ToList() ?? [];
+            await RefreshUserClubsAsync();
         }
 
         // Wrap in try-catch because HttpContext.User may differ from Blazor's AuthenticationState
         // during SSR prerender immediately after authentication changes
-        UserPhotoUrl = userPhotoStateService.PhotoUrl ?? UserPhotoUrl;
         if (string.IsNullOrEmpty(UserPhotoUrl))
         {
             try
             {
-                await userPhotoStateService.EnsureFreshAsync(CancellationToken);
-                UserPhotoUrl = userPhotoStateService.PhotoUrl;
+                await RefreshUserPhotoAsync();
             }
             catch (Exception ex) when (ex is UnauthorizedAccessException or InvalidOperationException)
             {
@@ -235,6 +181,26 @@ public partial class NavMenu(
         }
     }
 
+    private async Task RefreshUserClubsAsync()
+    {
+        var result = await clubsService.GetUserClubsAsync(CancellationToken);
+        if (result.IsSuccess)
+        {
+            UserClubs = result.Value;
+        }
+    }
+
+    private async Task RefreshUserPhotoAsync()
+    {
+        var result = await calcioUsersService.GetAccountPhotoAsync(CancellationToken);
+        if (result.IsSuccess)
+        {
+            UserPhotoUrl = result.Value.Match<string?>(
+                photo => photo.SmallUrl ?? photo.OriginalUrl,
+                _ => null);
+        }
+    }
+
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         currentUrl = navigationManager.ToBaseRelativePath(e.Location);
@@ -245,8 +211,6 @@ public partial class NavMenu(
     public override void Dispose()
     {
         navigationManager.LocationChanged -= OnLocationChanged;
-        userPhotoStateService.PhotoChanged -= OnPhotoChanged;
-        userClubStateService.ClubsChanged -= OnClubsChanged;
         if (_authSubscribed)
         {
             authenticationStateProvider.AuthenticationStateChanged -= HandleAuthenticationStateChanged;

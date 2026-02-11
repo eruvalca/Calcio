@@ -11,9 +11,7 @@ using Calcio.Shared.Services.Players;
 using Calcio.Shared.Services.Seasons;
 using Calcio.Shared.Services.Teams;
 using Calcio.Shared.Services.Account;
-using Calcio.UI.Services.CalcioUsers;
 using Calcio.UI.Services.Theme;
-using Calcio.UI.Services.Clubs;
 
 using Calcio.Client.Services.Account;
 
@@ -52,7 +50,5 @@ builder.Services.AddHttpClient<IAccountService, AccountService>(client =>
     client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
 builder.Services.AddScoped<ThemeService>();
-builder.Services.AddScoped<UserPhotoStateService>();
-builder.Services.AddScoped<UserClubStateService>();
 
 await builder.Build().RunAsync();

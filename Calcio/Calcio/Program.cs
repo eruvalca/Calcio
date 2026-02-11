@@ -34,8 +34,6 @@ using Calcio.Shared.Services.Teams;
 using Calcio.Shared.Services.UserClubsCache;
 using Calcio.Shared.Services.Account;
 using Calcio.UI.Services.Theme;
-using Calcio.UI.Services.CalcioUsers;
-using Calcio.UI.Services.Clubs;
 
 using Cropper.Blazor.Extensions;
 
@@ -134,8 +132,6 @@ builder.Services.AddSingleton<IEmailSender<CalcioUserEntity>, IdentityNoOpEmailS
 
 builder.Services.AddCropper();
 builder.Services.AddScoped<ThemeService>();
-builder.Services.AddScoped<UserPhotoStateService>();
-builder.Services.AddScoped<UserClubStateService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 
 builder.Services.AddScoped<IClubJoinRequestsService, ClubJoinRequestsService>();

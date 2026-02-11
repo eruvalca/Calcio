@@ -9,8 +9,6 @@ using Calcio.Shared.Results;
 using Calcio.Shared.Services.CalcioUsers;
 using Calcio.Shared.Services.Clubs;
 using Calcio.UI.Components.Layout;
-using Calcio.UI.Services.CalcioUsers;
-using Calcio.UI.Services.Clubs;
 using Calcio.UI.Services.Theme;
 
 using Microsoft.AspNetCore.Components;
@@ -71,8 +69,6 @@ public sealed class NavMenuTests : BunitContext
             .Returns(Task.FromResult(new ServiceResult<OneOf<CalcioUserPhotoDto, None>>(OneOf<CalcioUserPhotoDto, None>.FromT1(new None()))));
         Services.AddSingleton(_calcioUsersService);
         Services.AddSingleton(TimeProvider.System);
-        Services.AddSingleton<UserPhotoStateService>();
-        Services.AddSingleton<UserClubStateService>();
         Services.AddLogging();
 
         // Add authorization services with a default unauthenticated state
@@ -220,35 +216,6 @@ public sealed class NavMenuTests : BunitContext
     }
 
     [Fact]
-    public void WhenClubStateChanges_ShouldRenderClubNavLink()
-    {
-        // Arrange
-        SetupAuthenticatedUser();
-        _clubsService
-            .GetUserClubsAsync(Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult(new ServiceResult<List<BaseClubDto>>(new List<BaseClubDto>())));
-
-        var cut = RenderNavMenu();
-        var clubStateService = Services.GetRequiredService<UserClubStateService>();
-
-        // Act
-        clubStateService.SetUserClubs(
-        [
-            new BaseClubDto(321, "State Club", "City", "ST")
-        ]);
-
-        // Assert
-        cut.WaitForAssertion(() =>
-        {
-            var clubLink = cut.FindAll("a.nav-link").FirstOrDefault(a => a.TextContent.Contains("State Club"));
-            clubLink.ShouldNotBeNull();
-            var href = clubLink.GetAttribute("href");
-            href.ShouldNotBeNull();
-            (href.EndsWith("/clubs/321", StringComparison.Ordinal) || href.EndsWith("clubs/321", StringComparison.Ordinal)).ShouldBeTrue();
-        });
-    }
-
-    [Fact]
     public void WhenUnauthenticated_ShouldNotCallClubsService()
     {
         // Arrange
@@ -314,8 +281,6 @@ public sealed class NavMenuTests : BunitContext
         context.Services.AddSingleton(clubsService);
         context.Services.AddSingleton(calcioUsersService);
         context.Services.AddSingleton(TimeProvider.System);
-        context.Services.AddSingleton<UserPhotoStateService>();
-        context.Services.AddSingleton<UserClubStateService>();
         context.Services.AddLogging();
 
         context.SetRendererInfo(new RendererInfo("Server", isInteractive: true));
@@ -436,26 +401,6 @@ public sealed class NavMenuTests : BunitContext
         var usernameSpan = cut.Find("img.avatar-img").ParentElement?.QuerySelector(".d-none.d-sm-inline");
         usernameSpan.ShouldNotBeNull();
         usernameSpan.TextContent.ShouldContain("user@test.com");
-    }
-
-    [Fact]
-    public void WhenPhotoStateChanges_ShouldUpdateAvatarImage()
-    {
-        // Arrange
-        SetupAuthenticatedUser("user@test.com");
-        SetupUserWithoutPhoto();
-        var cut = RenderNavMenu();
-        var photoStateService = Services.GetRequiredService<UserPhotoStateService>();
-
-        // Act
-        photoStateService.SetPhotoUrl("https://example.com/updated-avatar.jpg");
-
-        // Assert
-        cut.WaitForAssertion(() =>
-        {
-            var avatarImg = cut.Find("img.avatar-img");
-            avatarImg.GetAttribute("src").ShouldBe("https://example.com/updated-avatar.jpg");
-        });
     }
 
     [Fact]
