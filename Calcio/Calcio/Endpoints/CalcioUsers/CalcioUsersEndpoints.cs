@@ -1,13 +1,17 @@
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 
 using Calcio.Endpoints.Extensions;
 using Calcio.Endpoints.Filters;
+using Calcio.Hubs;
 using Calcio.Shared.DTOs.CalcioUsers;
 using Calcio.Shared.Endpoints;
+using Calcio.Shared.Realtime;
 using Calcio.Shared.Security;
 using Calcio.Shared.Services.CalcioUsers;
 
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Calcio.Endpoints.CalcioUsers;
 
@@ -76,6 +80,8 @@ public static class CalcioUsersEndpoints
     private static async Task<Results<Ok<CalcioUserPhotoDto>, ProblemHttpResult>> UploadAccountPhoto(
         IFormFile file,
         ICalcioUsersService service,
+        IHubContext<UserPhotoHub> hubContext,
+        HttpContext httpContext,
         CancellationToken cancellationToken)
     {
         // Validate file
@@ -97,6 +103,16 @@ public static class CalcioUsersEndpoints
 
         await using var stream = file.OpenReadStream();
         var result = await service.UploadAccountPhotoAsync(stream, file.ContentType, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId is not null)
+            {
+                await hubContext.Clients.User(userId)
+                    .SendAsync(UserPhotoHubMessages.PhotoChanged, Array.Empty<object?>(), cancellationToken);
+            }
+        }
 
         return result.ToHttpResult(TypedResults.Ok);
     }

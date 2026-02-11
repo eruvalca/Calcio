@@ -12,6 +12,7 @@ using Calcio.Endpoints.Account;
 using Calcio.Endpoints.Players;
 using Calcio.Endpoints.Seasons;
 using Calcio.Endpoints.Teams;
+using Calcio.Hubs;
 using Calcio.ServiceDefaults;
 using Calcio.Services.Account;
 using Calcio.Services.BlobStorage;
@@ -33,6 +34,7 @@ using Calcio.Shared.Services.Seasons;
 using Calcio.Shared.Services.Teams;
 using Calcio.Shared.Services.UserClubsCache;
 using Calcio.Shared.Services.Account;
+using Calcio.Shared.Realtime;
 using Calcio.UI.Services.Theme;
 using Calcio.UI.Services.CalcioUsers;
 using Calcio.UI.Services.Clubs;
@@ -43,6 +45,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OpenApi;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.OpenApi;
@@ -134,9 +137,12 @@ builder.Services.AddSingleton<IEmailSender<CalcioUserEntity>, IdentityNoOpEmailS
 
 builder.Services.AddCropper();
 builder.Services.AddScoped<ThemeService>();
-builder.Services.AddScoped<UserPhotoStateService>();
+builder.Services.AddScoped<IUserPhotoNotifications, UserPhotoNotificationsService>();
 builder.Services.AddScoped<UserClubStateService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
+
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<IUserIdProvider, CalcioUserIdProvider>();
 
 builder.Services.AddScoped<IClubJoinRequestsService, ClubJoinRequestsService>();
 builder.Services.AddScoped<IClubsService, ClubsService>();
@@ -221,6 +227,8 @@ app.MapRazorComponents<App>()
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
+
+app.MapHub<UserPhotoHub>(UserPhotoHubRoutes.HubPath);
 
 app.MapClubJoinRequestsEndpoints();
 app.MapClubsEndpoints();

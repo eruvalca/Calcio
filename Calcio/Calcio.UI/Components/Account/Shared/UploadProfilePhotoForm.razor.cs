@@ -1,6 +1,5 @@
 using Calcio.Shared.DTOs.CalcioUsers;
 using Calcio.Shared.Services.CalcioUsers;
-using Calcio.UI.Services.CalcioUsers;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -9,7 +8,6 @@ namespace Calcio.UI.Components.Account.Shared;
 
 public partial class UploadProfilePhotoForm(
     ICalcioUsersService calcioUsersService,
-    UserPhotoStateService userPhotoStateService,
     NavigationManager navigationManager)
 {
     private const long MaxFileSize = 10 * 1024 * 1024; // 10 MB
@@ -109,8 +107,7 @@ public partial class UploadProfilePhotoForm(
 
         try
         {
-            var uploadedPhoto = await UploadCroppedPhotoAsync();
-            userPhotoStateService.UpdateFromPhoto(uploadedPhoto);
+            await UploadCroppedPhotoAsync();
 
             // Success - navigate to return URL or home
             var targetUrl = !string.IsNullOrEmpty(ReturnUrl) ? ReturnUrl : "/";

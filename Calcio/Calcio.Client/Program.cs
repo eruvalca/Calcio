@@ -52,7 +52,7 @@ builder.Services.AddHttpClient<IAccountService, AccountService>(client =>
     client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
 builder.Services.AddScoped<ThemeService>();
-builder.Services.AddScoped<UserPhotoStateService>();
+builder.Services.AddScoped<IUserPhotoNotifications, UserPhotoNotificationsService>();
 builder.Services.AddScoped<UserClubStateService>();
 
 await builder.Build().RunAsync();

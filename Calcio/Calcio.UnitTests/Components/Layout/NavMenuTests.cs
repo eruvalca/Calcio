@@ -45,6 +45,7 @@ public sealed class NavMenuTests : BunitContext
     private readonly BunitAuthorizationContext _authContext;
     private readonly IClubsService _clubsService;
     private readonly ICalcioUsersService _calcioUsersService;
+    private readonly TestUserPhotoNotifications _photoNotifications;
 
     public NavMenuTests()
     {
@@ -71,7 +72,9 @@ public sealed class NavMenuTests : BunitContext
             .Returns(Task.FromResult(new ServiceResult<OneOf<CalcioUserPhotoDto, None>>(OneOf<CalcioUserPhotoDto, None>.FromT1(new None()))));
         Services.AddSingleton(_calcioUsersService);
         Services.AddSingleton(TimeProvider.System);
-        Services.AddSingleton<UserPhotoStateService>();
+        _photoNotifications = new TestUserPhotoNotifications();
+        Services.AddSingleton<IUserPhotoNotifications>(_photoNotifications);
+        Services.AddSingleton(_photoNotifications);
         Services.AddSingleton<UserClubStateService>();
         Services.AddLogging();
 
@@ -127,6 +130,19 @@ public sealed class NavMenuTests : BunitContext
     private void SetupPhotoServiceError() => _calcioUsersService
             .GetAccountPhotoAsync(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(new ServiceResult<OneOf<CalcioUserPhotoDto, None>>(ServiceProblem.ServerError())));
+
+    private sealed class TestUserPhotoNotifications : IUserPhotoNotifications
+    {
+        public event Action? PhotoChanged;
+
+        public ValueTask StartAsync(CancellationToken cancellationToken) => ValueTask.CompletedTask;
+
+        public ValueTask StopAsync(CancellationToken cancellationToken) => ValueTask.CompletedTask;
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+
+        public void RaisePhotoChanged() => PhotoChanged?.Invoke();
+    }
 
     private sealed class SequenceAuthStateProvider : AuthenticationStateProvider
     {
@@ -314,7 +330,9 @@ public sealed class NavMenuTests : BunitContext
         context.Services.AddSingleton(clubsService);
         context.Services.AddSingleton(calcioUsersService);
         context.Services.AddSingleton(TimeProvider.System);
-        context.Services.AddSingleton<UserPhotoStateService>();
+        var photoNotifications = new TestUserPhotoNotifications();
+        context.Services.AddSingleton<IUserPhotoNotifications>(photoNotifications);
+        context.Services.AddSingleton(photoNotifications);
         context.Services.AddSingleton<UserClubStateService>();
         context.Services.AddLogging();
 
@@ -439,16 +457,20 @@ public sealed class NavMenuTests : BunitContext
     }
 
     [Fact]
-    public void WhenPhotoStateChanges_ShouldUpdateAvatarImage()
+    public void WhenPhotoNotificationReceived_ShouldUpdateAvatarImage()
     {
         // Arrange
         SetupAuthenticatedUser("user@test.com");
-        SetupUserWithoutPhoto();
+        var updatedPhoto = new CalcioUserPhotoDto(1, "https://example.com/original.jpg", "https://example.com/updated-avatar.jpg", null, null);
+        _calcioUsersService.GetAccountPhotoAsync(Arg.Any<CancellationToken>())
+            .Returns(
+                Task.FromResult(new ServiceResult<OneOf<CalcioUserPhotoDto, None>>(OneOf<CalcioUserPhotoDto, None>.FromT1(new None()))),
+                Task.FromResult(new ServiceResult<OneOf<CalcioUserPhotoDto, None>>(OneOf<CalcioUserPhotoDto, None>.FromT0(updatedPhoto))));
+
         var cut = RenderNavMenu();
-        var photoStateService = Services.GetRequiredService<UserPhotoStateService>();
 
         // Act
-        photoStateService.SetPhotoUrl("https://example.com/updated-avatar.jpg");
+        _photoNotifications.RaisePhotoChanged();
 
         // Assert
         cut.WaitForAssertion(() =>

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 
 using Calcio.Shared.DTOs.Clubs;
+using Calcio.Shared.Services.CalcioUsers;
 using Calcio.UI.Services.CalcioUsers;
 using Calcio.UI.Services.Clubs;
 using Calcio.UI.Services.Theme;
@@ -14,7 +15,8 @@ namespace Calcio.UI.Components.Layout;
 
 public partial class NavMenu(
     NavigationManager navigationManager,
-    UserPhotoStateService userPhotoStateService,
+    ICalcioUsersService calcioUsersService,
+    IUserPhotoNotifications userPhotoNotifications,
     UserClubStateService userClubStateService,
     ThemeService themeService,
     AuthenticationStateProvider authenticationStateProvider,
@@ -26,11 +28,11 @@ public partial class NavMenu(
     private bool _authSubscribed;
     private string? _currentUserId;
     private bool _pendingAuthRefresh;
+    private bool _photoLoaded;
 
     [PersistentState]
     public List<BaseClubDto>? UserClubs { get; set; }
 
-    [PersistentState]
     public string? UserPhotoUrl { get; set; }
 
     private bool IsLoadingPhoto { get; set; } = true;
@@ -39,7 +41,7 @@ public partial class NavMenu(
     {
         currentUrl = navigationManager.ToBaseRelativePath(navigationManager.Uri);
         navigationManager.LocationChanged += OnLocationChanged;
-        userPhotoStateService.PhotoChanged += OnPhotoChanged;
+        userPhotoNotifications.PhotoChanged += OnPhotoChanged;
         userClubStateService.ClubsChanged += OnClubsChanged;
 
         if (!_authSubscribed)
@@ -72,9 +74,11 @@ public partial class NavMenu(
             var userId = _authState?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (_authState?.User.Identity?.IsAuthenticated is true && userId is not null)
             {
-                userPhotoStateService.StartAutoRefresh();
-                await userPhotoStateService.EnsureFreshAsync(CancellationToken);
-                UserPhotoUrl = userPhotoStateService.PhotoUrl;
+                await StartPhotoNotificationsAsync();
+                if (!_photoLoaded)
+                {
+                    await RefreshUserPhotoAsync();
+                }
 
                 if (UserClubs is null || UserClubs.Count == 0)
                 {
@@ -102,8 +106,8 @@ public partial class NavMenu(
 
     private void OnPhotoChanged()
     {
-        UserPhotoUrl = userPhotoStateService.PhotoUrl;
-        InvokeAsync(StateHasChanged);
+        _photoLoaded = false;
+        _ = InvokeAsync(RefreshUserPhotoAsync);
     }
 
     private void OnClubsChanged()
@@ -148,12 +152,12 @@ public partial class NavMenu(
         var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (authState.User.Identity?.IsAuthenticated is not true)
         {
-            userPhotoStateService.StopAutoRefresh();
-            userPhotoStateService.ClearPhoto();
+            await StopPhotoNotificationsAsync();
             userClubStateService.ClearUserClubs();
             UserPhotoUrl = null;
             UserClubs = null;
             _currentUserId = null;
+            _photoLoaded = false;
             IsLoadingPhoto = false;
             return;
         }
@@ -161,7 +165,8 @@ public partial class NavMenu(
         if (userId is null)
         {
             _pendingAuthRefresh = true;
-            userPhotoStateService.StopAutoRefresh();
+            await StopPhotoNotificationsAsync();
+            _photoLoaded = false;
             IsLoadingPhoto = false;
             return;
         }
@@ -170,21 +175,25 @@ public partial class NavMenu(
 
         if (_currentUserId is not null && !string.Equals(_currentUserId, userId, StringComparison.Ordinal))
         {
-            userPhotoStateService.ClearPhoto();
             UserPhotoUrl = null;
             UserClubs = null;
             userClubStateService.ClearUserClubs();
+            _photoLoaded = false;
         }
 
         _currentUserId = userId;
 
-        if (RendererInfo.IsInteractive)
+        var shouldFetchPhoto = RendererInfo.IsInteractive;
+        if (shouldFetchPhoto)
         {
-            userPhotoStateService.StartAutoRefresh();
+            await StartPhotoNotificationsAsync();
         }
         else
         {
-            userPhotoStateService.StopAutoRefresh();
+            await StopPhotoNotificationsAsync();
+            UserPhotoUrl = null;
+            _photoLoaded = false;
+            IsLoadingPhoto = false;
         }
 
         if (UserClubs is not null && userClubStateService.UserClubs is null)
@@ -198,25 +207,47 @@ public partial class NavMenu(
             UserClubs = userClubStateService.UserClubs?.ToList() ?? [];
         }
 
-        // Wrap in try-catch because HttpContext.User may differ from Blazor's AuthenticationState
-        // during SSR prerender immediately after authentication changes
-        UserPhotoUrl = userPhotoStateService.PhotoUrl ?? UserPhotoUrl;
-        if (string.IsNullOrEmpty(UserPhotoUrl))
+        if (shouldFetchPhoto)
         {
-            try
+            await RefreshUserPhotoAsync();
+        }
+    }
+
+    private async Task RefreshUserPhotoAsync()
+    {
+        IsLoadingPhoto = true;
+
+        try
+        {
+            var result = await calcioUsersService.GetAccountPhotoAsync(CancellationToken);
+            if (result.IsSuccess)
             {
-                await userPhotoStateService.EnsureFreshAsync(CancellationToken);
-                UserPhotoUrl = userPhotoStateService.PhotoUrl;
+                result.Value.Switch(
+                    photo => UserPhotoUrl = photo.SmallUrl ?? photo.OriginalUrl,
+                    _ => UserPhotoUrl = null);
             }
-            catch (Exception ex) when (ex is UnauthorizedAccessException or InvalidOperationException)
+            else
             {
-                // User claims not yet available in HttpContext - fall back to no photo
                 UserPhotoUrl = null;
             }
         }
-
-        IsLoadingPhoto = false;
+        catch (Exception ex) when (ex is UnauthorizedAccessException or InvalidOperationException)
+        {
+            UserPhotoUrl = null;
+        }
+        finally
+        {
+            _photoLoaded = true;
+            IsLoadingPhoto = false;
+            await InvokeAsync(StateHasChanged);
+        }
     }
+
+    private async Task StartPhotoNotificationsAsync()
+        => await userPhotoNotifications.StartAsync(CancellationToken);
+
+    private async Task StopPhotoNotificationsAsync()
+        => await userPhotoNotifications.StopAsync(CancellationToken);
 
     private async Task EnsureAuthStateHydratedAsync()
     {
@@ -245,7 +276,7 @@ public partial class NavMenu(
     public override void Dispose()
     {
         navigationManager.LocationChanged -= OnLocationChanged;
-        userPhotoStateService.PhotoChanged -= OnPhotoChanged;
+        userPhotoNotifications.PhotoChanged -= OnPhotoChanged;
         userClubStateService.ClubsChanged -= OnClubsChanged;
         if (_authSubscribed)
         {
