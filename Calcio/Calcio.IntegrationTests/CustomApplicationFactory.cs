@@ -17,8 +17,7 @@ namespace Calcio.IntegrationTests;
 
 public class CustomApplicationFactory : WebApplicationFactory<ICalcioMarker>, IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _databaseContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:17.7")
+    private readonly PostgreSqlContainer _databaseContainer = new PostgreSqlBuilder("postgres:17.7")
         .WithUsername("postgres")
         .WithPassword("postgres")
         .WithDatabase("calcioDb")

@@ -22,15 +22,13 @@ namespace Calcio.IntegrationTests;
 /// </summary>
 public class BlobStorageApplicationFactory : WebApplicationFactory<ICalcioMarker>, IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _databaseContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:17.7")
+    private readonly PostgreSqlContainer _databaseContainer = new PostgreSqlBuilder("postgres:17.7")
         .WithUsername("postgres")
         .WithPassword("postgres")
         .WithDatabase("calcioDb")
         .Build();
 
-    private readonly AzuriteContainer _azuriteContainer = new AzuriteBuilder()
-        .WithImage("mcr.microsoft.com/azure-storage/azurite:3.35.0")
+    private readonly AzuriteContainer _azuriteContainer = new AzuriteBuilder("mcr.microsoft.com/azure-storage/azurite:3.35.0")
         .Build();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

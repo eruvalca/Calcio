@@ -59,7 +59,7 @@ public partial class BlobStorageService(
         var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
         var deletedCount = 0;
 
-        await foreach (var blobItem in containerClient.GetBlobsAsync(prefix: prefix, cancellationToken: cancellationToken))
+        await foreach (var blobItem in containerClient.GetBlobsAsync(traits: BlobTraits.None, states: BlobStates.All, prefix: prefix, cancellationToken: cancellationToken))
         {
             var blobClient = containerClient.GetBlobClient(blobItem.Name);
             var deleted = await blobClient.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots, cancellationToken: cancellationToken);
