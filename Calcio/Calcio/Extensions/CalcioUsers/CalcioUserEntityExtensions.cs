@@ -1,12 +1,13 @@
-using Calcio.Shared.Entities;
+using Calcio.Entities;
+using Calcio.Shared.DTOs.CalcioUsers;
 
-namespace Calcio.Shared.Extensions.CalcioUsers;
+namespace Calcio.Extensions.CalcioUsers;
 
 public static class CalcioUserEntityExtensions
 {
     extension(CalcioUserEntity user)
     {
-        public DTOs.CalcioUsers.ClubMemberDto ToClubMemberDto(bool isClubAdmin)
+        public ClubMemberDto ToClubMemberDto(bool isClubAdmin)
             => new(
                 UserId: user.Id,
                 FullName: user.FullName,

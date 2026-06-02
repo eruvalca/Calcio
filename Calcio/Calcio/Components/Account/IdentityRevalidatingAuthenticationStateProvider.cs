@@ -1,6 +1,6 @@
 using System.Security.Claims;
 
-using Calcio.Shared.Entities;
+using Calcio.Entities;
 
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;

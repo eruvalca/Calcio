@@ -1,7 +1,7 @@
-﻿using Calcio.Shared.DTOs.Clubs;
-using Calcio.Shared.Entities;
+using Calcio.Shared.DTOs.Clubs;
+using Calcio.Entities;
 
-namespace Calcio.Shared.Extensions.Clubs;
+namespace Calcio.Extensions.Clubs;
 
 public static class ClubEntityExtensions
 {

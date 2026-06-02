@@ -1,7 +1,7 @@
 using Calcio.Shared.DTOs.ClubJoinRequests;
-using Calcio.Shared.Entities;
+using Calcio.Entities;
 
-namespace Calcio.Shared.Extensions.ClubJoinRequests;
+namespace Calcio.Extensions.ClubJoinRequests;
 
 public static class ClubJoinRequestEntityExtensions
 {

@@ -4,7 +4,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 
 using Calcio.Data.Contexts;
-using Calcio.Shared.Entities;
+using Calcio.Entities;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;

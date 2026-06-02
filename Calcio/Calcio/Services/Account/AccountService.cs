@@ -1,4 +1,4 @@
-using Calcio.Shared.Entities;
+using Calcio.Entities;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.Account;
 

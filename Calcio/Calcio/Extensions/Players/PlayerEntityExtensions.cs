@@ -1,12 +1,13 @@
-using Calcio.Shared.Entities;
+using Calcio.Entities;
+using Calcio.Shared.DTOs.Players;
 
-namespace Calcio.Shared.Extensions.Players;
+namespace Calcio.Extensions.Players;
 
 public static class PlayerEntityExtensions
 {
     extension(PlayerEntity player)
     {
-        public DTOs.Players.ClubPlayerDto ToClubPlayerDto()
+        public ClubPlayerDto ToClubPlayerDto()
             => new(
                 PlayerId: player.PlayerId,
                 FirstName: player.FirstName,

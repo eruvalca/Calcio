@@ -1,5 +1,5 @@
 using Calcio.Data.Contexts;
-using Calcio.Shared.Entities;
+using Calcio.Entities;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;

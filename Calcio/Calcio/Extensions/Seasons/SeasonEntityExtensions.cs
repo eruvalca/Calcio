@@ -1,7 +1,7 @@
 using Calcio.Shared.DTOs.Seasons;
-using Calcio.Shared.Entities;
+using Calcio.Entities;
 
-namespace Calcio.Shared.Extensions.Seasons;
+namespace Calcio.Extensions.Seasons;
 
 public static class SeasonEntityExtensions
 {

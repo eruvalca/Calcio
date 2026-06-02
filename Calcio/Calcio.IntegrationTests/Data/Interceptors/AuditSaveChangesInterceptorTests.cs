@@ -1,6 +1,6 @@
 using Calcio.Data.Contexts;
 using Calcio.IntegrationTests.Data.Contexts;
-using Calcio.Shared.Entities;
+using Calcio.Entities;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

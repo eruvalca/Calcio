@@ -1,7 +1,7 @@
 using Calcio.Data.Contexts;
 using Calcio.Shared.DTOs.Teams;
-using Calcio.Shared.Entities;
-using Calcio.Shared.Extensions.Teams;
+using Calcio.Entities;
+using Calcio.Extensions.Teams;
 using Calcio.Shared.Results;
 using Calcio.Shared.Services.Teams;
 

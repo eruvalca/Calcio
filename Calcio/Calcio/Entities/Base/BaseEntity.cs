@@ -1,4 +1,4 @@
-namespace Calcio.Shared.Entities.Base;
+namespace Calcio.Entities.Base;
 
 public abstract class BaseEntity
 {

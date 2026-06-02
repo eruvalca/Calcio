@@ -4,7 +4,7 @@ using Calcio.Data.Contexts;
 using Calcio.IntegrationTests.Data.Contexts;
 using Calcio.Services.Teams;
 using Calcio.Shared.DTOs.Teams;
-using Calcio.Shared.Entities;
+using Calcio.Entities;
 using Calcio.Shared.Security;
 
 using Microsoft.AspNetCore.Http;

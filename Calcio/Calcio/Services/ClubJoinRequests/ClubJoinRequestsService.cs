@@ -1,8 +1,8 @@
 using Calcio.Data.Contexts;
 using Calcio.Shared.DTOs.ClubJoinRequests;
-using Calcio.Shared.Entities;
+using Calcio.Entities;
 using Calcio.Shared.Enums;
-using Calcio.Shared.Extensions.ClubJoinRequests;
+using Calcio.Extensions.ClubJoinRequests;
 using Calcio.Shared.Results;
 using Calcio.Shared.Security;
 using Calcio.Shared.Services.ClubJoinRequests;

@@ -1,7 +1,7 @@
 using Calcio.Shared.DTOs.Teams;
-using Calcio.Shared.Entities;
+using Calcio.Entities;
 
-namespace Calcio.Shared.Extensions.Teams;
+namespace Calcio.Extensions.Teams;
 
 public static class TeamEntityExtensions
 {

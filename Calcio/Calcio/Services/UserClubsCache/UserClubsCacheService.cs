@@ -1,7 +1,7 @@
 using Calcio.Data.Contexts;
 using Calcio.Shared.Caching;
 using Calcio.Shared.DTOs.Clubs;
-using Calcio.Shared.Extensions.Clubs;
+using Calcio.Extensions.Clubs;
 using Calcio.Shared.Services.UserClubsCache;
 
 using Microsoft.EntityFrameworkCore;

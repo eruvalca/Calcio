@@ -6,7 +6,7 @@ using Bogus;
 
 using Calcio.Data.Contexts;
 using Calcio.Services.Players;
-using Calcio.Shared.Entities;
+using Calcio.Entities;
 using Calcio.Shared.Services.BlobStorage;
 using Calcio.Shared.Services.Players;
 

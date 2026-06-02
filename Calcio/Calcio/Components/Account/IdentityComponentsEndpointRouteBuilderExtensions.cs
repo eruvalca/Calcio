@@ -3,7 +3,7 @@ using System.Text.Json;
 
 using Calcio.Components.Account.Pages;
 using Calcio.Components.Account.Pages.Manage;
-using Calcio.Shared.Entities;
+using Calcio.Entities;
 
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;

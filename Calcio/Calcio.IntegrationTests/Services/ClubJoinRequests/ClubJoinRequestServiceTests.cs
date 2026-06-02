@@ -3,7 +3,7 @@ using Bogus;
 using Calcio.Data.Contexts;
 using Calcio.IntegrationTests.Data.Contexts;
 using Calcio.Services.ClubJoinRequests;
-using Calcio.Shared.Entities;
+using Calcio.Entities;
 using Calcio.Shared.Enums;
 
 using Calcio.Shared.Results;
