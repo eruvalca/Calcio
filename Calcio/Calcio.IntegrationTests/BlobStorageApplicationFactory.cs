@@ -57,7 +57,9 @@ public class BlobStorageApplicationFactory : WebApplicationFactory<ICalcioMarker
             x.RemoveAll<IBlobStorageService>();
 
             var connectionString = _azuriteContainer.GetConnectionString();
-            var blobServiceClient = new Azure.Storage.Blobs.BlobServiceClient(connectionString);
+            var blobServiceClient = new Azure.Storage.Blobs.BlobServiceClient(
+                connectionString,
+                new Azure.Storage.Blobs.BlobClientOptions(Azure.Storage.Blobs.BlobClientOptions.ServiceVersion.V2025_11_05));
 
             x.AddSingleton(blobServiceClient);
             x.AddSingleton<IBlobStorageService, BlobStorageService>();

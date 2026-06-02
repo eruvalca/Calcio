@@ -18,10 +18,16 @@ var postgres = builder.AddPostgres("postgres", pgUser, pgPassword)
 var postgresDb = postgres.AddDatabase("calcioDb");
 
 var blobStorage = builder.AddAzureStorage("storage")
-    .RunAsEmulator(emulator => emulator
-        .WithContainerName("azurite")
-        .WithLifetime(ContainerLifetime.Persistent)
-        .WithDataVolume())
+    .RunAsEmulator(emulator =>
+    {
+        // Persistent lifetime with Azurite is stable only when host ports are fixed.
+        emulator.WithContainerName("azurite");
+        emulator.WithDataVolume();
+        emulator.WithBlobPort(26000);
+        emulator.WithQueuePort(26001);
+        emulator.WithTablePort(26002);
+        emulator.WithLifetime(ContainerLifetime.Persistent);
+    })
     .AddBlobs("blobs");
 
 builder.AddProject<Projects.Calcio>("calcio")
