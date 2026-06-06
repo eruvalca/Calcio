@@ -1,5 +1,5 @@
 ---
-applyTo: "Calcio/Calcio/Services/**/*.cs,Calcio/Calcio.Client/Services/**/*.cs,Calcio/Calcio.Shared/Services/**/*.cs,Calcio/Calcio.Shared/Results/**/*.cs"
+applyTo: "Calcio/Services/**/*.cs,Calcio.Client/Services/**/*.cs,Calcio.Shared/Services/**/*.cs,Calcio.Shared/Results/**/*.cs"
 description: "Calcio service layer conventions for ServiceResult, ServiceProblem, server services, client services, and result primitives."
 ---
 
@@ -24,10 +24,10 @@ These conventions also apply when editing `Calcio.Shared.Results` primitives and
 
 ## Shared Service Contracts
 
-- Files under `Calcio/Calcio.Shared/Services/**/*.cs` define shared service interfaces and cross-project contracts.
+- Files under `Calcio.Shared/Services/**/*.cs` define shared service interfaces and cross-project contracts.
 - Keep shared service contracts free of server-only base classes, EF Core types, and implementation details.
-- Authentication-specific implementation guidance, such as inheriting from `AuthenticatedServiceBase`, applies to server services under `Calcio/Calcio/Services/**/*.cs`, not to shared interfaces.
-- Client implementations under `Calcio/Calcio.Client/Services/**/*.cs` implement the shared interfaces using `HttpClient`.
+- Authentication-specific implementation guidance, such as inheriting from `AuthenticatedServiceBase`, applies to server services under `Calcio/Services/**/*.cs`, not to shared interfaces.
+- Client implementations under `Calcio.Client/Services/**/*.cs` implement the shared interfaces using `HttpClient`.
 
 ## Server-side Services
 

@@ -1,5 +1,5 @@
 ---
-applyTo: "Calcio/Calcio.Shared/DTOs/**/*.cs,Calcio/Calcio/Extensions/**/*.cs"
+applyTo: "Calcio.Shared/DTOs/**/*.cs,Calcio/Extensions/**/*.cs"
 description: "Calcio shared DTO and entity-to-DTO mapping extension conventions."
 ---
 

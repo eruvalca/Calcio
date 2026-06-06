@@ -1,15 +1,15 @@
 # Repository Overview
 
 - This solution is a .NET 10 Blazor web app.
-- The server/host project is `Calcio/Calcio/Calcio.csproj`.
-- The Blazor WebAssembly project for interactive components is `Calcio/Calcio.Client/Calcio.Client.csproj`.
-- The shared UI library is `Calcio/Calcio.UI/Calcio.UI.csproj`.
-- The shared models, interfaces, endpoints, results, validation, and utilities project is `Calcio/Calcio.Shared/Calcio.Shared.csproj`.
-- Aspire instrumentation is configured in `Calcio/Calcio.AppHost/Calcio.AppHost.csproj` and `Calcio/Calcio.ServiceDefaults/Calcio.ServiceDefaults.csproj`.
+- The server/host project is `Calcio/Calcio.csproj`.
+- The Blazor WebAssembly project for interactive components is `Calcio.Client/Calcio.Client.csproj`.
+- The shared UI library is `Calcio.UI/Calcio.UI.csproj`.
+- The shared models, interfaces, endpoints, results, validation, and utilities project is `Calcio.Shared/Calcio.Shared.csproj`.
+- Aspire instrumentation is configured in `Calcio.AppHost/Calcio.AppHost.csproj` and `Calcio.ServiceDefaults/Calcio.ServiceDefaults.csproj`.
 
 ## Critical Invariants
 
-- When a change requires edits across multiple projects, make all changes in a single response in dependency order: Calcio.Shared first, then Calcio.UI, then Calcio/Calcio.Client, then Calcio. Do not leave the solution in a non-compiling state between steps.
+- When a change requires edits across multiple projects, make all changes in a single response in dependency order: Calcio.Shared first, then Calcio.UI, then Calcio.Client, then Calcio. Do not leave the solution in a non-compiling state between steps.
 - Preserve tenant isolation. Club-scoped data is filtered through `BaseDbContext.AccessibleClubIds`, global query filters, service checks, and `ClubMembershipFilter` where endpoints require club membership.
 - Never use `DbContext` directly from Blazor pages or components. UI code must use shared service interfaces such as `IClubsService` and `IPlayersService`.
 - If asked to implement a pattern that violates a Critical Invariant, do not comply. Instead, explain which invariant is violated and provide an alternative implementation that satisfies the request while respecting the invariant.

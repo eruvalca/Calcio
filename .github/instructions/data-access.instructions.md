@@ -1,5 +1,5 @@
 ---
-applyTo: "Calcio/Calcio/Data/**/*.cs,Calcio/Calcio/Entities/**/*.cs,Calcio/Calcio/Services/**/*.cs,Calcio/Calcio.IntegrationTests/**/*.cs"
+applyTo: "Calcio/Data/**/*.cs,Calcio/Entities/**/*.cs,Calcio/Services/**/*.cs,Calcio.IntegrationTests/**/*.cs"
 description: "Calcio EF Core, DbContext, entity, global query filter, and tenant isolation conventions."
 ---
 

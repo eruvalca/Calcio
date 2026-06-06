@@ -1,5 +1,5 @@
 ---
-applyTo: "Calcio/Calcio/Components/**/*.razor,Calcio/Calcio/Components/**/*.razor.cs,Calcio/Calcio.UI/Components/**/*.razor,Calcio/Calcio.UI/Components/**/*.razor.cs,Calcio/Calcio.Client/**/*.razor,Calcio/Calcio.Client/**/*.razor.cs"
+applyTo: "Calcio/Components/**/*.razor,Calcio/Components/**/*.razor.cs,Calcio.UI/Components/**/*.razor,Calcio.UI/Components/**/*.razor.cs,Calcio.Client/**/*.razor,Calcio.Client/**/*.razor.cs"
 description: "Calcio Blazor component placement, render mode, code-behind, Bootstrap, and CSS conventions."
 ---
 

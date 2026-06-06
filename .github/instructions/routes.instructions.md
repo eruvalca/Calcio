@@ -1,5 +1,5 @@
 ---
-applyTo: "Calcio/Calcio.Shared/Endpoints/**/*.cs,Calcio/Calcio/Endpoints/**/*.cs,Calcio/Calcio.Client/Services/**/*.cs"
+applyTo: "Calcio.Shared/Endpoints/**/*.cs,Calcio/Endpoints/**/*.cs,Calcio.Client/Services/**/*.cs"
 description: "Calcio API route constants, endpoint route templates, and client URL-builder conventions."
 ---
 
