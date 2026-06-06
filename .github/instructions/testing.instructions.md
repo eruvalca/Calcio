@@ -5,6 +5,11 @@ description: "Calcio unit and integration test conventions, fixtures, libraries,
 
 # Testing
 
+## Documentation
+
+- Test-support classes and helper members added or modified must include XML documentation comments for all access levels, including private/internal members.
+- Follow the canonical C# documentation rules in `.github/instructions/csharp-conventions.instructions.md` (Documentation section).
+
 - When writing code for new features or fixing bugs, include appropriate unit or integration tests for the changed behavior.
 - If the behavior cannot be unit tested due to missing abstractions or static dependencies, add an integration test instead and leave a TODO comment referencing the testability gap.
 - Run and verify all tests in the project(s) directly affected by the change (e.g., Calcio.UnitTests and/or Calcio.IntegrationTests) pass before considering the task complete.

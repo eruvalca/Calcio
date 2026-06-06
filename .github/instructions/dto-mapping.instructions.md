@@ -5,6 +5,11 @@ description: "Calcio shared DTO and entity-to-DTO mapping extension conventions.
 
 # DTOs And Mapping Extensions
 
+## Documentation
+
+- All DTO and mapping-extension classes/members added or modified must include XML documentation comments for all access levels, including private/internal members.
+- Follow the canonical C# documentation rules in `.github/instructions/csharp-conventions.instructions.md` (Documentation section).
+
 - Place DTOs in `Calcio.Shared/DTOs/{Feature}/` as record types with positional parameters.
 - Place entity-to-DTO mapping extensions in `Calcio/Extensions/{Feature}/`.
 - Use C# 14 extension members syntax for entity-to-DTO mappings; target the .NET 10 SDK with `<LangVersion>preview</LangVersion>`, for example: `extension(Player entity) { public PlayerDto ToPlayerDto() => new(...); }`.

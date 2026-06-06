@@ -12,6 +12,15 @@ description: "Calcio C# coding conventions, editorconfig expectations, and loggi
 - Eliminate unused parameters and unused value assignments; warnings are enabled for these patterns.
 - Prefer the C# 8+ declaration-form `using var x = …;` over the braced `using (var x = …) { }` form when the variable's lifetime naturally ends at the enclosing scope.
 
+## Documentation
+
+- Add XML documentation comments (`///`) for every C# type and member you add or modify, including `public`, `protected`, `internal`, and `private` declarations.
+- Required coverage includes classes, records, structs, interfaces, enums, delegates, services, constructors, methods, properties, fields, and events.
+- Every documented symbol must include a meaningful `<summary>` that explains purpose and behavior, not just a restatement of the symbol name.
+- Add `<param>` for each method or constructor parameter. Add `<returns>` for non-`void` return values, including `Task<T>` and `ValueTask<T>`.
+- Keep documentation behavior-accurate. When behavior changes, update docs in the same change.
+- Generated files (for example `*.g.cs`, designer-generated files, and third-party generated sources) are excluded unless the generator supports doc customization.
+
 ## Logging
 
 - Use source-generated logging via `partial` methods annotated with `LoggerMessage`.

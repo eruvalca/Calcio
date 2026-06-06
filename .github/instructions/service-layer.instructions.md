@@ -7,6 +7,11 @@ description: "Calcio service layer conventions for ServiceResult, ServiceProblem
 
 These conventions also apply when editing `Calcio.Shared.Results` primitives and HTTP response mapping helpers.
 
+## Documentation
+
+- All classes, interfaces, and methods added or modified in service-layer files must include XML documentation comments for all access levels, including private/internal members.
+- Follow the canonical C# documentation rules in `.github/instructions/csharp-conventions.instructions.md` (Documentation section).
+
 ## ServiceResult And ServiceProblem
 
 - Use `ServiceResult<TSuccess>` from `Calcio.Shared.Results` as the return type for service methods.

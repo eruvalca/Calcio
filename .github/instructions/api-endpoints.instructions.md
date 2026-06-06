@@ -8,6 +8,11 @@ description: "Use when creating or modifying Calcio Minimal API endpoints, endpo
 Route constants and URL builders are covered by `.github/instructions/routes.instructions.md`.
 DTO and entity mapping conventions are covered by `.github/instructions/dto-mapping.instructions.md`.
 
+## Documentation
+
+- All endpoint classes, helpers, and members added or modified must include XML documentation comments for all access levels, including private/internal members.
+- Follow the canonical C# documentation rules in `.github/instructions/csharp-conventions.instructions.md` (Documentation section).
+
 ## Minimal API Patterns
 
 - Place endpoints in `Endpoints/`, organized by feature.

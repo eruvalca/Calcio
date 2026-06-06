@@ -5,6 +5,11 @@ description: "Calcio Blazor component placement, render mode, code-behind, Boots
 
 # Blazor Components
 
+## Documentation
+
+- All component code-behind classes and members added or modified must include XML documentation comments for all access levels, including private/internal members.
+- Follow the canonical C# documentation rules in `.github/instructions/csharp-conventions.instructions.md` (Documentation section).
+
 - Prefer static server-rendered pages and components by default.
 - Only introduce interactive components, such as `@rendermode InteractiveAuto`, when interactivity is explicitly required.
 - Never use `DbContext` directly in Blazor components or pages; use service interfaces.

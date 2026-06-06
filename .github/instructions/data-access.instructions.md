@@ -5,6 +5,11 @@ description: "Calcio EF Core, DbContext, entity, global query filter, and tenant
 
 # Data Access
 
+## Documentation
+
+- All data-access classes and members added or modified must include XML documentation comments for all access levels, including private/internal members.
+- Follow the canonical C# documentation rules in `.github/instructions/csharp-conventions.instructions.md` (Documentation section).
+
 ## DbContext Usage
 
 - `BaseDbContext` injects `IHttpContextAccessor`, resolves the current `CalcioUserEntity` id, and exposes `AccessibleClubIds` plus helper filters. Never new up a context without an accessor; tenancy enforcement depends on it.

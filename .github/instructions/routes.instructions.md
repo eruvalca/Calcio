@@ -5,6 +5,11 @@ description: "Calcio API route constants, endpoint route templates, and client U
 
 # API Routes
 
+## Documentation
+
+- All classes and members added or modified in route constants, endpoint registrations, or client route-builder usage must include XML documentation comments for all access levels, including private/internal members.
+- Follow the canonical C# documentation rules in `.github/instructions/csharp-conventions.instructions.md` (Documentation section).
+
 - All API route strings are centralized in `Calcio.Shared/Endpoints/Routes.cs`.
 - Never use hardcoded route strings in endpoints or client services; always reference `Routes.*` constants.
 - Do not rename or delete existing `Routes.*` constants without first searching for all usages across `Endpoints/**` and `Services/**` and updating them in the same change.
