@@ -18,7 +18,7 @@
     <PackageReference Include="Scalar.AspNetCore" />
     <PackageReference Include="SkiaSharp" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux" />
-    <ProjectReference Include="..\..\Calcio.ServiceDefaults\Calcio.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Calcio.ServiceDefaults\Calcio.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Calcio.Client\Calcio.Client.csproj" />
     <ProjectReference Include="..\Calcio.Shared\Calcio.Shared.csproj" />
     <ProjectReference Include="..\Calcio.UI\Calcio.UI.csproj" />

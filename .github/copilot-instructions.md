@@ -5,7 +5,7 @@
 - The Blazor WebAssembly project for interactive components is `Calcio/Calcio.Client/Calcio.Client.csproj`.
 - The shared UI library is `Calcio/Calcio.UI/Calcio.UI.csproj`.
 - The shared models, interfaces, endpoints, results, validation, and utilities project is `Calcio/Calcio.Shared/Calcio.Shared.csproj`.
-- Aspire instrumentation is configured in `Calcio.AppHost/Calcio.AppHost.csproj` and `Calcio.ServiceDefaults/Calcio.ServiceDefaults.csproj`.
+- Aspire instrumentation is configured in `Calcio/Calcio.AppHost/Calcio.AppHost.csproj` and `Calcio/Calcio.ServiceDefaults/Calcio.ServiceDefaults.csproj`.
 
 ## Critical Invariants
 

@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Calcio\Calcio\Calcio.csproj" />
+    <ProjectReference Include="..\Calcio\Calcio.csproj" />
   </ItemGroup>
 
   <ItemGroup>
