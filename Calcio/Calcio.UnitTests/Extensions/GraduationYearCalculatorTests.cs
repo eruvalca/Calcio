@@ -4,8 +4,14 @@ using Shouldly;
 
 namespace Calcio.UnitTests.Extensions;
 
+/// <summary>
+/// Contains unit tests for G ra du at io nY ea rC al cu la to r behavior.
+/// </summary>
 public class GraduationYearCalculatorTests
 {
+    /// <summary>
+    /// Verifies the ComputeFromDateOfBirth_WhenBornInJanuary_Returns18YearsFromBirthYear scenario.
+    /// </summary>
     [Fact]
     public void ComputeFromDateOfBirth_WhenBornInJanuary_Returns18YearsFromBirthYear()
     {
@@ -19,6 +25,9 @@ public class GraduationYearCalculatorTests
         // Born January 2010 -> turns 18 in 2028 before August -> graduates 2028
         result.ShouldBe(2028);
     }
+    /// <summary>
+    /// Verifies the ComputeFromDateOfBirth_WhenBornInJuly_Returns18YearsFromBirthYear scenario.
+    /// </summary>
 
     [Fact]
     public void ComputeFromDateOfBirth_WhenBornInJuly_Returns18YearsFromBirthYear()
@@ -33,6 +42,9 @@ public class GraduationYearCalculatorTests
         // Born July 2010 -> turns 18 in 2028 before August -> graduates 2028
         result.ShouldBe(2028);
     }
+    /// <summary>
+    /// Verifies the ComputeFromDateOfBirth_WhenBornInAugust_Returns19YearsFromBirthYear scenario.
+    /// </summary>
 
     [Fact]
     public void ComputeFromDateOfBirth_WhenBornInAugust_Returns19YearsFromBirthYear()
@@ -47,6 +59,9 @@ public class GraduationYearCalculatorTests
         // Born August 2010 -> turns 18 in August 2028 (after cutoff) -> graduates 2029
         result.ShouldBe(2029);
     }
+    /// <summary>
+    /// Verifies the ComputeFromDateOfBirth_WhenBornInDecember_Returns19YearsFromBirthYear scenario.
+    /// </summary>
 
     [Fact]
     public void ComputeFromDateOfBirth_WhenBornInDecember_Returns19YearsFromBirthYear()
@@ -61,6 +76,9 @@ public class GraduationYearCalculatorTests
         // Born December 2010 -> turns 18 in December 2028 (after cutoff) -> graduates 2029
         result.ShouldBe(2029);
     }
+    /// <summary>
+    /// Verifies the ComputeFromDateOfBirth_WhenBornOnAugustCutoff_Returns19YearsFromBirthYear scenario.
+    /// </summary>
 
     [Fact]
     public void ComputeFromDateOfBirth_WhenBornOnAugustCutoff_Returns19YearsFromBirthYear()
@@ -75,6 +93,9 @@ public class GraduationYearCalculatorTests
         // August birthdays are after the cutoff -> +19 years from birth year
         result.ShouldBe(2024);
     }
+    /// <summary>
+    /// Verifies the ComputeFromDateOfBirth_WhenBornInSeptember_Returns19YearsFromBirthYear scenario.
+    /// </summary>
 
     [Fact]
     public void ComputeFromDateOfBirth_WhenBornInSeptember_Returns19YearsFromBirthYear()
@@ -88,6 +109,9 @@ public class GraduationYearCalculatorTests
         // Assert
         result.ShouldBe(2024);
     }
+    /// <summary>
+    /// Verifies the ComputeFromDateOfBirth_WhenBornOnLastDayOfJuly_Returns18YearsFromBirthYear scenario.
+    /// </summary>
 
     [Fact]
     public void ComputeFromDateOfBirth_WhenBornOnLastDayOfJuly_Returns18YearsFromBirthYear()

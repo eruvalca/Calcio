@@ -15,9 +15,17 @@ using Microsoft.Extensions.Primitives;
 
 namespace Calcio.Components.Account;
 
+/// <summary>
+/// Provides extension members for Identity Components Endpoint Route Builder Extensions.
+/// </summary>
 internal static partial class IdentityComponentsEndpointRouteBuilderExtensions
 {
     // These endpoints are required by the Identity Razor components defined in the /Components/Account/Pages directory of this project.
+    /// <summary>
+    /// Executes the Map Additional Identity Endpoints operation.
+    /// </summary>
+    /// <param name="endpoints">The endpoints.</param>
+    /// <returns>The operation result.</returns>
     public static IEndpointConventionBuilder MapAdditionalIdentityEndpoints(this IEndpointRouteBuilder endpoints)
     {
         ArgumentNullException.ThrowIfNull(endpoints);
@@ -152,6 +160,16 @@ internal static partial class IdentityComponentsEndpointRouteBuilderExtensions
         return accountGroup;
     }
 
+    /// <summary>
+    /// Executes the Log User Asked For Personal Data operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="userId">The user Id.</param>
     [LoggerMessage(Level = LogLevel.Information, Message = "User with ID '{UserId}' asked for their personal data.")]
+    /// <summary>
+    /// Executes the log user asked for personal data operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="userId">The user id.</param>
     private static partial void LogUserAskedForPersonalData(ILogger logger, string userId);
 }

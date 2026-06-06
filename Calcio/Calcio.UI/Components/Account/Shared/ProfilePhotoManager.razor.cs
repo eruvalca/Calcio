@@ -6,34 +6,80 @@ using Microsoft.AspNetCore.Components.Forms;
 
 namespace Calcio.UI.Components.Account.Shared;
 
+/// <summary>
+/// Manages viewing and replacing the signed-in user's account profile photo.
+/// </summary>
+/// <param name="calcioUsersService">The service used to load and upload account photos.</param>
+/// <param name="navigationManager">The navigation manager used to refresh the current page after upload.</param>
 public partial class ProfilePhotoManager(
     ICalcioUsersService calcioUsersService,
     NavigationManager navigationManager)
 {
+    /// <summary>
+    /// Defines the maximum accepted image file size in bytes.
+    /// </summary>
     private const long MaxFileSize = 10 * 1024 * 1024; // 10 MB
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the existing photo is loading.
+    /// </summary>
     private bool IsLoading { get; set; } = true;
 
+    /// <summary>
+    /// Gets or sets the currently stored account photo details.
+    /// </summary>
     private CalcioUserPhotoDto? CurrentPhoto { get; set; }
 
+    /// <summary>
+    /// Gets or sets the selected source image file before cropping.
+    /// </summary>
     private IBrowserFile? SelectedPhoto { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether form submission is in progress.
+    /// </summary>
     private bool IsSubmitting { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the cropped photo upload is in progress.
+    /// </summary>
     private bool IsUploadingPhoto { get; set; }
 
+    /// <summary>
+    /// Gets or sets upload progress percentage displayed in the UI.
+    /// </summary>
     private double UploadProgressPercent { get; set; }
 
+    /// <summary>
+    /// Gets or sets the data URL for the original selected image.
+    /// </summary>
     private string? OriginalPhotoDataUrl { get; set; }
 
+    /// <summary>
+    /// Gets or sets the data URL for the cropped image.
+    /// </summary>
     private string? CroppedPhotoDataUrl { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the cropper modal is displayed.
+    /// </summary>
     private bool ShowCropperModal { get; set; }
 
+    /// <summary>
+    /// Gets or sets the current error message shown to the user.
+    /// </summary>
     private string? ErrorMessage { get; set; }
 
+    /// <summary>
+    /// Loads the current account photo during component initialization.
+    /// </summary>
+    /// <returns>A task that completes when initialization data is loaded.</returns>
     protected override async Task OnInitializedAsync() => await LoadCurrentPhotoAsync();
 
+    /// <summary>
+    /// Loads the current account photo from the server.
+    /// </summary>
+    /// <returns>A task that completes when the photo retrieval operation finishes.</returns>
     private async Task LoadCurrentPhotoAsync()
     {
         IsLoading = true;
@@ -55,6 +101,11 @@ public partial class ProfilePhotoManager(
         }
     }
 
+    /// <summary>
+    /// Validates and reads a selected image file for cropping.
+    /// </summary>
+    /// <param name="e">File selection event data.</param>
+    /// <returns>A task that completes when file selection is processed.</returns>
     private async Task OnPhotoSelected(InputFileChangeEventArgs e)
     {
         ErrorMessage = null;
@@ -91,12 +142,19 @@ public partial class ProfilePhotoManager(
         }
     }
 
+    /// <summary>
+    /// Stores the cropped image data and closes the cropper modal.
+    /// </summary>
+    /// <param name="croppedDataUrl">The cropped image data URL.</param>
     private void OnCropApplied(string croppedDataUrl)
     {
         CroppedPhotoDataUrl = croppedDataUrl;
         ShowCropperModal = false;
     }
 
+    /// <summary>
+    /// Clears selected image state when cropping is canceled.
+    /// </summary>
     private void OnCropCancelled()
     {
         // User cancelled cropping, clear the selection
@@ -106,6 +164,9 @@ public partial class ProfilePhotoManager(
         ShowCropperModal = false;
     }
 
+    /// <summary>
+    /// Clears the currently selected photo and crop data.
+    /// </summary>
     private void ClearPhoto()
     {
         SelectedPhoto = null;
@@ -113,6 +174,10 @@ public partial class ProfilePhotoManager(
         CroppedPhotoDataUrl = null;
     }
 
+    /// <summary>
+    /// Submits the cropped photo for upload.
+    /// </summary>
+    /// <returns>A task that completes when submission handling finishes.</returns>
     private async Task HandleSubmit()
     {
         if (IsSubmitting || string.IsNullOrEmpty(CroppedPhotoDataUrl))
@@ -142,6 +207,10 @@ public partial class ProfilePhotoManager(
         }
     }
 
+    /// <summary>
+    /// Uploads the cropped image data to the account photo endpoint.
+    /// </summary>
+    /// <returns>A task that resolves to the updated account photo details.</returns>
     private async Task<CalcioUserPhotoDto> UploadCroppedPhotoAsync()
     {
         if (string.IsNullOrEmpty(CroppedPhotoDataUrl))
@@ -181,6 +250,11 @@ public partial class ProfilePhotoManager(
         return uploadResult.Value;
     }
 
+    /// <summary>
+    /// Formats a byte count using human-readable file size units.
+    /// </summary>
+    /// <param name="bytes">The byte count to format.</param>
+    /// <returns>A formatted file size string.</returns>
     private static string FormatFileSize(long bytes)
         => bytes switch
         {

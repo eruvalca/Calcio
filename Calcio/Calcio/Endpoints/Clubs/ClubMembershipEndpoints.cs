@@ -9,8 +9,16 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Calcio.Endpoints.Clubs;
 
+/// <summary>
+/// Registers API endpoints for Club Membership Endpoints.
+/// </summary>
 public static class ClubMembershipEndpoints
 {
+    /// <summary>
+    /// Executes the Map Club Membership Endpoints operation.
+    /// </summary>
+    /// <param name="endpoints">The endpoints.</param>
+    /// <returns>The operation result.</returns>
     public static IEndpointRouteBuilder MapClubMembershipEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup(Routes.ClubMembership.Group)
@@ -26,6 +34,13 @@ public static class ClubMembershipEndpoints
         return endpoints;
     }
 
+    /// <summary>
+    /// Removes the current user from the specified club.
+    /// </summary>
+    /// <param name="clubId">The identifier of the club to leave.</param>
+    /// <param name="service">The service used to process the leave-club operation.</param>
+    /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
+    /// <returns>A no-content response when the user leaves the club, or a problem response when the operation fails.</returns>
     private static async Task<Results<NoContent, ProblemHttpResult>> LeaveClub(
         [Required]
         [Range(1, long.MaxValue)]

@@ -26,6 +26,9 @@ namespace Calcio.Services.Players;
 /// Marked as sealed and immutable for HybridCache instance reuse.
 /// </summary>
 [ImmutableObject(true)]
+/// <summary>
+/// Represents the cached player photo paths record.
+/// </summary>
 internal sealed record CachedPlayerPhotoPaths(
     long PlayerPhotoId,
     string OriginalBlobName,
@@ -33,6 +36,16 @@ internal sealed record CachedPlayerPhotoPaths(
     string? MediumBlobName,
     string? LargeBlobName);
 
+/// <summary>
+/// Provides Players Service operations.
+/// </summary>
+/// <param name="readOnlyDbContextFactory">The read Only Db Context Factory.</param>
+/// <param name="readWriteDbContextFactory">The read Write Db Context Factory.</param>
+/// <param name="blobStorageService">The blob Storage Service.</param>
+/// <param name="importParserService">The import Parser Service.</param>
+/// <param name="cache">The cache.</param>
+/// <param name="httpContextAccessor">The http Context Accessor.</param>
+/// <param name="httpContextAccessor">The http Context Accessor.</param>
 public partial class PlayersService(
     IDbContextFactory<ReadOnlyDbContext> readOnlyDbContextFactory,
     IDbContextFactory<ReadWriteDbContext> readWriteDbContextFactory,
@@ -42,12 +55,33 @@ public partial class PlayersService(
     IHttpContextAccessor httpContextAccessor,
     ILogger<PlayersService> logger) : AuthenticatedServiceBase(httpContextAccessor), IPlayersService
 {
+    /// <summary>
+    /// Stores the Container Name.
+    /// </summary>
     private const string ContainerName = "player-photos";
+    /// <summary>
+    /// Stores the Small Size.
+    /// </summary>
     private const int SmallSize = 128;
+    /// <summary>
+    /// Stores the Medium Size.
+    /// </summary>
     private const int MediumSize = 512;
+    /// <summary>
+    /// Stores the Large Size.
+    /// </summary>
     private const int LargeSize = 1024;
+    /// <summary>
+    /// Stores the Sas Url Expiration.
+    /// </summary>
     private static readonly TimeSpan SasUrlExpiration = TimeSpan.FromHours(1);
 
+    /// <summary>
+    /// Executes the Get Club Players Async operation.
+    /// </summary>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<List<ClubPlayerDto>>> GetClubPlayersAsync(long clubId, CancellationToken cancellationToken)
     {
         // Club membership is validated by ClubMembershipFilter before this service is called.
@@ -64,6 +98,13 @@ public partial class PlayersService(
         return players;
     }
 
+    /// <summary>
+    /// Executes the Create Player Async operation.
+    /// </summary>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="dto">The dto.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<PlayerCreatedDto>> CreatePlayerAsync(long clubId, CreatePlayerDto dto, CancellationToken cancellationToken)
     {
         await using var dbContext = await readWriteDbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -93,6 +134,15 @@ public partial class PlayersService(
             player.FullName);
     }
 
+    /// <summary>
+    /// Executes the Upload Player Photo Async operation.
+    /// </summary>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="playerId">The player Id.</param>
+    /// <param name="photoStream">The photo Stream.</param>
+    /// <param name="contentType">The content Type.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<PlayerPhotoDto>> UploadPlayerPhotoAsync(
         long clubId,
         long playerId,
@@ -251,6 +301,11 @@ public partial class PlayersService(
         return (OneOf<PlayerPhotoDto, None>)GeneratePhotoDtoFromPaths(cachedPaths);
     }
 
+    /// <summary>
+    /// Executes the Generate Photo Dto operation.
+    /// </summary>
+    /// <param name="photo">The photo.</param>
+    /// <returns>The operation result.</returns>
     private PlayerPhotoDto GeneratePhotoDto(PlayerPhotoEntity photo)
         => new(
             photo.PlayerPhotoId,
@@ -259,6 +314,11 @@ public partial class PlayersService(
             photo.MediumBlobName is not null ? blobStorageService.GetSasUrl(ContainerName, photo.MediumBlobName, SasUrlExpiration).ToString() : null,
             photo.LargeBlobName is not null ? blobStorageService.GetSasUrl(ContainerName, photo.LargeBlobName, SasUrlExpiration).ToString() : null);
 
+    /// <summary>
+    /// Executes the Generate Photo Dto From Paths operation.
+    /// </summary>
+    /// <param name="paths">The paths.</param>
+    /// <returns>The operation result.</returns>
     private PlayerPhotoDto GeneratePhotoDtoFromPaths(CachedPlayerPhotoPaths paths)
         => new(
             paths.PlayerPhotoId,
@@ -305,6 +365,11 @@ public partial class PlayersService(
         return results;
     }
 
+    /// <summary>
+    /// Executes the Crop To Square operation.
+    /// </summary>
+    /// <param name="source">The source.</param>
+    /// <returns>The operation result.</returns>
     private static SKBitmap CropToSquare(SKBitmap source)
     {
         var size = Math.Min(source.Width, source.Height);
@@ -320,6 +385,12 @@ public partial class PlayersService(
         return croppedBitmap;
     }
 
+    /// <summary>
+    /// Executes the Resize Bitmap operation.
+    /// </summary>
+    /// <param name="source">The source.</param>
+    /// <param name="maxSize">The max Size.</param>
+    /// <returns>The operation result.</returns>
     private static SKBitmap ResizeBitmap(SKBitmap source, int maxSize)
     {
         if (source.Width <= maxSize && source.Height <= maxSize)
@@ -351,6 +422,12 @@ public partial class PlayersService(
         return resized;
     }
 
+    /// <summary>
+    /// Executes the Encode To Jpeg operation.
+    /// </summary>
+    /// <param name="bitmap">The bitmap.</param>
+    /// <param name="quality">The quality.</param>
+    /// <returns>The operation result.</returns>
     private static byte[] EncodeToJpeg(SKBitmap bitmap, int quality)
     {
         using var image = SKImage.FromBitmap(bitmap);
@@ -365,6 +442,11 @@ public partial class PlayersService(
         return (variant, uri);
     }
 
+    /// <summary>
+    /// Executes the Get Blob Guid From Path operation.
+    /// </summary>
+    /// <param name="blobPath">The blob Path.</param>
+    /// <returns>The operation result.</returns>
     private static string GetBlobGuidFromPath(string blobPath)
     {
         // Path format: players/{playerId}/{guid}/variant.jpg
@@ -372,6 +454,14 @@ public partial class PlayersService(
         return parts.Length >= 3 ? parts[2] : string.Empty;
     }
 
+    /// <summary>
+    /// Executes the Validate Bulk Import Async operation.
+    /// </summary>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="fileStream">The file Stream.</param>
+    /// <param name="fileName">The file Name.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<BulkValidateResultDto>> ValidateBulkImportAsync(
         long clubId,
         Stream fileStream,
@@ -383,6 +473,13 @@ public partial class PlayersService(
         return await importParserService.ParseAndValidateAsync(fileStream, fileName, clubId, cancellationToken);
     }
 
+    /// <summary>
+    /// Executes the Revalidate Bulk Import Async operation.
+    /// </summary>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="rows">The rows.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<BulkValidateResultDto>> RevalidateBulkImportAsync(
         long clubId,
         List<PlayerImportRowDto> rows,
@@ -393,6 +490,13 @@ public partial class PlayersService(
         return await importParserService.RevalidateRowsAsync(rows, clubId, cancellationToken);
     }
 
+    /// <summary>
+    /// Executes the Bulk Create Players Async operation.
+    /// </summary>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="rows">The rows.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<BulkImportResultDto>> BulkCreatePlayersAsync(
         long clubId,
         List<PlayerImportRowDto> rows,
@@ -438,27 +542,137 @@ public partial class PlayersService(
             SkippedCount: skippedCount);
     }
 
+    /// <summary>
+    /// Executes the Log Players Retrieved operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="playerCount">The player Count.</param>
+    /// <param name="userId">The user Id.</param>
     [LoggerMessage(Level = LogLevel.Debug, Message = "Retrieved {PlayerCount} players for club {ClubId} by user {UserId}")]
+    /// <summary>
+    /// Executes the log players retrieved operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club id.</param>
+    /// <param name="playerCount">The player count.</param>
+    /// <param name="userId">The user id.</param>
     private static partial void LogPlayersRetrieved(ILogger logger, long clubId, int playerCount, long userId);
 
+    /// <summary>
+    /// Executes the Log Player Created operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="playerId">The player Id.</param>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="userId">The user Id.</param>
     [LoggerMessage(Level = LogLevel.Information, Message = "Created player {PlayerId} for club {ClubId} by user {UserId}")]
+    /// <summary>
+    /// Executes the log player created operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="playerId">The player id.</param>
+    /// <param name="clubId">The club id.</param>
+    /// <param name="userId">The user id.</param>
     private static partial void LogPlayerCreated(ILogger logger, long playerId, long clubId, long userId);
 
+    /// <summary>
+    /// Executes the Log Photo Uploaded operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="playerId">The player Id.</param>
+    /// <param name="photoId">The photo Id.</param>
+    /// <param name="userId">The user Id.</param>
     [LoggerMessage(Level = LogLevel.Information, Message = "Uploaded photo {PhotoId} for player {PlayerId} by user {UserId}")]
+    /// <summary>
+    /// Executes the log photo uploaded operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="playerId">The player id.</param>
+    /// <param name="photoId">The photo id.</param>
+    /// <param name="userId">The user id.</param>
     private static partial void LogPhotoUploaded(ILogger logger, long playerId, long photoId, long userId);
 
+    /// <summary>
+    /// Executes the Log Existing Photo Deleted operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="playerId">The player Id.</param>
+    /// <param name="userId">The user Id.</param>
     [LoggerMessage(Level = LogLevel.Information, Message = "Deleted existing photo for player {PlayerId} by user {UserId}")]
+    /// <summary>
+    /// Executes the log existing photo deleted operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="playerId">The player id.</param>
+    /// <param name="userId">The user id.</param>
     private static partial void LogExistingPhotoDeleted(ILogger logger, long playerId, long userId);
 
+    /// <summary>
+    /// Executes the Log Bulk Import Validation Started operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="fileName">The file Name.</param>
+    /// <param name="userId">The user Id.</param>
     [LoggerMessage(Level = LogLevel.Information, Message = "Bulk import validation started for club {ClubId}, file: {FileName}, by user {UserId}")]
+    /// <summary>
+    /// Executes the log bulk import validation started operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club id.</param>
+    /// <param name="fileName">The file name.</param>
+    /// <param name="userId">The user id.</param>
     private static partial void LogBulkImportValidationStarted(ILogger logger, long clubId, string fileName, long userId);
 
+    /// <summary>
+    /// Executes the Log Bulk Import Revalidation Started operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="rowCount">The row Count.</param>
+    /// <param name="userId">The user Id.</param>
     [LoggerMessage(Level = LogLevel.Information, Message = "Bulk import re-validation started for club {ClubId}, {RowCount} rows, by user {UserId}")]
+    /// <summary>
+    /// Executes the log bulk import revalidation started operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club id.</param>
+    /// <param name="rowCount">The row count.</param>
+    /// <param name="userId">The user id.</param>
     private static partial void LogBulkImportRevalidationStarted(ILogger logger, long clubId, int rowCount, long userId);
 
+    /// <summary>
+    /// Executes the Log Bulk Import No Valid Rows operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="userId">The user Id.</param>
     [LoggerMessage(Level = LogLevel.Warning, Message = "Bulk import for club {ClubId} had no valid rows to import, by user {UserId}")]
+    /// <summary>
+    /// Executes the log bulk import no valid rows operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club id.</param>
+    /// <param name="userId">The user id.</param>
     private static partial void LogBulkImportNoValidRows(ILogger logger, long clubId, long userId);
 
+    /// <summary>
+    /// Executes the Log Bulk Import Completed operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="createdCount">The created Count.</param>
+    /// <param name="skippedCount">The skipped Count.</param>
+    /// <param name="userId">The user Id.</param>
     [LoggerMessage(Level = LogLevel.Information, Message = "Bulk import completed for club {ClubId}: {CreatedCount} created, {SkippedCount} skipped, by user {UserId}")]
+    /// <summary>
+    /// Executes the log bulk import completed operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club id.</param>
+    /// <param name="createdCount">The created count.</param>
+    /// <param name="skippedCount">The skipped count.</param>
+    /// <param name="userId">The user id.</param>
     private static partial void LogBulkImportCompleted(ILogger logger, long clubId, int createdCount, int skippedCount, long userId);
 }

@@ -10,17 +10,37 @@ using Microsoft.AspNetCore.WebUtilities;
 
 namespace Calcio.Components.Account.Pages;
 
+/// <summary>
+/// Represents the Forgot Password.
+/// </summary>
+/// <param name="userManager">The user Manager.</param>
+/// <param name="emailSender">The email Sender.</param>
+/// <param name="navigationManager">The navigation Manager.</param>
+/// <param name="redirectManager">The redirect Manager.</param>
 public partial class ForgotPassword(
     UserManager<CalcioUserEntity> userManager,
     IEmailSender<CalcioUserEntity> emailSender,
     NavigationManager navigationManager,
     IdentityRedirectManager redirectManager)
 {
+    /// <summary>
+    /// Gets or sets the Input.
+    /// </summary>
     [SupplyParameterFromForm]
+    /// <summary>
+    /// Gets or sets the input.
+    /// </summary>
     private InputModel Input { get; set; } = default!;
 
+    /// <summary>
+    /// Executes the On Initialized operation.
+    /// </summary>
     protected override void OnInitialized() => Input ??= new();
 
+    /// <summary>
+    /// Executes the On Valid Submit Async operation.
+    /// </summary>
+    /// <returns>The operation result.</returns>
     private async Task OnValidSubmitAsync()
     {
         var user = await userManager.FindByEmailAsync(Input.Email);
@@ -44,10 +64,19 @@ public partial class ForgotPassword(
         redirectManager.RedirectTo("Account/ForgotPasswordConfirmation");
     }
 
+    /// <summary>
+    /// Represents the Input Model.
+    /// </summary>
     private sealed class InputModel
     {
+        /// <summary>
+        /// Gets or sets the Email.
+        /// </summary>
         [Required]
         [EmailAddress]
+        /// <summary>
+        /// Gets or sets the email.
+        /// </summary>
         public string Email { get; set; } = "";
     }
 }

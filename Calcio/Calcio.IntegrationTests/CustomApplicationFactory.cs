@@ -15,14 +15,24 @@ using Testcontainers.PostgreSql;
 
 namespace Calcio.IntegrationTests;
 
+/// <summary>
+/// Provides a test server configured with PostgreSQL and mocked blob storage dependencies.
+/// </summary>
 public class CustomApplicationFactory : WebApplicationFactory<ICalcioMarker>, IAsyncLifetime
 {
+    /// <summary>
+    /// Hosts the PostgreSQL test container used by integration tests.
+    /// </summary>
     private readonly PostgreSqlContainer _databaseContainer = new PostgreSqlBuilder("postgres:17.7")
         .WithUsername("postgres")
         .WithPassword("postgres")
         .WithDatabase("calcioDb")
         .Build();
 
+    /// <summary>
+    /// Replaces production infrastructure with test implementations for integration tests.
+    /// </summary>
+    /// <param name="builder">The web host builder for configuring test services.</param>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
         => builder.ConfigureTestServices(x =>
         {
@@ -69,9 +79,21 @@ public class CustomApplicationFactory : WebApplicationFactory<ICalcioMarker>, IA
             x.AddHybridCache();
         });
 
+    /// <summary>
+    /// Starts the PostgreSQL container before tests execute.
+    /// </summary>
+    /// <returns>A task that completes when the container is running.</returns>
     public async Task InitializeAsync() => await _databaseContainer.StartAsync();
 
+    /// <summary>
+    /// Stops the PostgreSQL container after tests complete.
+    /// </summary>
+    /// <returns>A task that completes when the container is stopped.</returns>
     public new async Task DisposeAsync() => await _databaseContainer.StopAsync();
 
+    /// <summary>
+    /// Starts asynchronous lifetime resources required by xUnit.
+    /// </summary>
+    /// <returns>A value task that completes when lifetime initialization finishes.</returns>
     async ValueTask IAsyncLifetime.InitializeAsync() => await _databaseContainer.StartAsync();
 }

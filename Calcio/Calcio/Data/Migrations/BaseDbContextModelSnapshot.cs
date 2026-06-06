@@ -14,8 +14,15 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Calcio.Data.Migrations;
 
 [DbContext(typeof(BaseDbContext))]
+/// <summary>
+/// Captures the current Entity Framework Core model used for database migrations.
+/// </summary>
 partial class BaseDbContextModelSnapshot : ModelSnapshot
 {
+    /// <summary>
+    /// Builds the entity model snapshot metadata used by Entity Framework migrations.
+    /// </summary>
+    /// <param name="modelBuilder">The model builder receiving entity configuration metadata.</param>
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
 #pragma warning disable 612, 618

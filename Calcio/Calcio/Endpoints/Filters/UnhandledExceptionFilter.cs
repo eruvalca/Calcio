@@ -2,10 +2,21 @@ using System.Diagnostics;
 
 namespace Calcio.Endpoints.Filters;
 
+/// <summary>
+/// Applies Unhandled Exception Filter behavior to endpoint execution.
+/// </summary>
+/// <param name="logger">The logger.</param>
+/// <param name="problemDetailsService">The problem Details Service.</param>
 public sealed partial class UnhandledExceptionFilter(
     ILogger<UnhandledExceptionFilter> logger,
     IProblemDetailsService problemDetailsService) : IEndpointFilter
 {
+    /// <summary>
+    /// Executes the Invoke Async operation.
+    /// </summary>
+    /// <param name="context">The context.</param>
+    /// <param name="next">The next.</param>
+    /// <returns>The operation result.</returns>
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
         try
@@ -37,6 +48,22 @@ public sealed partial class UnhandledExceptionFilter(
         }
     }
 
+    /// <summary>
+    /// Executes the Log Unhandled Exception operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="ex">The ex.</param>
+    /// <param name="method">The method.</param>
+    /// <param name="path">The path.</param>
+    /// <param name="traceId">The trace Id.</param>
     [LoggerMessage(Level = LogLevel.Error, Message = "Unhandled exception in {Method} {Path}. TraceId: {TraceId}")]
+    /// <summary>
+    /// Executes the log unhandled exception operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="ex">The ex.</param>
+    /// <param name="method">The method.</param>
+    /// <param name="path">The path.</param>
+    /// <param name="traceId">The trace id.</param>
     private static partial void LogUnhandledException(ILogger logger, Exception ex, string method, PathString path, string? traceId);
 }

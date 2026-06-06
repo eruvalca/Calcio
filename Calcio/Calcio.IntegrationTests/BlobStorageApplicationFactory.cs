@@ -22,15 +22,25 @@ namespace Calcio.IntegrationTests;
 /// </summary>
 public class BlobStorageApplicationFactory : WebApplicationFactory<ICalcioMarker>, IAsyncLifetime
 {
+    /// <summary>
+    /// Hosts the PostgreSQL test container used by the integration test server.
+    /// </summary>
     private readonly PostgreSqlContainer _databaseContainer = new PostgreSqlBuilder("postgres:17.7")
         .WithUsername("postgres")
         .WithPassword("postgres")
         .WithDatabase("calcioDb")
         .Build();
 
+    /// <summary>
+    /// Hosts the Azurite container used to emulate Azure Blob Storage in tests.
+    /// </summary>
     private readonly AzuriteContainer _azuriteContainer = new AzuriteBuilder("mcr.microsoft.com/azure-storage/azurite:3.35.0")
         .Build();
 
+    /// <summary>
+    /// Reconfigures the test host to use containerized database and blob storage dependencies.
+    /// </summary>
+    /// <param name="builder">The web host builder for configuring test services.</param>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
         => builder.ConfigureTestServices(x =>
         {
@@ -68,16 +78,28 @@ public class BlobStorageApplicationFactory : WebApplicationFactory<ICalcioMarker
             x.AddHybridCache();
         });
 
+    /// <summary>
+    /// Starts database and Azurite containers before tests run.
+    /// </summary>
+    /// <returns>A task that completes when both containers are running.</returns>
     public async Task InitializeAsync()
         => await Task.WhenAll(
             _databaseContainer.StartAsync(),
             _azuriteContainer.StartAsync());
 
+    /// <summary>
+    /// Stops database and Azurite containers after tests complete.
+    /// </summary>
+    /// <returns>A task that completes when both containers are stopped.</returns>
     public new async Task DisposeAsync()
         => await Task.WhenAll(
             _databaseContainer.StopAsync(),
             _azuriteContainer.StopAsync());
 
+    /// <summary>
+    /// Starts asynchronous lifetime resources required by xUnit.
+    /// </summary>
+    /// <returns>A value task that completes when lifetime initialization finishes.</returns>
     async ValueTask IAsyncLifetime.InitializeAsync()
         => await Task.WhenAll(
             _databaseContainer.StartAsync(),

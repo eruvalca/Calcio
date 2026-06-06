@@ -15,9 +15,18 @@ using Shouldly;
 
 namespace Calcio.UnitTests.Components.Teams.Shared;
 
+/// <summary>
+/// Contains unit tests for T ea ms Gr id behavior.
+/// </summary>
 public sealed class TeamsGridTests : BunitContext
 {
+    /// <summary>
+    /// Stores test state for m oc kt ea ms se rv ic e.
+    /// </summary>
     private readonly ITeamsService _mockTeamsService;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TeamsGridTests"/> class.
+    /// </summary>
 
     public TeamsGridTests()
     {
@@ -30,6 +39,11 @@ public sealed class TeamsGridTests : BunitContext
 
     #region Helper Methods
 
+    /// <summary>
+    /// Creates a collection of team DTOs for rendering and filter test cases.
+    /// </summary>
+    /// <param name="count">The number of teams to generate.</param>
+    /// <returns>A generated list of <see cref="TeamDto"/> values.</returns>
     private static List<TeamDto> CreateTestTeams(int count = 2)
         => [
             .. Enumerable.Range(1, count)
@@ -39,6 +53,12 @@ public sealed class TeamsGridTests : BunitContext
                     GraduationYear: DateTime.Today.Year + i))
         ];
 
+    /// <summary>
+    /// Renders the <see cref="TeamsGrid"/> component with the provided test parameters.
+    /// </summary>
+    /// <param name="clubId">The club identifier supplied to the component.</param>
+    /// <param name="teams">The list of teams passed to the component.</param>
+    /// <returns>The rendered component under test.</returns>
     private IRenderedComponent<TeamsGrid> RenderGrid(
         long clubId = 100,
         List<TeamDto>? teams = null)
@@ -49,6 +69,9 @@ public sealed class TeamsGridTests : BunitContext
     #endregion
 
     #region Initial Rendering Tests
+    /// <summary>
+    /// Verifies the WhenNoTeams_ShouldDisplayEmptyMessage scenario.
+    /// </summary>
 
     [Fact]
     public void WhenNoTeams_ShouldDisplayEmptyMessage()
@@ -62,6 +85,9 @@ public sealed class TeamsGridTests : BunitContext
 
         cut.FindAll("table").ShouldBeEmpty();
     }
+    /// <summary>
+    /// Verifies the WhenTeamsExist_ShouldDisplayGrid scenario.
+    /// </summary>
 
     [Fact]
     public void WhenTeamsExist_ShouldDisplayGrid()
@@ -82,6 +108,9 @@ public sealed class TeamsGridTests : BunitContext
     #endregion
 
     #region Create Form Toggle Tests
+    /// <summary>
+    /// Verifies the WhenInitialRender_ShouldDisplayNewTeamButton scenario.
+    /// </summary>
 
     [Fact]
     public void WhenInitialRender_ShouldDisplayNewTeamButton()
@@ -93,6 +122,9 @@ public sealed class TeamsGridTests : BunitContext
         var button = cut.Find("button.btn-primary");
         button.TextContent.ShouldContain("New Team");
     }
+    /// <summary>
+    /// Verifies the WhenNewTeamClicked_ShouldShowCreateForm scenario.
+    /// </summary>
 
     [Fact]
     public void WhenNewTeamClicked_ShouldShowCreateForm()
@@ -108,6 +140,9 @@ public sealed class TeamsGridTests : BunitContext
         cut.Find("#teamName").ShouldNotBeNull();
         cut.Find("#graduationYear").ShouldNotBeNull();
     }
+    /// <summary>
+    /// Verifies the WhenCreateFormShown_ShouldHideNewTeamButton scenario.
+    /// </summary>
 
     [Fact]
     public void WhenCreateFormShown_ShouldHideNewTeamButton()
@@ -121,6 +156,9 @@ public sealed class TeamsGridTests : BunitContext
         // Assert
         cut.FindAll(".card-header button.btn-primary").ShouldBeEmpty();
     }
+    /// <summary>
+    /// Verifies the WhenCancelClicked_ShouldHideCreateForm scenario.
+    /// </summary>
 
     [Fact]
     public void WhenCancelClicked_ShouldHideCreateForm()
@@ -140,6 +178,10 @@ public sealed class TeamsGridTests : BunitContext
     #endregion
 
     #region Create Team Tests
+    /// <summary>
+    /// Verifies the WhenCreateFormSubmitted_ShouldCallService scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task WhenCreateFormSubmitted_ShouldCallService()
@@ -168,6 +210,10 @@ public sealed class TeamsGridTests : BunitContext
                 dto.Name == "U12 Red" &&
                 dto.GraduationYear == DateTime.Today.Year + 5), Arg.Any<CancellationToken>());
     }
+    /// <summary>
+    /// Verifies the WhenCreateReturnsForbidden_ShouldDisplayError scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task WhenCreateReturnsForbidden_ShouldDisplayError()
@@ -193,6 +239,10 @@ public sealed class TeamsGridTests : BunitContext
             alert.TextContent.ShouldContain("not authorized");
         });
     }
+    /// <summary>
+    /// Verifies the WhenCreateReturnsConflict_ShouldDisplayConflictError scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task WhenCreateReturnsConflict_ShouldDisplayConflictError()
@@ -218,6 +268,10 @@ public sealed class TeamsGridTests : BunitContext
             alert.TextContent.ShouldContain("already exists");
         });
     }
+    /// <summary>
+    /// Verifies the WhenCreateReturnsServerError_ShouldDisplayGenericError scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task WhenCreateReturnsServerError_ShouldDisplayGenericError()
@@ -247,6 +301,10 @@ public sealed class TeamsGridTests : BunitContext
     #endregion
 
     #region Button State Tests
+    /// <summary>
+    /// Verifies the WhenCreating_ShouldDisableButtons scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task WhenCreating_ShouldDisableButtons()
@@ -281,6 +339,10 @@ public sealed class TeamsGridTests : BunitContext
         tcs.SetResult(new ServiceResult<Success>(new Success()));
         await submitTask;
     }
+    /// <summary>
+    /// Verifies the WhenCreating_ShouldShowSpinner scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task WhenCreating_ShouldShowSpinner()
@@ -316,6 +378,9 @@ public sealed class TeamsGridTests : BunitContext
     #endregion
 
     #region Graduation Year Default Value Tests
+    /// <summary>
+    /// Verifies the WhenCreateFormOpened_ShouldDefaultGraduationYearToCurrentYear scenario.
+    /// </summary>
 
     [Fact]
     public void WhenCreateFormOpened_ShouldDefaultGraduationYearToCurrentYear()
@@ -334,6 +399,9 @@ public sealed class TeamsGridTests : BunitContext
     #endregion
 
     #region Multiple Teams Tests
+    /// <summary>
+    /// Verifies the WhenMultipleTeams_ShouldDisplayAll scenario.
+    /// </summary>
 
     [Fact]
     public void WhenMultipleTeams_ShouldDisplayAll()
@@ -353,6 +421,9 @@ public sealed class TeamsGridTests : BunitContext
     #endregion
 
     #region Search/Filter Tests
+    /// <summary>
+    /// Verifies the WhenSearchTermIsEmpty_ShouldDisplayAllTeams scenario.
+    /// </summary>
 
     [Fact]
     public void WhenSearchTermIsEmpty_ShouldDisplayAllTeams()
@@ -367,6 +438,9 @@ public sealed class TeamsGridTests : BunitContext
         var rows = cut.FindAll("tbody tr");
         rows.Count.ShouldBe(3);
     }
+    /// <summary>
+    /// Verifies the WhenSearchByName_ShouldFilterTeams scenario.
+    /// </summary>
 
     [Fact]
     public void WhenSearchByName_ShouldFilterTeams()
@@ -389,6 +463,9 @@ public sealed class TeamsGridTests : BunitContext
             cut.Markup.ShouldNotContain("Team 3");
         });
     }
+    /// <summary>
+    /// Verifies the WhenSearchByPartialName_ShouldFilterTeams scenario.
+    /// </summary>
 
     [Fact]
     public void WhenSearchByPartialName_ShouldFilterTeams()
@@ -408,6 +485,9 @@ public sealed class TeamsGridTests : BunitContext
             rows.Count.ShouldBe(3); // All 3 teams match "Team"
         });
     }
+    /// <summary>
+    /// Verifies the WhenSearchIsCaseInsensitive_ShouldFilterTeams scenario.
+    /// </summary>
 
     [Fact]
     public void WhenSearchIsCaseInsensitive_ShouldFilterTeams()
@@ -428,6 +508,9 @@ public sealed class TeamsGridTests : BunitContext
             cut.Markup.ShouldContain("Team 1");
         });
     }
+    /// <summary>
+    /// Verifies the WhenSearchMatchesNoTeams_ShouldDisplayEmptyGrid scenario.
+    /// </summary>
 
     [Fact]
     public void WhenSearchMatchesNoTeams_ShouldDisplayEmptyGrid()
@@ -447,6 +530,9 @@ public sealed class TeamsGridTests : BunitContext
             rows.Count.ShouldBe(0);
         });
     }
+    /// <summary>
+    /// Verifies the WhenSearchCleared_ShouldDisplayAllTeams scenario.
+    /// </summary>
 
     [Fact]
     public void WhenSearchCleared_ShouldDisplayAllTeams()

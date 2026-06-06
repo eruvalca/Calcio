@@ -21,10 +21,21 @@ using Shouldly;
 
 namespace Calcio.IntegrationTests.Services.Clubs;
 
+/// <summary>
+/// Contains integration tests for clubs service behavior.
+/// </summary>
+/// <param name="factory">Provides dependencies used to build the integration test host.</param>
 public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContextTests(factory)
 {
+    /// <summary>
+    /// Stores the unaffiliated user id value used by this test suite.
+    /// </summary>
     private const long UnaffiliatedUserId = 200;
 
+    /// <summary>
+    /// Initializes shared test data required by this test suite.
+    /// </summary>
+    /// <returns>A value task that represents the asynchronous initialization operation.</returns>
     public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
@@ -99,6 +110,10 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
     #region GetUserClubsAsync Tests
 
     [Fact]
+    /// <summary>
+    /// Verifies that get user clubs async when user belongs to club returns clubs.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task GetUserClubsAsync_WhenUserBelongsToClub_ReturnsClubs()
     {
         // Arrange
@@ -118,6 +133,10 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that get user clubs async when user has no club returns empty list.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task GetUserClubsAsync_WhenUserHasNoClub_ReturnsEmptyList()
     {
         // Arrange
@@ -140,6 +159,10 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
     #region GetAllClubsForBrowsingAsync Tests
 
     [Fact]
+    /// <summary>
+    /// Verifies that get all clubs for browsing async returns all clubs.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task GetAllClubsForBrowsingAsync_ReturnsAllClubs()
     {
         // Arrange
@@ -160,6 +183,10 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that get all clubs for browsing async ignores query filters.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task GetAllClubsForBrowsingAsync_IgnoresQueryFilters()
     {
         // Arrange
@@ -186,6 +213,10 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
     #region GetClubByIdAsync Tests
 
     [Fact]
+    /// <summary>
+    /// Verifies that get club by id async when user is member returns club.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task GetClubByIdAsync_WhenUserIsMember_ReturnsClub()
     {
         // Arrange
@@ -210,6 +241,10 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that get club by id async when user is not member returns not found.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task GetClubByIdAsync_WhenUserIsNotMember_ReturnsNotFound()
     {
         // Arrange
@@ -236,6 +271,10 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that get club by id async when club does not exist returns not found.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task GetClubByIdAsync_WhenClubDoesNotExist_ReturnsNotFound()
     {
         // Arrange
@@ -258,6 +297,10 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
     #region CreateClubAsync Tests
 
     [Fact]
+    /// <summary>
+    /// Verifies that create club async when valid user returns success and creates club.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task CreateClubAsync_WhenValidUser_ReturnsSuccessAndCreatesClub()
     {
         // Arrange
@@ -302,6 +345,10 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that create club async when user already has club returns conflict.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task CreateClubAsync_WhenUserAlreadyHasClub_ReturnsConflict()
     {
         // Arrange
@@ -322,6 +369,10 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that create club async when user has pending join request returns conflict.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task CreateClubAsync_WhenUserHasPendingJoinRequest_ReturnsConflict()
     {
         // Arrange
@@ -359,6 +410,10 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that create club async when user has rejected join request deletes request and creates club.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task CreateClubAsync_WhenUserHasRejectedJoinRequest_DeletesRequestAndCreatesClub()
     {
         // Arrange
@@ -404,6 +459,10 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
     #region LeaveClubAsync Tests
 
     [Fact]
+    /// <summary>
+    /// Verifies that leave club async when member and not club admin removes club and returns success.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task LeaveClubAsync_WhenMemberAndNotClubAdmin_RemovesClubAndReturnsSuccess()
     {
         // Arrange
@@ -458,6 +517,10 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that leave club async when user not in club returns not found.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task LeaveClubAsync_WhenUserNotInClub_ReturnsNotFound()
     {
         // Arrange
@@ -485,6 +548,10 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that leave club async when user is club admin returns forbidden and does not leave.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task LeaveClubAsync_WhenUserIsClubAdmin_ReturnsForbiddenAndDoesNotLeave()
     {
         // Arrange
@@ -526,6 +593,11 @@ public class ClubsServiceTests(CustomApplicationFactory factory) : BaseDbContext
 
     #region Helpers
 
+    /// <summary>
+    /// Creates the service under test using dependencies from the current scope.
+    /// </summary>
+    /// <param name="services">Specifies the services value for this scenario.</param>
+    /// <returns>The clubs service produced by the operation.</returns>
     private static ClubsService CreateService(IServiceProvider services)
     {
         var readOnlyFactory = services.GetRequiredService<IDbContextFactory<ReadOnlyDbContext>>();

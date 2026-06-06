@@ -4,12 +4,25 @@ using Shouldly;
 
 namespace Calcio.UnitTests.Validation;
 
+/// <summary>
+/// Contains unit tests for G ra du at io nY ea rA tt ri bu te behavior.
+/// </summary>
 public class GraduationYearAttributeTests
 {
+    /// <summary>
+    /// Gets the current calendar year used by graduation-year boundary checks.
+    /// </summary>
     private static int CurrentYear => DateTime.Today.Year;
+
+    /// <summary>
+    /// Gets the maximum graduation year accepted by the validation attribute.
+    /// </summary>
     private static int MaxYear => CurrentYear + 25;
 
     #region GraduationYearAttribute Tests
+    /// <summary>
+    /// Verifies the GraduationYear_WhenNull_ReturnsInvalid scenario.
+    /// </summary>
 
     [Fact]
     public void GraduationYear_WhenNull_ReturnsInvalid()
@@ -23,6 +36,9 @@ public class GraduationYearAttributeTests
         // Assert
         result.ShouldBeFalse();
     }
+    /// <summary>
+    /// Verifies the GraduationYear_WhenCurrentYear_ReturnsValid scenario.
+    /// </summary>
 
     [Fact]
     public void GraduationYear_WhenCurrentYear_ReturnsValid()
@@ -36,6 +52,9 @@ public class GraduationYearAttributeTests
         // Assert
         result.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the GraduationYear_WhenNextYear_ReturnsValid scenario.
+    /// </summary>
 
     [Fact]
     public void GraduationYear_WhenNextYear_ReturnsValid()
@@ -49,6 +68,9 @@ public class GraduationYearAttributeTests
         // Assert
         result.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the GraduationYear_WhenLastYear_ReturnsInvalid scenario.
+    /// </summary>
 
     [Fact]
     public void GraduationYear_WhenLastYear_ReturnsInvalid()
@@ -62,6 +84,9 @@ public class GraduationYearAttributeTests
         // Assert
         result.ShouldBeFalse();
     }
+    /// <summary>
+    /// Verifies the GraduationYear_WhenMaxYear_ReturnsValid scenario.
+    /// </summary>
 
     [Fact]
     public void GraduationYear_WhenMaxYear_ReturnsValid()
@@ -75,6 +100,9 @@ public class GraduationYearAttributeTests
         // Assert
         result.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the GraduationYear_WhenAboveMaxYear_ReturnsInvalid scenario.
+    /// </summary>
 
     [Fact]
     public void GraduationYear_WhenAboveMaxYear_ReturnsInvalid()
@@ -88,6 +116,9 @@ public class GraduationYearAttributeTests
         // Assert
         result.ShouldBeFalse();
     }
+    /// <summary>
+    /// Verifies the GraduationYear_WhenYearWithinRange_ReturnsValid scenario.
+    /// </summary>
 
     [Fact]
     public void GraduationYear_WhenYearWithinRange_ReturnsValid()
@@ -101,6 +132,9 @@ public class GraduationYearAttributeTests
         // Assert
         result.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the GraduationYear_WhenNegativeYear_ReturnsInvalid scenario.
+    /// </summary>
 
     [Fact]
     public void GraduationYear_WhenNegativeYear_ReturnsInvalid()
@@ -114,6 +148,9 @@ public class GraduationYearAttributeTests
         // Assert
         result.ShouldBeFalse();
     }
+    /// <summary>
+    /// Verifies the GraduationYear_WhenZero_ReturnsInvalid scenario.
+    /// </summary>
 
     [Fact]
     public void GraduationYear_WhenZero_ReturnsInvalid()
@@ -127,6 +164,9 @@ public class GraduationYearAttributeTests
         // Assert
         result.ShouldBeFalse();
     }
+    /// <summary>
+    /// Verifies the GraduationYear_WhenInvalidType_ReturnsInvalid scenario.
+    /// </summary>
 
     [Fact]
     public void GraduationYear_WhenInvalidType_ReturnsInvalid()
@@ -140,6 +180,9 @@ public class GraduationYearAttributeTests
         // Assert
         result.ShouldBeFalse();
     }
+    /// <summary>
+    /// Verifies the GraduationYear_FormatErrorMessage_ContainsMinAndMaxYear scenario.
+    /// </summary>
 
     [Fact]
     public void GraduationYear_FormatErrorMessage_ContainsMinAndMaxYear()

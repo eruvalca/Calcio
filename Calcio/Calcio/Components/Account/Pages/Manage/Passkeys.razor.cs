@@ -7,28 +7,71 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Calcio.Components.Account.Pages.Manage;
 
+/// <summary>
+/// Represents the Passkeys.
+/// </summary>
+/// <param name="userManager">The user Manager.</param>
+/// <param name="signInManager">The sign In Manager.</param>
+/// <param name="redirectManager">The redirect Manager.</param>
 public partial class Passkeys(
     UserManager<CalcioUserEntity> userManager,
     SignInManager<CalcioUserEntity> signInManager,
     IdentityRedirectManager redirectManager)
 {
+    /// <summary>
+    /// Stores the Max Passkey Count.
+    /// </summary>
     private const int MaxPasskeyCount = 100;
 
+    /// <summary>
+    /// Stores the current Passkeys.
+    /// </summary>
     private CalcioUserEntity? user;
+    /// <summary>
+    /// Stores the current Passkeys.
+    /// </summary>
     private IList<UserPasskeyInfo>? currentPasskeys;
 
+    /// <summary>
+    /// Gets or sets the Http Context.
+    /// </summary>
     [CascadingParameter]
+    /// <summary>
+    /// Gets or sets the http context.
+    /// </summary>
     private HttpContext HttpContext { get; set; } = default!;
 
+    /// <summary>
+    /// Gets or sets the Action.
+    /// </summary>
     [SupplyParameterFromForm]
+    /// <summary>
+    /// Gets or sets the action.
+    /// </summary>
     private string? Action { get; set; }
 
+    /// <summary>
+    /// Gets or sets the Credential Id.
+    /// </summary>
     [SupplyParameterFromForm]
+    /// <summary>
+    /// Gets or sets the credential id.
+    /// </summary>
     private string? CredentialId { get; set; }
 
+    /// <summary>
+    /// Gets or sets the Input.
+    /// </summary>
     [SupplyParameterFromForm(FormName = "add-passkey")]
+    /// <summary>
+    /// Gets or sets the input.
+    /// </summary>
     private PasskeyInputModel Input { get; set; } = default!;
 
+    /// <summary>
+    /// Executes the On Initialized Async operation.
+    /// </summary>
+    /// <returns>The operation result.</returns>
     protected override async Task OnInitializedAsync()
     {
         Input ??= new();
@@ -43,6 +86,10 @@ public partial class Passkeys(
         currentPasskeys = await userManager.GetPasskeysAsync(user);
     }
 
+    /// <summary>
+    /// Executes the Add Passkey operation.
+    /// </summary>
+    /// <returns>The operation result.</returns>
     private async Task AddPasskey()
     {
         if (user is null)
@@ -88,6 +135,10 @@ public partial class Passkeys(
         redirectManager.RedirectTo($"Account/Manage/RenamePasskey/{credentialIdBase64Url}");
     }
 
+    /// <summary>
+    /// Executes the Update Passkey operation.
+    /// </summary>
+    /// <returns>The operation result.</returns>
     private async Task UpdatePasskey()
     {
         switch (Action)
@@ -104,6 +155,10 @@ public partial class Passkeys(
         }
     }
 
+    /// <summary>
+    /// Executes the Delete Passkey operation.
+    /// </summary>
+    /// <returns>The operation result.</returns>
     private async Task DeletePasskey()
     {
         if (user is null)

@@ -15,6 +15,15 @@ using OneOf.Types;
 
 namespace Calcio.Services.ClubJoinRequests;
 
+/// <summary>
+/// Provides Club Join Requests Service operations.
+/// </summary>
+/// <param name="readOnlyDbContextFactory">The read Only Db Context Factory.</param>
+/// <param name="readWriteDbContextFactory">The read Write Db Context Factory.</param>
+/// <param name="userManager">The user Manager.</param>
+/// <param name="userClubsCacheService">The user Clubs Cache Service.</param>
+/// <param name="httpContextAccessor">The http Context Accessor.</param>
+/// <param name="httpContextAccessor">The http Context Accessor.</param>
 public partial class ClubJoinRequestsService(
     IDbContextFactory<ReadOnlyDbContext> readOnlyDbContextFactory,
     IDbContextFactory<ReadWriteDbContext> readWriteDbContextFactory,
@@ -23,6 +32,11 @@ public partial class ClubJoinRequestsService(
     IHttpContextAccessor httpContextAccessor,
     ILogger<ClubJoinRequestsService> logger) : AuthenticatedServiceBase(httpContextAccessor), IClubJoinRequestsService
 {
+    /// <summary>
+    /// Executes the Get Request For Current User Async operation.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<ClubJoinRequestDto>> GetRequestForCurrentUserAsync(CancellationToken cancellationToken)
     {
         await using var dbContext = await readOnlyDbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -39,6 +53,12 @@ public partial class ClubJoinRequestsService(
             : request;
     }
 
+    /// <summary>
+    /// Executes the Create Join Request Async operation.
+    /// </summary>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<Success>> CreateJoinRequestAsync(long clubId, CancellationToken cancellationToken)
     {
         await using var dbContext = await readWriteDbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -81,6 +101,11 @@ public partial class ClubJoinRequestsService(
         return new Success();
     }
 
+    /// <summary>
+    /// Executes the Cancel Join Request Async operation.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<Success>> CancelJoinRequestAsync(CancellationToken cancellationToken)
     {
         await using var dbContext = await readWriteDbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -100,6 +125,12 @@ public partial class ClubJoinRequestsService(
         return new Success();
     }
 
+    /// <summary>
+    /// Executes the Get Pending Requests For Club Async operation.
+    /// </summary>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<List<ClubJoinRequestWithUserDto>>> GetPendingRequestsForClubAsync(long clubId, CancellationToken cancellationToken)
     {
         // Club membership is validated by ClubMembershipFilter before this service is called.
@@ -115,6 +146,14 @@ public partial class ClubJoinRequestsService(
         return requests;
     }
 
+    /// <summary>
+    /// Executes the Update Join Request Status Async operation.
+    /// </summary>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="requestId">The request Id.</param>
+    /// <param name="status">The status.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<Success>> UpdateJoinRequestStatusAsync(long clubId, long requestId, RequestStatus status, CancellationToken cancellationToken)
         => status switch
         {
@@ -123,6 +162,13 @@ public partial class ClubJoinRequestsService(
             _ => ServiceProblem.BadRequest("Invalid status. Only 'Approved' or 'Rejected' transitions are allowed.")
         };
 
+    /// <summary>
+    /// Executes the Approve Join Request Internal Async operation.
+    /// </summary>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="requestId">The request Id.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     private async Task<ServiceResult<Success>> ApproveJoinRequestInternalAsync(long clubId, long requestId, CancellationToken cancellationToken)
     {
         // Club membership is validated by ClubMembershipFilter before this service is called.
@@ -169,6 +215,13 @@ public partial class ClubJoinRequestsService(
         return new Success();
     }
 
+    /// <summary>
+    /// Executes the Reject Join Request Internal Async operation.
+    /// </summary>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="requestId">The request Id.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     private async Task<ServiceResult<Success>> RejectJoinRequestInternalAsync(long clubId, long requestId, CancellationToken cancellationToken)
     {
         // Club membership is validated by ClubMembershipFilter before this service is called.
@@ -191,18 +244,82 @@ public partial class ClubJoinRequestsService(
         return new Success();
     }
 
+    /// <summary>
+    /// Executes the Log Join Request Created operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="userId">The user Id.</param>
     [LoggerMessage(Level = LogLevel.Information, Message = "Join request created for club {ClubId} by user {UserId}")]
+    /// <summary>
+    /// Executes the log join request created operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club id.</param>
+    /// <param name="userId">The user id.</param>
     private static partial void LogJoinRequestCreated(ILogger logger, long clubId, long userId);
 
+    /// <summary>
+    /// Executes the Log Join Request Canceled operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="userId">The user Id.</param>
     [LoggerMessage(Level = LogLevel.Information, Message = "Join request canceled for club {ClubId} by user {UserId}")]
+    /// <summary>
+    /// Executes the log join request canceled operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club id.</param>
+    /// <param name="userId">The user id.</param>
     private static partial void LogJoinRequestCanceled(ILogger logger, long clubId, long userId);
 
+    /// <summary>
+    /// Executes the Log Join Request Approved operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="requestingUserId">The requesting User Id.</param>
+    /// <param name="approvingUserId">The approving User Id.</param>
     [LoggerMessage(Level = LogLevel.Information, Message = "Join request for club {ClubId} from user {RequestingUserId} approved by user {ApprovingUserId}")]
+    /// <summary>
+    /// Executes the log join request approved operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club id.</param>
+    /// <param name="requestingUserId">The requesting user id.</param>
+    /// <param name="approvingUserId">The approving user id.</param>
     private static partial void LogJoinRequestApproved(ILogger logger, long clubId, long requestingUserId, long approvingUserId);
 
+    /// <summary>
+    /// Executes the Log Join Request Rejected operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="requestingUserId">The requesting User Id.</param>
+    /// <param name="rejectingUserId">The rejecting User Id.</param>
     [LoggerMessage(Level = LogLevel.Information, Message = "Join request for club {ClubId} from user {RequestingUserId} rejected by user {RejectingUserId}")]
+    /// <summary>
+    /// Executes the log join request rejected operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club id.</param>
+    /// <param name="requestingUserId">The requesting user id.</param>
+    /// <param name="rejectingUserId">The rejecting user id.</param>
     private static partial void LogJoinRequestRejected(ILogger logger, long clubId, long requestingUserId, long rejectingUserId);
 
+    /// <summary>
+    /// Executes the Log Standard User Role Failed operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="userId">The user Id.</param>
+    /// <param name="errors">The errors.</param>
     [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to add StandardUser role to user {UserId}: {Errors}")]
+    /// <summary>
+    /// Executes the log standard user role failed operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="userId">The user id.</param>
+    /// <param name="errors">The errors.</param>
     private static partial void LogStandardUserRoleFailed(ILogger logger, long userId, string errors);
 }

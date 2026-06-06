@@ -12,11 +12,21 @@ using Shouldly;
 
 namespace Calcio.UnitTests.Services.Teams;
 
+/// <summary>
+/// Contains unit tests for T ea mS er vi ce behavior.
+/// </summary>
 public class TeamServiceTests
 {
+    /// <summary>
+    /// Defines the base URL used by mocked HTTP requests in this test class.
+    /// </summary>
     private const string BaseUrl = "http://localhost";
 
     #region GetTeamsAsync Tests
+    /// <summary>
+    /// Verifies the GetTeamsAsync_WhenOk_ReturnsList scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetTeamsAsync_WhenOk_ReturnsList()
@@ -50,6 +60,10 @@ public class TeamServiceTests
         list[1].Name.ShouldBe("U14 Blue");
         list[1].GraduationYear.ShouldBe(2010);
     }
+    /// <summary>
+    /// Verifies the GetTeamsAsync_WhenEmptyResponse_ReturnsEmptyList scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetTeamsAsync_WhenEmptyResponse_ReturnsEmptyList()
@@ -73,6 +87,10 @@ public class TeamServiceTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBeEmpty();
     }
+    /// <summary>
+    /// Verifies the GetTeamsAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetTeamsAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -96,6 +114,10 @@ public class TeamServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the GetTeamsAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetTeamsAsync_WhenServerError_ReturnsServerErrorProblem()
@@ -119,6 +141,10 @@ public class TeamServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.ServerError);
     }
+    /// <summary>
+    /// Verifies the GetTeamsAsync_WhenNullResponse_ReturnsEmptyList scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetTeamsAsync_WhenNullResponse_ReturnsEmptyList()
@@ -142,6 +168,10 @@ public class TeamServiceTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBeEmpty();
     }
+    /// <summary>
+    /// Verifies the GetTeamsAsync_CorrectlyMapsTeamProperties scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetTeamsAsync_CorrectlyMapsTeamProperties()
@@ -176,6 +206,10 @@ public class TeamServiceTests
     #endregion
 
     #region CreateTeamAsync Tests
+    /// <summary>
+    /// Verifies the CreateTeamAsync_WhenCreated_ReturnsSuccess scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateTeamAsync_WhenCreated_ReturnsSuccess()
@@ -199,6 +233,10 @@ public class TeamServiceTests
         // Assert
         result.IsSuccess.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the CreateTeamAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateTeamAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -223,6 +261,10 @@ public class TeamServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the CreateTeamAsync_WhenConflict_ReturnsConflictProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateTeamAsync_WhenConflict_ReturnsConflictProblem()
@@ -247,6 +289,10 @@ public class TeamServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Conflict);
     }
+    /// <summary>
+    /// Verifies the CreateTeamAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateTeamAsync_WhenServerError_ReturnsServerErrorProblem()
@@ -271,6 +317,10 @@ public class TeamServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.ServerError);
     }
+    /// <summary>
+    /// Verifies the CreateTeamAsync_WithGraduationYear_SendsCorrectPayload scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateTeamAsync_WithGraduationYear_SendsCorrectPayload()

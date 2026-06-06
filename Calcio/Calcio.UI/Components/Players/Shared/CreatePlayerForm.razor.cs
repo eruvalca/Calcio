@@ -11,42 +11,97 @@ using Microsoft.AspNetCore.Components.Forms;
 
 namespace Calcio.UI.Components.Players.Shared;
 
+/// <summary>
+/// Provides player creation with optional client-side image cropping and photo upload.
+/// </summary>
+/// <param name="playersService">The service used to create players and upload player photos.</param>
+/// <param name="navigationManager">The navigation manager used after submission.</param>
 public partial class CreatePlayerForm(
     IPlayersService playersService,
     NavigationManager navigationManager)
 {
+    /// <summary>
+    /// Defines the maximum accepted image file size in bytes.
+    /// </summary>
     private const long MaxFileSize = 10 * 1024 * 1024; // 10 MB
 
+    /// <summary>
+    /// Gets or sets the club identifier where the player will be created.
+    /// </summary>
     [Parameter]
     public required long ClubId { get; set; }
 
+    /// <summary>
+    /// Gets or sets the URL to navigate to when creation completes or is canceled.
+    /// </summary>
     [Parameter]
     public string CancelUrl { get; set; } = "/account/manage/clubs";
 
+    /// <summary>
+    /// Gets or sets the create-player input model.
+    /// </summary>
     private CreatePlayerInputModel Input { get; set; } = new();
 
+    /// <summary>
+    /// Gets or sets the selected source photo file before cropping.
+    /// </summary>
     private IBrowserFile? SelectedPhoto { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether player submission is in progress.
+    /// </summary>
     private bool IsSubmitting { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether photo upload is in progress.
+    /// </summary>
     private bool IsUploadingPhoto { get; set; }
 
+    /// <summary>
+    /// Gets or sets upload progress percentage displayed in the UI.
+    /// </summary>
     private double UploadProgressPercent { get; set; }
 
+    /// <summary>
+    /// Gets or sets the data URL for the original selected image.
+    /// </summary>
     private string? OriginalPhotoDataUrl { get; set; }
 
+    /// <summary>
+    /// Gets or sets the data URL for the cropped image.
+    /// </summary>
     private string? CroppedPhotoDataUrl { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the cropper modal is visible.
+    /// </summary>
     private bool ShowCropperModal { get; set; }
 
+    /// <summary>
+    /// Gets or sets the current error message shown to the user.
+    /// </summary>
     private string? ErrorMessage { get; set; }
 
+    /// <summary>
+    /// Gets or sets the current success message shown to the user.
+    /// </summary>
     private string? SuccessMessage { get; set; }
 
+    /// <summary>
+    /// Gets the current calendar year.
+    /// </summary>
     private static int CurrentYear => DateTime.Today.Year;
 
+    /// <summary>
+    /// Gets the maximum graduation year accepted by the form.
+    /// </summary>
     private static int MaxYear => DateTime.Today.Year + 25;
 
+    /// <summary>
+    /// Validates and reads a selected image file for cropping.
+    /// </summary>
+    /// <param name="e">File selection event data.</param>
+    /// <returns>A task that completes when file selection is processed.</returns>
     private async Task OnPhotoSelected(InputFileChangeEventArgs e)
     {
         ErrorMessage = null;
@@ -83,12 +138,19 @@ public partial class CreatePlayerForm(
         }
     }
 
+    /// <summary>
+    /// Stores the cropped image data and closes the cropper modal.
+    /// </summary>
+    /// <param name="croppedDataUrl">The cropped image data URL.</param>
     private void OnCropApplied(string croppedDataUrl)
     {
         CroppedPhotoDataUrl = croppedDataUrl;
         ShowCropperModal = false;
     }
 
+    /// <summary>
+    /// Clears selected image state when cropping is canceled.
+    /// </summary>
     private void OnCropCancelled()
     {
         // User cancelled cropping, clear the selection
@@ -98,6 +160,9 @@ public partial class CreatePlayerForm(
         ShowCropperModal = false;
     }
 
+    /// <summary>
+    /// Clears the selected photo and crop data.
+    /// </summary>
     private void ClearPhoto()
     {
         SelectedPhoto = null;
@@ -105,6 +170,10 @@ public partial class CreatePlayerForm(
         CroppedPhotoDataUrl = null;
     }
 
+    /// <summary>
+    /// Creates a player and uploads a cropped photo when one is available.
+    /// </summary>
+    /// <returns>A task that completes when submission handling is finished.</returns>
     private async Task HandleSubmit()
     {
         if (IsSubmitting)
@@ -179,6 +248,11 @@ public partial class CreatePlayerForm(
         }
     }
 
+    /// <summary>
+    /// Uploads the cropped image to the created player's photo endpoint.
+    /// </summary>
+    /// <param name="playerId">The player identifier receiving the uploaded photo.</param>
+    /// <returns>A task that completes when upload processing finishes.</returns>
     private async Task UploadCroppedPhotoAsync(long playerId)
     {
         if (string.IsNullOrEmpty(CroppedPhotoDataUrl))
@@ -218,6 +292,11 @@ public partial class CreatePlayerForm(
         StateHasChanged();
     }
 
+    /// <summary>
+    /// Formats a byte count using human-readable file size units.
+    /// </summary>
+    /// <param name="bytes">The byte count to format.</param>
+    /// <returns>A formatted file size string.</returns>
     private static string FormatFileSize(long bytes)
         => bytes switch
         {
@@ -226,28 +305,52 @@ public partial class CreatePlayerForm(
             _ => $"{bytes / 1024.0 / 1024.0:F1} MB"
         };
 
+    /// <summary>
+    /// Represents form input values used to create a player.
+    /// </summary>
     private sealed class CreatePlayerInputModel
     {
+        /// <summary>
+        /// Gets or sets the player's first name.
+        /// </summary>
         [Required(ErrorMessage = "First name is required.")]
         [StringLength(100, MinimumLength = 1, ErrorMessage = "First name must be between 1 and 100 characters.")]
         public string FirstName { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the player's last name.
+        /// </summary>
         [Required(ErrorMessage = "Last name is required.")]
         [StringLength(100, MinimumLength = 1, ErrorMessage = "Last name must be between 1 and 100 characters.")]
         public string LastName { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the player's date of birth.
+        /// </summary>
         [Required(ErrorMessage = "Date of birth is required.")]
         public DateOnly DateOfBirth { get; set; } = DateOnly.FromDateTime(DateTime.Today.AddYears(-10));
 
+        /// <summary>
+        /// Gets or sets the player's graduation year.
+        /// </summary>
         [Required(ErrorMessage = "Graduation year is required.")]
         [GraduationYear]
         public int GraduationYear { get; set; } = DateTime.Today.Year + 10;
 
+        /// <summary>
+        /// Gets or sets the player's gender.
+        /// </summary>
         public Gender? Gender { get; set; }
 
+        /// <summary>
+        /// Gets or sets the player's jersey number.
+        /// </summary>
         [Range(0, 999, ErrorMessage = "Jersey number must be between 0 and 999.")]
         public int? JerseyNumber { get; set; }
 
+        /// <summary>
+        /// Gets or sets the player's tryout number.
+        /// </summary>
         [Range(0, 9999, ErrorMessage = "Tryout number must be between 0 and 9999.")]
         public int? TryoutNumber { get; set; }
     }

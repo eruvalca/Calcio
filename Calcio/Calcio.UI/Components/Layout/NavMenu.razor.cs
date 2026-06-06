@@ -12,6 +12,15 @@ using Microsoft.Extensions.Logging;
 
 namespace Calcio.UI.Components.Layout;
 
+/// <summary>
+/// Renders the primary navigation menu and keeps user navigation, clubs, profile photo, and theme state synchronized.
+/// </summary>
+/// <param name="navigationManager">The navigation manager used for URL state and refresh operations.</param>
+/// <param name="calcioUsersService">The service used to retrieve the signed-in user's photo.</param>
+/// <param name="clubsService">The service used to retrieve clubs available to the signed-in user.</param>
+/// <param name="themeService">The service used to initialize and change theme preference.</param>
+/// <param name="authenticationStateProvider">The provider used to observe authentication state changes.</param>
+/// <param name="logger">The logger used to capture authentication refresh failures.</param>
 public partial class NavMenu(
     NavigationManager navigationManager,
     ICalcioUsersService calcioUsersService,
@@ -20,20 +29,52 @@ public partial class NavMenu(
     AuthenticationStateProvider authenticationStateProvider,
     ILogger<NavMenu> logger)
 {
+    /// <summary>
+    /// Stores the current relative URL used to highlight active navigation links.
+    /// </summary>
     private string? currentUrl;
+
+    /// <summary>
+    /// Indicates whether the component subscribed to theme change events.
+    /// </summary>
     private bool _themeSubscribed;
+
+    /// <summary>
+    /// Indicates whether the component subscribed to authentication state change events.
+    /// </summary>
     private bool _authSubscribed;
+
+    /// <summary>
+    /// Tracks the authenticated user ID to detect account switches.
+    /// </summary>
     private string? _currentUserId;
+
+    /// <summary>
+    /// Indicates whether another authentication check is needed once interactivity is available.
+    /// </summary>
     private bool _pendingAuthRefresh;
 
+    /// <summary>
+    /// Gets or sets the clubs associated with the current user for prerender persistence.
+    /// </summary>
     [PersistentState]
     public List<BaseClubDto>? UserClubs { get; set; }
 
+    /// <summary>
+    /// Gets or sets the current user's profile photo URL for prerender persistence.
+    /// </summary>
     [PersistentState]
     public string? UserPhotoUrl { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the profile photo is currently loading.
+    /// </summary>
     private bool IsLoadingPhoto { get; set; } = true;
 
+    /// <summary>
+    /// Initializes navigation and authentication subscriptions, then hydrates authentication-dependent state.
+    /// </summary>
+    /// <returns>A task that completes when initial state loading finishes.</returns>
     protected override async Task OnInitializedAsync()
     {
         currentUrl = navigationManager.ToBaseRelativePath(navigationManager.Uri);
@@ -49,6 +90,11 @@ public partial class NavMenu(
         await HandleAuthStateAsync(authState);
     }
 
+    /// <summary>
+    /// Completes interactive-only initialization such as theme subscription and deferred auth refresh.
+    /// </summary>
+    /// <param name="firstRender">A value indicating whether this is the first render pass.</param>
+    /// <returns>A task that completes when after-render initialization is done.</returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && RendererInfo.IsInteractive)
@@ -68,10 +114,23 @@ public partial class NavMenu(
         }
     }
 
+    /// <summary>
+    /// Requests a rerender when the active theme changes.
+    /// </summary>
+    /// <param name="pref">The updated theme preference.</param>
     private void OnThemeChanged(ThemePreference pref) => InvokeAsync(StateHasChanged);
 
+    /// <summary>
+    /// Returns the CSS class used to indicate the active theme option.
+    /// </summary>
+    /// <param name="pref">The theme option being evaluated.</param>
+    /// <returns><c>active</c> when the option matches the current theme; otherwise, an empty string.</returns>
     private string IsActive(ThemePreference pref) => themeService.Current == pref ? "active" : string.Empty;
 
+    /// <summary>
+    /// Gets an icon representing the currently selected theme.
+    /// </summary>
+    /// <returns>An emoji string for light, dark, or system theme.</returns>
     private string GetThemeLabel() => themeService.Current switch
     {
         ThemePreference.Light => "☀️",
@@ -79,11 +138,25 @@ public partial class NavMenu(
         _ => "🌗"
     };
 
+    /// <summary>
+    /// Changes the current theme preference.
+    /// </summary>
+    /// <param name="pref">The theme preference to apply.</param>
+    /// <returns>A task that completes when the theme is updated.</returns>
     private async Task ChangeTheme(ThemePreference pref) => await themeService.SetThemeAsync(pref);
 
+    /// <summary>
+    /// Forwards authentication state change notifications to asynchronous handling.
+    /// </summary>
+    /// <param name="authStateTask">The authentication state task provided by the framework.</param>
     private void HandleAuthenticationStateChanged(Task<AuthenticationState> authStateTask)
         => _ = HandleAuthenticationStateChangedAsync(authStateTask);
 
+    /// <summary>
+    /// Handles authentication state changes and refreshes user-scoped menu data.
+    /// </summary>
+    /// <param name="authStateTask">The authentication state task provided by the framework.</param>
+    /// <returns>A task that completes when menu data has been refreshed.</returns>
     private async Task HandleAuthenticationStateChangedAsync(Task<AuthenticationState> authStateTask)
     {
         try
@@ -108,6 +181,11 @@ public partial class NavMenu(
         }
     }
 
+    /// <summary>
+    /// Applies the provided authentication state to clubs and profile photo state.
+    /// </summary>
+    /// <param name="authState">The authentication state to process.</param>
+    /// <returns>A task that completes when related data has been loaded.</returns>
     private async Task HandleAuthStateAsync(AuthenticationState authState)
     {
         // Guard: ensure user is authenticated AND has a valid NameIdentifier claim
@@ -164,6 +242,10 @@ public partial class NavMenu(
         IsLoadingPhoto = false;
     }
 
+    /// <summary>
+    /// Retries authentication-dependent hydration once interactivity is available.
+    /// </summary>
+    /// <returns>A task that completes when hydration is retried.</returns>
     private async Task EnsureAuthStateHydratedAsync()
     {
         try
@@ -181,6 +263,10 @@ public partial class NavMenu(
         }
     }
 
+    /// <summary>
+    /// Reloads the list of clubs associated with the current user.
+    /// </summary>
+    /// <returns>A task that completes when club retrieval finishes.</returns>
     private async Task RefreshUserClubsAsync()
     {
         var result = await clubsService.GetUserClubsAsync(CancellationToken);
@@ -190,6 +276,10 @@ public partial class NavMenu(
         }
     }
 
+    /// <summary>
+    /// Reloads the signed-in user's profile photo URL.
+    /// </summary>
+    /// <returns>A task that completes when photo retrieval finishes.</returns>
     private async Task RefreshUserPhotoAsync()
     {
         var result = await calcioUsersService.GetAccountPhotoAsync(CancellationToken);
@@ -201,6 +291,11 @@ public partial class NavMenu(
         }
     }
 
+    /// <summary>
+    /// Updates the active URL when navigation occurs.
+    /// </summary>
+    /// <param name="sender">The event sender.</param>
+    /// <param name="e">Navigation event details.</param>
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         currentUrl = navigationManager.ToBaseRelativePath(e.Location);
@@ -208,6 +303,9 @@ public partial class NavMenu(
     }
 
 #pragma warning disable CA1816 // Dispose methods should call SuppressFinalize
+    /// <summary>
+    /// Unsubscribes from navigation, authentication, and theme events.
+    /// </summary>
     public override void Dispose()
     {
         navigationManager.LocationChanged -= OnLocationChanged;
@@ -225,6 +323,11 @@ public partial class NavMenu(
     }
 #pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
 
+    /// <summary>
+    /// Logs failures that occur while handling authentication state change events.
+    /// </summary>
+    /// <param name="logger">The logger that writes the message.</param>
+    /// <param name="exception">The exception raised during handling.</param>
     [LoggerMessage(1, LogLevel.Warning, "Authentication state change handling failed.")]
     private static partial void LogAuthStateChangedFailed(ILogger logger, Exception exception);
 }

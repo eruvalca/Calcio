@@ -11,11 +11,25 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Calcio.Endpoints.Players;
 
+/// <summary>
+/// Registers API endpoints for Players Endpoints.
+/// </summary>
 public static class PlayersEndpoints
 {
+    /// <summary>
+    /// Stores the Max Photo Size.
+    /// </summary>
     private const long MaxPhotoSize = 10 * 1024 * 1024; // 10 MB
+    /// <summary>
+    /// Stores the Max Import File Size.
+    /// </summary>
     private const long MaxImportFileSize = 10 * 1024 * 1024; // 10 MB
 
+    /// <summary>
+    /// Executes the Map Players Endpoints operation.
+    /// </summary>
+    /// <param name="endpoints">The endpoints.</param>
+    /// <returns>The operation result.</returns>
     public static IEndpointRouteBuilder MapPlayersEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup(Routes.Players.Group)
@@ -57,6 +71,13 @@ public static class PlayersEndpoints
         return endpoints;
     }
 
+    /// <summary>
+    /// Gets players for a specific club.
+    /// </summary>
+    /// <param name="clubId">The identifier of the club whose players are requested.</param>
+    /// <param name="service">The players service used to retrieve player data.</param>
+    /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
+    /// <returns>An OK response with club players, or a problem response when retrieval fails.</returns>
     private static async Task<Results<Ok<List<ClubPlayerDto>>, ProblemHttpResult>> GetClubPlayers(
         [Required]
         [Range(1, long.MaxValue)]
@@ -69,6 +90,14 @@ public static class PlayersEndpoints
         return result.ToHttpResult(TypedResults.Ok);
     }
 
+    /// <summary>
+    /// Creates a player in a specific club.
+    /// </summary>
+    /// <param name="clubId">The identifier of the club where the player will be created.</param>
+    /// <param name="dto">The player creation payload.</param>
+    /// <param name="service">The players service used to create the player.</param>
+    /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
+    /// <returns>A created response with the created player, or a problem response when creation fails.</returns>
     private static async Task<Results<Created<PlayerCreatedDto>, ProblemHttpResult>> CreatePlayer(
         [Required]
         [Range(1, long.MaxValue)]
@@ -82,6 +111,15 @@ public static class PlayersEndpoints
         return result.ToHttpResult(value => TypedResults.Created($"{Routes.Clubs.Base}/{clubId}/players/{value.PlayerId}", value));
     }
 
+    /// <summary>
+    /// Uploads a player's photo for a club.
+    /// </summary>
+    /// <param name="clubId">The identifier of the club that owns the player.</param>
+    /// <param name="playerId">The identifier of the player whose photo is uploaded.</param>
+    /// <param name="file">The image file to upload.</param>
+    /// <param name="service">The players service used to store the photo.</param>
+    /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
+    /// <returns>An OK response with photo metadata, or a problem response when validation or upload fails.</returns>
     private static async Task<Results<Ok<PlayerPhotoDto>, ProblemHttpResult>> UploadPlayerPhoto(
         [Required]
         [Range(1, long.MaxValue)]
@@ -116,6 +154,16 @@ public static class PlayersEndpoints
         return result.ToHttpResult(TypedResults.Ok);
     }
 
+    /// <summary>
+    /// Gets a player's photo for a club.
+    /// </summary>
+    /// <param name="clubId">The identifier of the club that owns the player.</param>
+    /// <param name="playerId">The identifier of the player whose photo is requested.</param>
+    /// <param name="service">The players service used to retrieve the photo.</param>
+    /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
+    /// <returns>
+    /// An OK response with photo metadata when present, no-content when no photo exists, or a problem response when retrieval fails.
+    /// </returns>
     private static async Task<Results<Ok<PlayerPhotoDto>, NoContent, ProblemHttpResult>> GetPlayerPhoto(
         [Required]
         [Range(1, long.MaxValue)]
@@ -135,6 +183,14 @@ public static class PlayersEndpoints
             problem => TypedResults.Problem(statusCode: problem.StatusCode, detail: problem.Detail));
     }
 
+    /// <summary>
+    /// Validates a bulk player import file.
+    /// </summary>
+    /// <param name="clubId">The identifier of the club where players are being imported.</param>
+    /// <param name="file">The CSV file to validate.</param>
+    /// <param name="service">The players service used to validate import rows.</param>
+    /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
+    /// <returns>An OK response with validation results, or a problem response when validation fails.</returns>
     private static async Task<Results<Ok<BulkValidateResultDto>, ProblemHttpResult>> ValidateBulkImport(
         [Required]
         [Range(1, long.MaxValue)]
@@ -166,6 +222,14 @@ public static class PlayersEndpoints
         return result.ToHttpResult(TypedResults.Ok);
     }
 
+    /// <summary>
+    /// Revalidates edited bulk import rows before execution.
+    /// </summary>
+    /// <param name="clubId">The identifier of the club where players are being imported.</param>
+    /// <param name="rows">The rows to revalidate.</param>
+    /// <param name="service">The players service used to revalidate rows.</param>
+    /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
+    /// <returns>An OK response with validation results, or a problem response when revalidation fails.</returns>
     private static async Task<Results<Ok<BulkValidateResultDto>, ProblemHttpResult>> RevalidateBulkImport(
         [Required]
         [Range(1, long.MaxValue)]
@@ -184,6 +248,14 @@ public static class PlayersEndpoints
         return result.ToHttpResult(TypedResults.Ok);
     }
 
+    /// <summary>
+    /// Executes bulk player import for validated rows.
+    /// </summary>
+    /// <param name="clubId">The identifier of the club where players are being imported.</param>
+    /// <param name="request">The bulk import request containing rows to import.</param>
+    /// <param name="service">The players service used to execute the import.</param>
+    /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
+    /// <returns>An OK response with import results, or a problem response when import fails.</returns>
     private static async Task<Results<Ok<BulkImportResultDto>, ProblemHttpResult>> ExecuteBulkImport(
         [Required]
         [Range(1, long.MaxValue)]
@@ -202,6 +274,12 @@ public static class PlayersEndpoints
         return result.ToHttpResult(TypedResults.Ok);
     }
 
+    /// <summary>
+    /// Gets the CSV template used for bulk player import.
+    /// </summary>
+    /// <param name="clubId">The identifier of the club requesting the template.</param>
+    /// <param name="templateService">The template service used to generate the CSV template.</param>
+    /// <returns>A file response containing the bulk import template.</returns>
     private static FileContentHttpResult GetImportTemplate(
         [Required]
         [Range(1, long.MaxValue)]

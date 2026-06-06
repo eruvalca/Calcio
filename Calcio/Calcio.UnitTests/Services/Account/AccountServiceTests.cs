@@ -10,9 +10,19 @@ using Shouldly;
 
 namespace Calcio.UnitTests.Services.Account;
 
+/// <summary>
+/// Contains unit tests for A cc ou nt Se rv ic e behavior.
+/// </summary>
 public class AccountServiceTests
 {
+    /// <summary>
+    /// Defines the base URL used by mocked HTTP requests in this test class.
+    /// </summary>
     private const string BaseUrl = "http://localhost";
+    /// <summary>
+    /// Verifies the RefreshSignInAsync_WhenNoContent_ReturnsSuccess scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task RefreshSignInAsync_WhenNoContent_ReturnsSuccess()
@@ -33,6 +43,10 @@ public class AccountServiceTests
         // Assert
         result.IsSuccess.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the RefreshSignInAsync_WhenNotFound_ReturnsNotFoundProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task RefreshSignInAsync_WhenNotFound_ReturnsNotFoundProblem()

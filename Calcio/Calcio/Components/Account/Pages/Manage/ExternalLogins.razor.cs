@@ -6,31 +6,81 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Calcio.Components.Account.Pages.Manage;
 
+/// <summary>
+/// Represents the External Logins.
+/// </summary>
+/// <param name="userManager">The user Manager.</param>
+/// <param name="signInManager">The sign In Manager.</param>
+/// <param name="userStore">The user Store.</param>
+/// <param name="redirectManager">The redirect Manager.</param>
 public partial class ExternalLogins(
     UserManager<CalcioUserEntity> userManager,
     SignInManager<CalcioUserEntity> signInManager,
     IUserStore<CalcioUserEntity> userStore,
     IdentityRedirectManager redirectManager)
 {
+    /// <summary>
+    /// Stores the Link Login Callback Action.
+    /// </summary>
     public const string LinkLoginCallbackAction = "LinkLoginCallback";
 
+    /// <summary>
+    /// Stores the current Logins.
+    /// </summary>
     private CalcioUserEntity? user;
+    /// <summary>
+    /// Stores the other Logins.
+    /// </summary>
     private IList<UserLoginInfo>? currentLogins;
+    /// <summary>
+    /// Stores the show Remove Button.
+    /// </summary>
     private IList<AuthenticationScheme>? otherLogins;
+    /// <summary>
+    /// Stores the show Remove Button.
+    /// </summary>
     private bool showRemoveButton;
 
+    /// <summary>
+    /// Gets or sets the Http Context.
+    /// </summary>
     [CascadingParameter]
+    /// <summary>
+    /// Gets or sets the http context.
+    /// </summary>
     private HttpContext HttpContext { get; set; } = default!;
 
+    /// <summary>
+    /// Gets or sets the Login Provider.
+    /// </summary>
     [SupplyParameterFromForm]
+    /// <summary>
+    /// Gets or sets the login provider.
+    /// </summary>
     private string? LoginProvider { get; set; }
 
+    /// <summary>
+    /// Gets or sets the Provider Key.
+    /// </summary>
     [SupplyParameterFromForm]
+    /// <summary>
+    /// Gets or sets the provider key.
+    /// </summary>
     private string? ProviderKey { get; set; }
 
+    /// <summary>
+    /// Gets or sets the Action.
+    /// </summary>
     [SupplyParameterFromQuery]
+    /// <summary>
+    /// Gets or sets the action.
+    /// </summary>
     private string? Action { get; set; }
 
+    /// <summary>
+    /// Executes the On Initialized Async operation.
+    /// </summary>
+    /// <returns>The operation result.</returns>
     protected override async Task OnInitializedAsync()
     {
         user = await userManager.GetUserAsync(HttpContext.User);
@@ -57,6 +107,10 @@ public partial class ExternalLogins(
         }
     }
 
+    /// <summary>
+    /// Executes the On Submit Async operation.
+    /// </summary>
+    /// <returns>The operation result.</returns>
     private async Task OnSubmitAsync()
     {
         if (user is null)
@@ -77,6 +131,10 @@ public partial class ExternalLogins(
         }
     }
 
+    /// <summary>
+    /// Executes the On Get Link Login Callback Async operation.
+    /// </summary>
+    /// <returns>The operation result.</returns>
     private async Task OnGetLinkLoginCallbackAsync()
     {
         if (user is null)

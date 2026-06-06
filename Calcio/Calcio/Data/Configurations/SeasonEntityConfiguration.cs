@@ -5,8 +5,15 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Calcio.Data.Configurations;
 
+/// <summary>
+/// Configures EF Core mapping for Season Entity Configuration.
+/// </summary>
 public class SeasonEntityConfiguration : IEntityTypeConfiguration<SeasonEntity>
 {
+    /// <summary>
+    /// Executes the Configure operation.
+    /// </summary>
+    /// <param name="builder">The builder.</param>
     public void Configure(EntityTypeBuilder<SeasonEntity> builder)
     {
         builder.HasKey(e => e.SeasonId);

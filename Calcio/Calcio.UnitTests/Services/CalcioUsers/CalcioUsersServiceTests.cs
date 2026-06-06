@@ -12,11 +12,21 @@ using Shouldly;
 
 namespace Calcio.UnitTests.Services.CalcioUsers;
 
+/// <summary>
+/// Contains unit tests for C al ci oU se rs Se rv ic e behavior.
+/// </summary>
 public class CalcioUsersServiceTests
 {
+    /// <summary>
+    /// Defines the base URL used by mocked HTTP requests in this test class.
+    /// </summary>
     private const string BaseUrl = "http://localhost";
 
     #region GetClubMembersAsync Tests
+    /// <summary>
+    /// Verifies the GetClubMembersAsync_WhenOk_ReturnsList scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetClubMembersAsync_WhenOk_ReturnsList()
@@ -50,6 +60,10 @@ public class CalcioUsersServiceTests
         list[1].FullName.ShouldBe("Jane Member");
         list[1].IsClubAdmin.ShouldBeFalse();
     }
+    /// <summary>
+    /// Verifies the GetClubMembersAsync_WhenEmptyResponse_ReturnsEmptyList scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetClubMembersAsync_WhenEmptyResponse_ReturnsEmptyList()
@@ -73,6 +87,10 @@ public class CalcioUsersServiceTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBeEmpty();
     }
+    /// <summary>
+    /// Verifies the GetClubMembersAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetClubMembersAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -96,6 +114,10 @@ public class CalcioUsersServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the GetClubMembersAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetClubMembersAsync_WhenServerError_ReturnsServerErrorProblem()
@@ -123,6 +145,10 @@ public class CalcioUsersServiceTests
     #endregion
 
     #region RemoveClubMemberAsync Tests
+    /// <summary>
+    /// Verifies the RemoveClubMemberAsync_WhenNoContent_ReturnsSuccess scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task RemoveClubMemberAsync_WhenNoContent_ReturnsSuccess()
@@ -146,6 +172,10 @@ public class CalcioUsersServiceTests
         // Assert
         result.IsSuccess.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the RemoveClubMemberAsync_WhenNotFound_ReturnsNotFoundProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task RemoveClubMemberAsync_WhenNotFound_ReturnsNotFoundProblem()
@@ -170,6 +200,10 @@ public class CalcioUsersServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
+    /// <summary>
+    /// Verifies the RemoveClubMemberAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task RemoveClubMemberAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -194,6 +228,10 @@ public class CalcioUsersServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the RemoveClubMemberAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task RemoveClubMemberAsync_WhenServerError_ReturnsServerErrorProblem()
@@ -222,6 +260,10 @@ public class CalcioUsersServiceTests
     #endregion
 
     #region UploadAccountPhotoAsync Tests
+    /// <summary>
+    /// Verifies the UploadAccountPhotoAsync_WhenOk_ReturnsCalcioUserPhotoDto scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task UploadAccountPhotoAsync_WhenOk_ReturnsCalcioUserPhotoDto()
@@ -257,6 +299,10 @@ public class CalcioUsersServiceTests
         photo.MediumUrl!.ShouldContain("medium.jpg");
         photo.LargeUrl!.ShouldContain("large.jpg");
     }
+    /// <summary>
+    /// Verifies the UploadAccountPhotoAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task UploadAccountPhotoAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -280,6 +326,10 @@ public class CalcioUsersServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the UploadAccountPhotoAsync_WhenBadRequest_ReturnsBadRequestProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task UploadAccountPhotoAsync_WhenBadRequest_ReturnsBadRequestProblem()
@@ -303,6 +353,10 @@ public class CalcioUsersServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.BadRequest);
     }
+    /// <summary>
+    /// Verifies the UploadAccountPhotoAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task UploadAccountPhotoAsync_WhenServerError_ReturnsServerErrorProblem()
@@ -330,6 +384,10 @@ public class CalcioUsersServiceTests
     #endregion
 
     #region GetAccountPhotoAsync Tests
+    /// <summary>
+    /// Verifies the GetAccountPhotoAsync_WhenOk_ReturnsCalcioUserPhotoDto scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetAccountPhotoAsync_WhenOk_ReturnsCalcioUserPhotoDto()
@@ -361,6 +419,10 @@ public class CalcioUsersServiceTests
         photo.CalcioUserPhotoId.ShouldBe(1);
         photo.OriginalUrl.ShouldContain("original.jpg");
     }
+    /// <summary>
+    /// Verifies the GetAccountPhotoAsync_WhenNoContent_ReturnsNone scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetAccountPhotoAsync_WhenNoContent_ReturnsNone()
@@ -382,6 +444,10 @@ public class CalcioUsersServiceTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.IsT1.ShouldBeTrue(); // None
     }
+    /// <summary>
+    /// Verifies the GetAccountPhotoAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetAccountPhotoAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -403,6 +469,10 @@ public class CalcioUsersServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the GetAccountPhotoAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetAccountPhotoAsync_WhenServerError_ReturnsServerErrorProblem()
@@ -428,6 +498,10 @@ public class CalcioUsersServiceTests
     #endregion
 
     #region HasAccountPhotoAsync Tests
+    /// <summary>
+    /// Verifies the HasAccountPhotoAsync_WhenOk_ReturnsTrue scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task HasAccountPhotoAsync_WhenOk_ReturnsTrue()
@@ -451,6 +525,10 @@ public class CalcioUsersServiceTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the HasAccountPhotoAsync_WhenNoContent_ReturnsFalse scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task HasAccountPhotoAsync_WhenNoContent_ReturnsFalse()
@@ -472,6 +550,10 @@ public class CalcioUsersServiceTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBeFalse();
     }
+    /// <summary>
+    /// Verifies the HasAccountPhotoAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task HasAccountPhotoAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -493,6 +575,10 @@ public class CalcioUsersServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the HasAccountPhotoAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task HasAccountPhotoAsync_WhenServerError_ReturnsServerErrorProblem()

@@ -261,8 +261,19 @@ if (app.Environment.IsDevelopment())
 
 await app.RunAsync();
 
+/// <summary>
+/// Represents the Cookie Security Scheme Transformer.
+/// </summary>
+/// <param name="authenticationSchemeProvider">The authentication Scheme Provider.</param>
 internal sealed class CookieSecuritySchemeTransformer(IAuthenticationSchemeProvider authenticationSchemeProvider) : IOpenApiDocumentTransformer
 {
+    /// <summary>
+    /// Executes the Transform Async operation.
+    /// </summary>
+    /// <param name="document">The document.</param>
+    /// <param name="context">The context.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
     {
         var authenticationSchemes = await authenticationSchemeProvider.GetAllSchemesAsync();

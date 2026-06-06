@@ -11,12 +11,31 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Calcio.IntegrationTests.Data.Contexts;
 
+/// <summary>
+/// Provides common fixture initialization and tenant-scoped seed helpers for database integration tests.
+/// </summary>
+/// <param name="factory">The application factory that supplies scoped services for test execution.</param>
 public abstract class BaseDbContextTests(CustomApplicationFactory factory) : IClassFixture<CustomApplicationFactory>, IAsyncLifetime
 {
+    /// <summary>
+    /// Stores the application factory used to create dependency injection scopes for tests.
+    /// </summary>
     protected readonly CustomApplicationFactory Factory = factory;
+
+    /// <summary>
+    /// Identifies the primary seeded user used in integration test setup.
+    /// </summary>
     protected const long UserAId = 1;
+
+    /// <summary>
+    /// Identifies the secondary seeded user used for cross-club test scenarios.
+    /// </summary>
     protected const long UserBId = 2;
 
+    /// <summary>
+    /// Ensures the test database exists and seeds baseline data for integration tests.
+    /// </summary>
+    /// <returns>A value task that completes when initialization has finished.</returns>
     public virtual async ValueTask InitializeAsync()
     {
         using var scope = Factory.Services.CreateScope();
@@ -34,8 +53,17 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
         }
     }
 
+    /// <summary>
+    /// Completes asynchronous fixture disposal for tests that derive from this base type.
+    /// </summary>
+    /// <returns>A completed value task because explicit teardown is not required.</returns>
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
+    /// <summary>
+    /// Seeds baseline users, clubs, and related entities for tenant-aware integration tests.
+    /// </summary>
+    /// <param name="dbContext">The write-enabled database context used for seeding.</param>
+    /// <returns>A task that completes after seed data is saved.</returns>
     protected static async Task SeedDataAsync(ReadWriteDbContext dbContext)
     {
         // Create Users
@@ -78,6 +106,10 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
         await dbContext.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Generates seasons, campaigns, teams, and players for the supplied club.
+    /// </summary>
+    /// <param name="club">The club entity that receives generated related entities.</param>
     protected static void GenerateClubEntities(ClubEntity club)
     {
         var seasonFaker = new Faker<SeasonEntity>()
@@ -127,6 +159,11 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
         }
     }
 
+    /// <summary>
+    /// Sets the authenticated test user in the current HTTP context.
+    /// </summary>
+    /// <param name="services">The service provider used to resolve the HTTP context accessor.</param>
+    /// <param name="userId">The user identifier applied to the authenticated principal.</param>
     protected static void SetCurrentUser(IServiceProvider services, long userId)
     {
         var httpContextAccessor = services.GetRequiredService<IHttpContextAccessor>();
@@ -136,6 +173,12 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
         httpContextAccessor.HttpContext = new DefaultHttpContext { User = principal };
     }
 
+    /// <summary>
+    /// Seeds one note per club so tests can verify tenant filtering behavior.
+    /// </summary>
+    /// <param name="context">The write-enabled context used to persist notes.</param>
+    /// <param name="cancellationToken">The token used to cancel asynchronous operations.</param>
+    /// <returns>A task that completes after notes are saved and tracked entities are cleared.</returns>
     protected static async Task SeedNotesForBothClubsAsync(ReadWriteDbContext context, CancellationToken cancellationToken)
     {
         var userPlayer = await GetPlayerForUserAsync(context, UserAId, cancellationToken);
@@ -161,6 +204,12 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
         context.ChangeTracker.Clear();
     }
 
+    /// <summary>
+    /// Seeds one player tag per club so tests can verify tenant filtering behavior.
+    /// </summary>
+    /// <param name="context">The write-enabled context used to persist player tags.</param>
+    /// <param name="cancellationToken">The token used to cancel asynchronous operations.</param>
+    /// <returns>A task that completes after tags are saved and tracked entities are cleared.</returns>
     protected static async Task SeedPlayerTagsForBothClubsAsync(ReadWriteDbContext context, CancellationToken cancellationToken)
     {
         var userPlayer = await GetPlayerForUserAsync(context, UserAId, cancellationToken);
@@ -186,6 +235,12 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
         context.ChangeTracker.Clear();
     }
 
+    /// <summary>
+    /// Seeds one campaign assignment per club so tests can verify tenant filtering behavior.
+    /// </summary>
+    /// <param name="context">The write-enabled context used to persist campaign assignments.</param>
+    /// <param name="cancellationToken">The token used to cancel asynchronous operations.</param>
+    /// <returns>A task that completes after assignments are saved and tracked entities are cleared.</returns>
     protected static async Task SeedCampaignAssignmentsForBothClubsAsync(ReadWriteDbContext context, CancellationToken cancellationToken)
     {
         var userPlayer = await GetPlayerForUserAsync(context, UserAId, cancellationToken);
@@ -217,6 +272,12 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
         context.ChangeTracker.Clear();
     }
 
+    /// <summary>
+    /// Seeds one player photo per club so tests can verify tenant filtering behavior.
+    /// </summary>
+    /// <param name="context">The write-enabled context used to persist player photos.</param>
+    /// <param name="cancellationToken">The token used to cancel asynchronous operations.</param>
+    /// <returns>A task that completes after photos are saved and tracked entities are cleared.</returns>
     protected static async Task SeedPlayerPhotosForBothClubsAsync(ReadWriteDbContext context, CancellationToken cancellationToken)
     {
         var userPlayer = await GetPlayerForUserAsync(context, UserAId, cancellationToken);
@@ -242,6 +303,13 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
         context.ChangeTracker.Clear();
     }
 
+    /// <summary>
+    /// Gets a player belonging to the club associated with the specified user.
+    /// </summary>
+    /// <param name="context">The context used to query players.</param>
+    /// <param name="userId">The user whose club membership determines the scope.</param>
+    /// <param name="cancellationToken">The token used to cancel asynchronous operations.</param>
+    /// <returns>A task that resolves to a player in the user's club.</returns>
     protected static Task<PlayerEntity> GetPlayerForUserAsync(ReadWriteDbContext context, long userId, CancellationToken cancellationToken)
         => context.Players
             .IgnoreQueryFilters()
@@ -249,6 +317,13 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
             .ThenInclude(c => c.CalcioUsers)
             .FirstAsync(p => p.Club.CalcioUsers.Any(u => u.Id == userId), cancellationToken);
 
+    /// <summary>
+    /// Gets a campaign belonging to the club associated with the specified user.
+    /// </summary>
+    /// <param name="context">The context used to query campaigns.</param>
+    /// <param name="userId">The user whose club membership determines the scope.</param>
+    /// <param name="cancellationToken">The token used to cancel asynchronous operations.</param>
+    /// <returns>A task that resolves to a campaign in the user's club.</returns>
     protected static Task<CampaignEntity> GetCampaignForUserAsync(ReadWriteDbContext context, long userId, CancellationToken cancellationToken)
         => context.Campaigns
             .IgnoreQueryFilters()
@@ -256,6 +331,13 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
             .ThenInclude(club => club.CalcioUsers)
             .FirstAsync(c => c.Club.CalcioUsers.Any(u => u.Id == userId), cancellationToken);
 
+    /// <summary>
+    /// Gets a team belonging to the club associated with the specified user.
+    /// </summary>
+    /// <param name="context">The context used to query teams.</param>
+    /// <param name="userId">The user whose club membership determines the scope.</param>
+    /// <param name="cancellationToken">The token used to cancel asynchronous operations.</param>
+    /// <returns>A task that resolves to a team in the user's club.</returns>
     protected static Task<TeamEntity> GetTeamForUserAsync(ReadWriteDbContext context, long userId, CancellationToken cancellationToken)
         => context.Teams
             .IgnoreQueryFilters()
@@ -263,6 +345,18 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
             .ThenInclude(c => c.CalcioUsers)
             .FirstAsync(t => t.Club.CalcioUsers.Any(u => u.Id == userId), cancellationToken);
 
+    /// <summary>
+    /// Captures identifiers for an isolated club entity graph used by cascade and filter tests.
+    /// </summary>
+    /// <param name="ClubId">The generated club identifier.</param>
+    /// <param name="PlayerId">The generated player identifier.</param>
+    /// <param name="CampaignId">The generated campaign identifier.</param>
+    /// <param name="TeamId">The generated team identifier.</param>
+    /// <param name="SeasonId">The generated season identifier.</param>
+    /// <param name="PlayerTagId">The generated player tag identifier.</param>
+    /// <param name="NoteId">The generated note identifier when note creation is enabled.</param>
+    /// <param name="PhotoId">The generated photo identifier when photo creation is enabled.</param>
+    /// <param name="AssignmentId">The generated assignment identifier when assignment creation is enabled.</param>
     protected sealed record ClubGraphIds(
         long ClubId,
         long PlayerId,
@@ -274,6 +368,15 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
         long? PhotoId,
         long? AssignmentId);
 
+    /// <summary>
+    /// Creates a complete club graph with optional dependents for integration test scenarios.
+    /// </summary>
+    /// <param name="context">The write-enabled context used to persist the graph.</param>
+    /// <param name="includeNote">Determines whether a note entity is created.</param>
+    /// <param name="includePhoto">Determines whether a photo entity is created.</param>
+    /// <param name="includeAssignment">Determines whether an assignment entity is created.</param>
+    /// <param name="cancellationToken">The token used to cancel asynchronous operations.</param>
+    /// <returns>A task that resolves to identifiers for the created graph.</returns>
     protected static async Task<ClubGraphIds> CreateClubGraphAsync(
         ReadWriteDbContext context,
         bool includeNote = true,
@@ -421,6 +524,13 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
             assignment?.PlayerCampaignAssignmentId);
     }
 
+    /// <summary>
+    /// Removes entities from a previously created club graph and deletes the graph root.
+    /// </summary>
+    /// <param name="context">The write-enabled context used to remove entities.</param>
+    /// <param name="graph">The identifiers of the graph to delete.</param>
+    /// <param name="cancellationToken">The token used to cancel asynchronous operations.</param>
+    /// <returns>A task that completes when cleanup has finished.</returns>
     protected static async Task CleanupClubGraphAsync(ReadWriteDbContext context, ClubGraphIds graph, CancellationToken cancellationToken)
     {
         context.ChangeTracker.Clear();

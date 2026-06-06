@@ -5,8 +5,15 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Calcio.Data.Configurations;
 
+/// <summary>
+/// Configures EF Core mapping for Note Entity Configuration.
+/// </summary>
 public class NoteEntityConfiguration : IEntityTypeConfiguration<NoteEntity>
 {
+    /// <summary>
+    /// Executes the Configure operation.
+    /// </summary>
+    /// <param name="builder">The builder.</param>
     public void Configure(EntityTypeBuilder<NoteEntity> builder)
     {
         builder.HasKey(e => e.NoteId);

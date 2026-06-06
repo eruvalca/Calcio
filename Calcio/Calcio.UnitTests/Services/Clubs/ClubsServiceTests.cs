@@ -12,11 +12,21 @@ using Shouldly;
 
 namespace Calcio.UnitTests.Services.Clubs;
 
+/// <summary>
+/// Contains unit tests for C lu bs Se rv ic e behavior.
+/// </summary>
 public class ClubsServiceTests
 {
+    /// <summary>
+    /// Defines the base URL used by mocked HTTP requests in this test class.
+    /// </summary>
     private const string BaseUrl = "http://localhost";
 
     #region GetUserClubsAsync Tests
+    /// <summary>
+    /// Verifies the GetUserClubsAsync_WhenOk_ReturnsList scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetUserClubsAsync_WhenOk_ReturnsList()
@@ -47,6 +57,10 @@ public class ClubsServiceTests
         list[0].Name.ShouldBe("FC Barcelona");
         list[1].Name.ShouldBe("Real Madrid");
     }
+    /// <summary>
+    /// Verifies the GetUserClubsAsync_WhenEmptyResponse_ReturnsEmptyList scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetUserClubsAsync_WhenEmptyResponse_ReturnsEmptyList()
@@ -68,6 +82,10 @@ public class ClubsServiceTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBeEmpty();
     }
+    /// <summary>
+    /// Verifies the GetUserClubsAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetUserClubsAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -89,6 +107,10 @@ public class ClubsServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the GetUserClubsAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetUserClubsAsync_WhenServerError_ReturnsServerErrorProblem()
@@ -114,6 +136,10 @@ public class ClubsServiceTests
     #endregion
 
     #region GetAllClubsForBrowsingAsync Tests
+    /// <summary>
+    /// Verifies the GetAllClubsForBrowsingAsync_WhenOk_ReturnsList scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetAllClubsForBrowsingAsync_WhenOk_ReturnsList()
@@ -143,6 +169,10 @@ public class ClubsServiceTests
         var list = result.Value;
         list.Count.ShouldBe(3);
     }
+    /// <summary>
+    /// Verifies the GetAllClubsForBrowsingAsync_WhenEmptyResponse_ReturnsEmptyList scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetAllClubsForBrowsingAsync_WhenEmptyResponse_ReturnsEmptyList()
@@ -164,6 +194,10 @@ public class ClubsServiceTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBeEmpty();
     }
+    /// <summary>
+    /// Verifies the GetAllClubsForBrowsingAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetAllClubsForBrowsingAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -185,6 +219,10 @@ public class ClubsServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the GetAllClubsForBrowsingAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetAllClubsForBrowsingAsync_WhenServerError_ReturnsServerErrorProblem()
@@ -210,6 +248,10 @@ public class ClubsServiceTests
     #endregion
 
     #region GetClubByIdAsync Tests
+    /// <summary>
+    /// Verifies the GetClubByIdAsync_WhenOk_ReturnsClub scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetClubByIdAsync_WhenOk_ReturnsClub()
@@ -238,6 +280,10 @@ public class ClubsServiceTests
         club.City.ShouldBe("Barcelona");
         club.State.ShouldBe("CA");
     }
+    /// <summary>
+    /// Verifies the GetClubByIdAsync_WhenNotFound_ReturnsNotFoundProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetClubByIdAsync_WhenNotFound_ReturnsNotFoundProblem()
@@ -261,6 +307,10 @@ public class ClubsServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
+    /// <summary>
+    /// Verifies the GetClubByIdAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetClubByIdAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -284,6 +334,10 @@ public class ClubsServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the GetClubByIdAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetClubByIdAsync_WhenServerError_ReturnsServerErrorProblem()
@@ -311,6 +365,10 @@ public class ClubsServiceTests
     #endregion
 
     #region LeaveClubAsync Tests
+    /// <summary>
+    /// Verifies the LeaveClubAsync_WhenNoContent_ReturnsSuccess scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task LeaveClubAsync_WhenNoContent_ReturnsSuccess()
@@ -333,6 +391,10 @@ public class ClubsServiceTests
         // Assert
         result.IsSuccess.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the LeaveClubAsync_WhenNotFound_ReturnsNotFoundProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task LeaveClubAsync_WhenNotFound_ReturnsNotFoundProblem()
@@ -356,6 +418,10 @@ public class ClubsServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
+    /// <summary>
+    /// Verifies the LeaveClubAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task LeaveClubAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -379,6 +445,10 @@ public class ClubsServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the LeaveClubAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task LeaveClubAsync_WhenServerError_ReturnsServerErrorProblem()
@@ -406,6 +476,10 @@ public class ClubsServiceTests
     #endregion
 
     #region CreateClubAsync Tests
+    /// <summary>
+    /// Verifies the CreateClubAsync_WhenCreated_ReturnsClubCreatedDto scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateClubAsync_WhenCreated_ReturnsClubCreatedDto()
@@ -432,6 +506,10 @@ public class ClubsServiceTests
         created.ClubId.ShouldBe(1);
         created.Name.ShouldBe("FC Barcelona");
     }
+    /// <summary>
+    /// Verifies the CreateClubAsync_WhenNotFound_ReturnsNotFoundProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateClubAsync_WhenNotFound_ReturnsNotFoundProblem()
@@ -455,6 +533,10 @@ public class ClubsServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
+    /// <summary>
+    /// Verifies the CreateClubAsync_WhenConflict_ReturnsConflictProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateClubAsync_WhenConflict_ReturnsConflictProblem()
@@ -478,6 +560,10 @@ public class ClubsServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Conflict);
     }
+    /// <summary>
+    /// Verifies the CreateClubAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateClubAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -501,6 +587,10 @@ public class ClubsServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the CreateClubAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateClubAsync_WhenServerError_ReturnsServerErrorProblem()

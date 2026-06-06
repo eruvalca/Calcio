@@ -15,6 +15,15 @@ using OneOf.Types;
 
 namespace Calcio.Services.Clubs;
 
+/// <summary>
+/// Provides Clubs Service operations.
+/// </summary>
+/// <param name="readOnlyDbContextFactory">The read Only Db Context Factory.</param>
+/// <param name="readWriteDbContextFactory">The read Write Db Context Factory.</param>
+/// <param name="userManager">The user Manager.</param>
+/// <param name="userClubsCacheService">The user Clubs Cache Service.</param>
+/// <param name="httpContextAccessor">The http Context Accessor.</param>
+/// <param name="httpContextAccessor">The http Context Accessor.</param>
 public partial class ClubsService(
     IDbContextFactory<ReadOnlyDbContext> readOnlyDbContextFactory,
     IDbContextFactory<ReadWriteDbContext> readWriteDbContextFactory,
@@ -23,12 +32,23 @@ public partial class ClubsService(
     IHttpContextAccessor httpContextAccessor,
     ILogger<ClubsService> logger) : AuthenticatedServiceBase(httpContextAccessor), IClubsService
 {
+    /// <summary>
+    /// Executes the Get User Clubs Async operation.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<List<BaseClubDto>>> GetUserClubsAsync(CancellationToken cancellationToken)
     {
         var clubs = await userClubsCacheService.GetClubsListAsync(CurrentUserId, cancellationToken);
         return clubs.ToList();
     }
 
+    /// <summary>
+    /// Executes the Get Club By Id Async operation.
+    /// </summary>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<BaseClubDto>> GetClubByIdAsync(long clubId, CancellationToken cancellationToken)
     {
         await using var dbContext = await readOnlyDbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -43,6 +63,11 @@ public partial class ClubsService(
             : ServiceProblem.NotFound();
     }
 
+    /// <summary>
+    /// Executes the Get All Clubs For Browsing Async operation.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<List<BaseClubDto>>> GetAllClubsForBrowsingAsync(CancellationToken cancellationToken)
     {
         await using var dbContext = await readOnlyDbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -58,6 +83,12 @@ public partial class ClubsService(
         return clubs;
     }
 
+    /// <summary>
+    /// Executes the Create Club Async operation.
+    /// </summary>
+    /// <param name="dto">The dto.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<ClubCreatedDto>> CreateClubAsync(CreateClubDto dto, CancellationToken cancellationToken)
     {
         await using var dbContext = await readWriteDbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -135,6 +166,12 @@ public partial class ClubsService(
         return new ClubCreatedDto(club.ClubId, club.Name);
     }
 
+    /// <summary>
+    /// Executes the Leave Club Async operation.
+    /// </summary>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<Success>> LeaveClubAsync(long clubId, CancellationToken cancellationToken)
     {
         await using var dbContext = await readWriteDbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -181,15 +218,65 @@ public partial class ClubsService(
         return new Success();
     }
 
+    /// <summary>
+    /// Executes the Log User Left Club operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="userId">The user Id.</param>
     [LoggerMessage(Level = LogLevel.Information, Message = "User {UserId} left club {ClubId}")]
+    /// <summary>
+    /// Executes the log user left club operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club id.</param>
+    /// <param name="userId">The user id.</param>
     private static partial void LogUserLeftClub(ILogger logger, long clubId, long userId);
 
+    /// <summary>
+    /// Executes the Log Role Removal Failed operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="userId">The user Id.</param>
+    /// <param name="roleName">The role Name.</param>
+    /// <param name="errors">The errors.</param>
     [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to remove {RoleName} role from user {UserId}: {Errors}")]
+    /// <summary>
+    /// Executes the log role removal failed operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="userId">The user id.</param>
+    /// <param name="roleName">The role name.</param>
+    /// <param name="errors">The errors.</param>
     private static partial void LogRoleRemovalFailed(ILogger logger, long userId, string roleName, string errors);
 
+    /// <summary>
+    /// Executes the Log Club Created operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubName">The club Name.</param>
+    /// <param name="userId">The user Id.</param>
     [LoggerMessage(Level = LogLevel.Information, Message = "Club '{ClubName}' created by user {UserId}")]
+    /// <summary>
+    /// Executes the log club created operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubName">The club name.</param>
+    /// <param name="userId">The user id.</param>
     private static partial void LogClubCreated(ILogger logger, string clubName, long userId);
 
+    /// <summary>
+    /// Executes the Log Club Admin Role Failed operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="userId">The user Id.</param>
+    /// <param name="errors">The errors.</param>
     [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to add ClubAdmin role to user {UserId}: {Errors}")]
+    /// <summary>
+    /// Executes the log club admin role failed operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="userId">The user id.</param>
+    /// <param name="errors">The errors.</param>
     private static partial void LogClubAdminRoleFailed(ILogger logger, long userId, string errors);
 }

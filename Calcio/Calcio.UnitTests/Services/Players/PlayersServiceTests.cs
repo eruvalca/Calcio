@@ -13,11 +13,21 @@ using Shouldly;
 
 namespace Calcio.UnitTests.Services.Players;
 
+/// <summary>
+/// Contains unit tests for P la ye rs Se rv ic e behavior.
+/// </summary>
 public class PlayersServiceTests
 {
+    /// <summary>
+    /// Defines the base URL used by mocked HTTP requests in this test class.
+    /// </summary>
     private const string BaseUrl = "http://localhost";
 
     #region GetClubPlayersAsync Tests
+    /// <summary>
+    /// Verifies the GetClubPlayersAsync_WhenOk_ReturnsList scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetClubPlayersAsync_WhenOk_ReturnsList()
@@ -50,6 +60,10 @@ public class PlayersServiceTests
         list[0].LastName.ShouldBe("Doe");
         list[1].FirstName.ShouldBe("Jane");
     }
+    /// <summary>
+    /// Verifies the GetClubPlayersAsync_WhenEmptyResponse_ReturnsEmptyList scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetClubPlayersAsync_WhenEmptyResponse_ReturnsEmptyList()
@@ -73,6 +87,10 @@ public class PlayersServiceTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBeEmpty();
     }
+    /// <summary>
+    /// Verifies the GetClubPlayersAsync_WhenNotFound_ReturnsNotFoundProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetClubPlayersAsync_WhenNotFound_ReturnsNotFoundProblem()
@@ -96,6 +114,10 @@ public class PlayersServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
+    /// <summary>
+    /// Verifies the GetClubPlayersAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetClubPlayersAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -119,6 +141,10 @@ public class PlayersServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the GetClubPlayersAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetClubPlayersAsync_WhenServerError_ReturnsServerErrorProblem()
@@ -146,6 +172,10 @@ public class PlayersServiceTests
     #endregion
 
     #region CreatePlayerAsync Tests
+    /// <summary>
+    /// Verifies the CreatePlayerAsync_WhenCreated_ReturnsPlayerCreatedDto scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreatePlayerAsync_WhenCreated_ReturnsPlayerCreatedDto()
@@ -183,6 +213,10 @@ public class PlayersServiceTests
         created.LastName.ShouldBe("Player");
         created.FullName.ShouldBe("Test Player");
     }
+    /// <summary>
+    /// Verifies the CreatePlayerAsync_WhenNotFound_ReturnsNotFoundProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreatePlayerAsync_WhenNotFound_ReturnsNotFoundProblem()
@@ -211,6 +245,10 @@ public class PlayersServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
+    /// <summary>
+    /// Verifies the CreatePlayerAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreatePlayerAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -239,6 +277,10 @@ public class PlayersServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the CreatePlayerAsync_WhenConflict_ReturnsConflictProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreatePlayerAsync_WhenConflict_ReturnsConflictProblem()
@@ -267,6 +309,10 @@ public class PlayersServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Conflict);
     }
+    /// <summary>
+    /// Verifies the CreatePlayerAsync_WhenBadRequest_ReturnsBadRequestProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreatePlayerAsync_WhenBadRequest_ReturnsBadRequestProblem()
@@ -295,6 +341,10 @@ public class PlayersServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.BadRequest);
     }
+    /// <summary>
+    /// Verifies the CreatePlayerAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreatePlayerAsync_WhenServerError_ReturnsServerErrorProblem()
@@ -327,6 +377,10 @@ public class PlayersServiceTests
     #endregion
 
     #region UploadPlayerPhotoAsync Tests
+    /// <summary>
+    /// Verifies the UploadPlayerPhotoAsync_WhenOk_ReturnsPlayerPhotoDto scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task UploadPlayerPhotoAsync_WhenOk_ReturnsPlayerPhotoDto()
@@ -364,6 +418,10 @@ public class PlayersServiceTests
         photo.MediumUrl!.ShouldContain("medium.jpg");
         photo.LargeUrl!.ShouldContain("large.jpg");
     }
+    /// <summary>
+    /// Verifies the UploadPlayerPhotoAsync_WhenNotFound_ReturnsNotFoundProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task UploadPlayerPhotoAsync_WhenNotFound_ReturnsNotFoundProblem()
@@ -390,6 +448,10 @@ public class PlayersServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
+    /// <summary>
+    /// Verifies the UploadPlayerPhotoAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task UploadPlayerPhotoAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -416,6 +478,10 @@ public class PlayersServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the UploadPlayerPhotoAsync_WhenBadRequest_ReturnsBadRequestProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task UploadPlayerPhotoAsync_WhenBadRequest_ReturnsBadRequestProblem()
@@ -442,6 +508,10 @@ public class PlayersServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.BadRequest);
     }
+    /// <summary>
+    /// Verifies the UploadPlayerPhotoAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task UploadPlayerPhotoAsync_WhenServerError_ReturnsServerErrorProblem()
@@ -472,6 +542,10 @@ public class PlayersServiceTests
     #endregion
 
     #region GetPlayerPhotoAsync Tests
+    /// <summary>
+    /// Verifies the GetPlayerPhotoAsync_WhenOk_ReturnsPlayerPhotoDto scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetPlayerPhotoAsync_WhenOk_ReturnsPlayerPhotoDto()
@@ -505,6 +579,10 @@ public class PlayersServiceTests
         photo.PlayerPhotoId.ShouldBe(1);
         photo.OriginalUrl.ShouldContain("original.jpg");
     }
+    /// <summary>
+    /// Verifies the GetPlayerPhotoAsync_WhenNoContent_ReturnsNone scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetPlayerPhotoAsync_WhenNoContent_ReturnsNone()
@@ -529,6 +607,10 @@ public class PlayersServiceTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.IsT1.ShouldBeTrue(); // None
     }
+    /// <summary>
+    /// Verifies the GetPlayerPhotoAsync_WhenNotFound_ReturnsNotFoundProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetPlayerPhotoAsync_WhenNotFound_ReturnsNotFoundProblem()
@@ -553,6 +635,10 @@ public class PlayersServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
+    /// <summary>
+    /// Verifies the GetPlayerPhotoAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetPlayerPhotoAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -577,6 +663,10 @@ public class PlayersServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the GetPlayerPhotoAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetPlayerPhotoAsync_WhenServerError_ReturnsServerErrorProblem()

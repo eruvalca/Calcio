@@ -5,16 +5,33 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Calcio.Data.Contexts;
 
+/// <summary>
+/// Represents the Read Write Db Context.
+/// </summary>
 public class ReadWriteDbContext : BaseDbContext
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ReadWriteDbContext"/> class.
+    /// </summary>
+    /// <param name="options">The options.</param>
+    /// <param name="httpContextAccessor">The http Context Accessor.</param>
     protected ReadWriteDbContext(DbContextOptions options, IHttpContextAccessor httpContextAccessor)
         : base(options, httpContextAccessor) => ArgumentNullException.ThrowIfNull(httpContextAccessor);
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ReadWriteDbContext"/> class.
+    /// </summary>
+    /// <param name="options">The options.</param>
+    /// <param name="httpContextAccessor">The http Context Accessor.</param>
     public ReadWriteDbContext(DbContextOptions<ReadWriteDbContext> options, IHttpContextAccessor httpContextAccessor)
         : this((DbContextOptions)options, httpContextAccessor)
     {
     }
 
+    /// <summary>
+    /// Executes the On Model Creating operation.
+    /// </summary>
+    /// <param name="builder">The builder.</param>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

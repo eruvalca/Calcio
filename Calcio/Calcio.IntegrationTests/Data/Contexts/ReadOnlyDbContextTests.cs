@@ -7,9 +7,16 @@ using Shouldly;
 
 namespace Calcio.IntegrationTests.Data.Contexts;
 
+/// <summary>
+/// Contains integration tests for read only db context behavior.
+/// </summary>
+/// <param name="factory">Provides dependencies used to build the integration test host.</param>
 public class ReadOnlyDbContextTests(CustomApplicationFactory factory) : BaseDbContextTests(factory)
 {
     [Fact]
+    /// <summary>
+    /// Verifies that save changes should throw not supported exception.
+    /// </summary>
     public void SaveChanges_ShouldThrowNotSupportedException()
     {
         // Arrange
@@ -24,6 +31,10 @@ public class ReadOnlyDbContextTests(CustomApplicationFactory factory) : BaseDbCo
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that save changes async should throw not supported exception.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task SaveChangesAsync_ShouldThrowNotSupportedException()
     {
         // Arrange
@@ -39,6 +50,9 @@ public class ReadOnlyDbContextTests(CustomApplicationFactory factory) : BaseDbCo
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that save changes with accept all changes should throw not supported exception.
+    /// </summary>
     public void SaveChanges_WithAcceptAllChanges_ShouldThrowNotSupportedException()
     {
         // Arrange
@@ -53,6 +67,10 @@ public class ReadOnlyDbContextTests(CustomApplicationFactory factory) : BaseDbCo
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that save changes async with accept all changes should throw not supported exception.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task SaveChangesAsync_WithAcceptAllChanges_ShouldThrowNotSupportedException()
     {
         // Arrange
@@ -68,6 +86,10 @@ public class ReadOnlyDbContextTests(CustomApplicationFactory factory) : BaseDbCo
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that queries should remain untracked.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task Queries_ShouldRemainUntracked()
     {
         // Arrange

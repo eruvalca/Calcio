@@ -23,13 +23,27 @@ public partial class PlayerImportParserService(
     IDbContextFactory<ReadOnlyDbContext> readOnlyDbContextFactory,
     ILogger<PlayerImportParserService> logger) : IPlayerImportParserService
 {
+    /// <summary>
+    /// Stores the Supported Extensions.
+    /// </summary>
     private static readonly string[] SupportedExtensions = [".csv"];
+    /// <summary>
+    /// Stores the Date Formats.
+    /// </summary>
     private static readonly string[] DateFormats =
     [
         "yyyy-MM-dd", "M/d/yyyy", "MM/dd/yyyy", "d/M/yyyy", "dd/MM/yyyy",
         "yyyy/MM/dd", "MM-dd-yyyy", "dd-MM-yyyy"
     ];
 
+    /// <summary>
+    /// Executes the Parse And Validate Async operation.
+    /// </summary>
+    /// <param name="fileStream">The file Stream.</param>
+    /// <param name="fileName">The file Name.</param>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<BulkValidateResultDto>> ParseAndValidateAsync(
         Stream fileStream,
         string fileName,
@@ -115,6 +129,13 @@ public partial class PlayerImportParserService(
         }
     }
 
+    /// <summary>
+    /// Executes the Revalidate Rows Async operation.
+    /// </summary>
+    /// <param name="rows">The rows.</param>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<BulkValidateResultDto>> RevalidateRowsAsync(
         List<PlayerImportRowDto> rows,
         long clubId,
@@ -136,6 +157,12 @@ public partial class PlayerImportParserService(
         return CreateResult(validatedRows, []);
     }
 
+    /// <summary>
+    /// Executes the Read Csv Data Table operation.
+    /// </summary>
+    /// <param name="stream">The stream.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     private static DataTable ReadCsvDataTable(Stream stream, CancellationToken cancellationToken)
     {
         if (stream.CanSeek)
@@ -199,6 +226,11 @@ public partial class PlayerImportParserService(
         return table;
     }
 
+    /// <summary>
+    /// Executes the Map Columns operation.
+    /// </summary>
+    /// <param name="columns">The columns.</param>
+    /// <returns>The operation result.</returns>
     private static List<ColumnMappingResultDto> MapColumns(DataColumnCollection columns)
     {
         var mappings = new List<ColumnMappingResultDto>();
@@ -233,6 +265,12 @@ public partial class PlayerImportParserService(
         return mappings;
     }
 
+    /// <summary>
+    /// Executes the Find Column Name For Field operation.
+    /// </summary>
+    /// <param name="columns">The columns.</param>
+    /// <param name="fieldName">The field Name.</param>
+    /// <returns>The operation result.</returns>
     private static string? FindColumnNameForField(DataColumnCollection columns, string fieldName)
     {
         if (!PlayerImportColumnMapping.AllFields.TryGetValue(fieldName, out var aliases))
@@ -271,6 +309,12 @@ public partial class PlayerImportParserService(
         return indexMap;
     }
 
+    /// <summary>
+    /// Executes the Parse Rows operation.
+    /// </summary>
+    /// <param name="table">The table.</param>
+    /// <param name="columnIndexMap">The column Index Map.</param>
+    /// <returns>The operation result.</returns>
     private static List<PlayerImportRowDto> ParseRows(DataTable table, Dictionary<string, int> columnIndexMap)
     {
         var rows = new List<PlayerImportRowDto>();
@@ -317,6 +361,13 @@ public partial class PlayerImportParserService(
         return rows;
     }
 
+    /// <summary>
+    /// Executes the Get String Value operation.
+    /// </summary>
+    /// <param name="row">The row.</param>
+    /// <param name="columnMap">The column Map.</param>
+    /// <param name="fieldName">The field Name.</param>
+    /// <returns>The operation result.</returns>
     private static string GetStringValue(DataRow row, Dictionary<string, int> columnMap, string fieldName)
     {
         if (!columnMap.TryGetValue(fieldName, out var index))
@@ -328,6 +379,13 @@ public partial class PlayerImportParserService(
         return value == DBNull.Value ? string.Empty : value.ToString()?.Trim() ?? string.Empty;
     }
 
+    /// <summary>
+    /// Executes the Get Date Value operation.
+    /// </summary>
+    /// <param name="row">The row.</param>
+    /// <param name="columnMap">The column Map.</param>
+    /// <param name="fieldName">The field Name.</param>
+    /// <returns>The operation result.</returns>
     private static DateOnly? GetDateValue(DataRow row, Dictionary<string, int> columnMap, string fieldName)
     {
         if (!columnMap.TryGetValue(fieldName, out var index))
@@ -371,6 +429,13 @@ public partial class PlayerImportParserService(
         return null;
     }
 
+    /// <summary>
+    /// Executes the Get Int Value operation.
+    /// </summary>
+    /// <param name="row">The row.</param>
+    /// <param name="columnMap">The column Map.</param>
+    /// <param name="fieldName">The field Name.</param>
+    /// <returns>The operation result.</returns>
     private static int? GetIntValue(DataRow row, Dictionary<string, int> columnMap, string fieldName)
     {
         if (!columnMap.TryGetValue(fieldName, out var index))
@@ -404,6 +469,13 @@ public partial class PlayerImportParserService(
         return int.TryParse(stringValue, out var result) ? result : null;
     }
 
+    /// <summary>
+    /// Executes the Get Gender Value operation.
+    /// </summary>
+    /// <param name="row">The row.</param>
+    /// <param name="columnMap">The column Map.</param>
+    /// <param name="fieldName">The field Name.</param>
+    /// <returns>The operation result.</returns>
     private static Gender? GetGenderValue(DataRow row, Dictionary<string, int> columnMap, string fieldName)
     {
         if (!columnMap.TryGetValue(fieldName, out var index))
@@ -432,6 +504,13 @@ public partial class PlayerImportParserService(
         };
     }
 
+    /// <summary>
+    /// Executes the Validate Rows Async operation.
+    /// </summary>
+    /// <param name="rows">The rows.</param>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     private async Task<List<PlayerImportRowDto>> ValidateRowsAsync(
         List<PlayerImportRowDto> rows,
         long clubId,
@@ -458,6 +537,10 @@ public partial class PlayerImportParserService(
         return rows;
     }
 
+    /// <summary>
+    /// Executes the Validate Required Fields operation.
+    /// </summary>
+    /// <param name="row">The row.</param>
     private static void ValidateRequiredFields(PlayerImportRowDto row)
     {
         if (string.IsNullOrWhiteSpace(row.FirstName))
@@ -508,6 +591,10 @@ public partial class PlayerImportParserService(
         }
     }
 
+    /// <summary>
+    /// Executes the Check In File Duplicates operation.
+    /// </summary>
+    /// <param name="rows">The rows.</param>
     private static void CheckInFileDuplicates(List<PlayerImportRowDto> rows)
     {
         var seen = new Dictionary<string, int>();
@@ -535,6 +622,13 @@ public partial class PlayerImportParserService(
         }
     }
 
+    /// <summary>
+    /// Executes the Check Database Duplicates Async operation.
+    /// </summary>
+    /// <param name="rows">The rows.</param>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     private async Task CheckDatabaseDuplicatesAsync(
         List<PlayerImportRowDto> rows,
         long clubId,
@@ -571,6 +665,12 @@ public partial class PlayerImportParserService(
         }
     }
 
+    /// <summary>
+    /// Executes the Create Result operation.
+    /// </summary>
+    /// <param name="rows">The rows.</param>
+    /// <param name="columnMappings">The column Mappings.</param>
+    /// <returns>The operation result.</returns>
     private static BulkValidateResultDto CreateResult(List<PlayerImportRowDto> rows, List<ColumnMappingResultDto> columnMappings)
     {
         var validCount = rows.Count(r => r.IsValid);
@@ -596,12 +696,52 @@ public partial class PlayerImportParserService(
             DuplicateInDatabaseCount: duplicateInDbCount);
     }
 
+    /// <summary>
+    /// Executes the Log Missing Required Columns operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="columns">The columns.</param>
+    /// <param name="fileName">The file Name.</param>
     [LoggerMessage(Level = LogLevel.Warning, Message = "Missing required columns in import file: {Columns}. File: {FileName}")]
+    /// <summary>
+    /// Executes the log missing required columns operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="columns">The columns.</param>
+    /// <param name="fileName">The file name.</param>
     private static partial void LogMissingRequiredColumns(ILogger logger, string columns, string fileName);
 
+    /// <summary>
+    /// Executes the Log Parse Complete operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="fileName">The file Name.</param>
+    /// <param name="validCount">The valid Count.</param>
+    /// <param name="errorCount">The error Count.</param>
+    /// <param name="warningCount">The warning Count.</param>
     [LoggerMessage(Level = LogLevel.Information, Message = "Import file parsed successfully. File: {FileName}, Valid: {ValidCount}, Errors: {ErrorCount}, Warnings: {WarningCount}")]
+    /// <summary>
+    /// Executes the log parse complete operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="fileName">The file name.</param>
+    /// <param name="validCount">The valid count.</param>
+    /// <param name="errorCount">The error count.</param>
+    /// <param name="warningCount">The warning count.</param>
     private static partial void LogParseComplete(ILogger logger, string fileName, int validCount, int errorCount, int warningCount);
 
+    /// <summary>
+    /// Executes the Log Parse Error operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="fileName">The file Name.</param>
+    /// <param name="error">The error.</param>
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to parse import file: {FileName}. Error: {Error}")]
+    /// <summary>
+    /// Executes the log parse error operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="fileName">The file name.</param>
+    /// <param name="error">The error.</param>
     private static partial void LogParseError(ILogger logger, string fileName, string error);
 }

@@ -28,6 +28,9 @@ namespace Calcio.Services.CalcioUsers;
 /// Marked as sealed and immutable for HybridCache instance reuse.
 /// </summary>
 [ImmutableObject(true)]
+/// <summary>
+/// Represents the cached user photo paths record.
+/// </summary>
 internal sealed record CachedUserPhotoPaths(
     long CalcioUserPhotoId,
     string OriginalBlobName,
@@ -35,6 +38,17 @@ internal sealed record CachedUserPhotoPaths(
     string? MediumBlobName,
     string? LargeBlobName);
 
+/// <summary>
+/// Provides Calcio Users Service operations.
+/// </summary>
+/// <param name="readOnlyDbContextFactory">The read Only Db Context Factory.</param>
+/// <param name="readWriteDbContextFactory">The read Write Db Context Factory.</param>
+/// <param name="userManager">The user Manager.</param>
+/// <param name="userClubsCacheService">The user Clubs Cache Service.</param>
+/// <param name="blobStorageService">The blob Storage Service.</param>
+/// <param name="cache">The cache.</param>
+/// <param name="httpContextAccessor">The http Context Accessor.</param>
+/// <param name="httpContextAccessor">The http Context Accessor.</param>
 public partial class CalcioUsersService(
     IDbContextFactory<ReadOnlyDbContext> readOnlyDbContextFactory,
     IDbContextFactory<ReadWriteDbContext> readWriteDbContextFactory,
@@ -45,11 +59,32 @@ public partial class CalcioUsersService(
     IHttpContextAccessor httpContextAccessor,
     ILogger<CalcioUsersService> logger) : AuthenticatedServiceBase(httpContextAccessor), ICalcioUsersService
 {
+    /// <summary>
+    /// Stores the Container Name.
+    /// </summary>
     private const string ContainerName = "user-photos";
+    /// <summary>
+    /// Stores the Small Size.
+    /// </summary>
     private const int SmallSize = 128;
+    /// <summary>
+    /// Stores the Medium Size.
+    /// </summary>
     private const int MediumSize = 512;
+    /// <summary>
+    /// Stores the Large Size.
+    /// </summary>
     private const int LargeSize = 1024;
+    /// <summary>
+    /// Stores the Sas Url Expiration.
+    /// </summary>
     private static readonly TimeSpan SasUrlExpiration = TimeSpan.FromHours(1);
+    /// <summary>
+    /// Executes the Get Club Members Async operation.
+    /// </summary>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<List<ClubMemberDto>>> GetClubMembersAsync(long clubId, CancellationToken cancellationToken)
     {
         // Club membership is validated by ClubMembershipFilter before this service is called.
@@ -69,6 +104,13 @@ public partial class CalcioUsersService(
         return members.OrderByDescending(m => m.IsClubAdmin).ThenBy(m => m.FullName).ToList();
     }
 
+    /// <summary>
+    /// Executes the Remove Club Member Async operation.
+    /// </summary>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="userId">The user Id.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<Success>> RemoveClubMemberAsync(long clubId, long userId, CancellationToken cancellationToken)
     {
         // Club membership is validated by ClubMembershipFilter before this service is called.
@@ -109,12 +151,47 @@ public partial class CalcioUsersService(
         return new Success();
     }
 
+    /// <summary>
+    /// Executes the Log Member Removed operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club Id.</param>
+    /// <param name="userId">The user Id.</param>
+    /// <param name="removingUserId">The removing User Id.</param>
     [LoggerMessage(Level = LogLevel.Information, Message = "Member {UserId} removed from club {ClubId} by user {RemovingUserId}")]
+    /// <summary>
+    /// Executes the log member removed operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club id.</param>
+    /// <param name="userId">The user id.</param>
+    /// <param name="removingUserId">The removing user id.</param>
     private static partial void LogMemberRemoved(ILogger logger, long clubId, long userId, long removingUserId);
 
+    /// <summary>
+    /// Executes the Log Role Removal Failed operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="userId">The user Id.</param>
+    /// <param name="roleName">The role Name.</param>
+    /// <param name="errors">The errors.</param>
     [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to remove {RoleName} role from user {UserId}: {Errors}")]
+    /// <summary>
+    /// Executes the log role removal failed operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="userId">The user id.</param>
+    /// <param name="roleName">The role name.</param>
+    /// <param name="errors">The errors.</param>
     private static partial void LogRoleRemovalFailed(ILogger logger, long userId, string roleName, string errors);
 
+    /// <summary>
+    /// Executes the Upload Account Photo Async operation.
+    /// </summary>
+    /// <param name="photoStream">The photo Stream.</param>
+    /// <param name="contentType">The content Type.</param>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<CalcioUserPhotoDto>> UploadAccountPhotoAsync(
         Stream photoStream,
         string contentType,
@@ -257,6 +334,11 @@ public partial class CalcioUsersService(
         return (OneOf<CalcioUserPhotoDto, None>)GeneratePhotoDtoFromPaths(cachedPaths);
     }
 
+    /// <summary>
+    /// Executes the Has Account Photo Async operation.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation Token.</param>
+    /// <returns>The operation result.</returns>
     public async Task<ServiceResult<bool>> HasAccountPhotoAsync(CancellationToken cancellationToken)
     {
         await using var dbContext = await readOnlyDbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -267,6 +349,11 @@ public partial class CalcioUsersService(
         return hasPhoto;
     }
 
+    /// <summary>
+    /// Executes the Generate Photo Dto operation.
+    /// </summary>
+    /// <param name="photo">The photo.</param>
+    /// <returns>The operation result.</returns>
     private CalcioUserPhotoDto GeneratePhotoDto(CalcioUserPhotoEntity photo)
         => new(
             photo.CalcioUserPhotoId,
@@ -275,6 +362,11 @@ public partial class CalcioUsersService(
             photo.MediumBlobName is not null ? blobStorageService.GetSasUrl(ContainerName, photo.MediumBlobName, SasUrlExpiration).ToString() : null,
             photo.LargeBlobName is not null ? blobStorageService.GetSasUrl(ContainerName, photo.LargeBlobName, SasUrlExpiration).ToString() : null);
 
+    /// <summary>
+    /// Executes the Generate Photo Dto From Paths operation.
+    /// </summary>
+    /// <param name="paths">The paths.</param>
+    /// <returns>The operation result.</returns>
     private CalcioUserPhotoDto GeneratePhotoDtoFromPaths(CachedUserPhotoPaths paths)
         => new(
             paths.CalcioUserPhotoId,
@@ -319,6 +411,11 @@ public partial class CalcioUsersService(
         return results;
     }
 
+    /// <summary>
+    /// Executes the Crop To Square operation.
+    /// </summary>
+    /// <param name="source">The source.</param>
+    /// <returns>The operation result.</returns>
     private static SKBitmap CropToSquare(SKBitmap source)
     {
         var size = Math.Min(source.Width, source.Height);
@@ -334,6 +431,12 @@ public partial class CalcioUsersService(
         return croppedBitmap;
     }
 
+    /// <summary>
+    /// Executes the Resize Bitmap operation.
+    /// </summary>
+    /// <param name="source">The source.</param>
+    /// <param name="maxSize">The max Size.</param>
+    /// <returns>The operation result.</returns>
     private static SKBitmap ResizeBitmap(SKBitmap source, int maxSize)
     {
         if (source.Width <= maxSize && source.Height <= maxSize)
@@ -362,6 +465,12 @@ public partial class CalcioUsersService(
         return resized;
     }
 
+    /// <summary>
+    /// Executes the Encode To Jpeg operation.
+    /// </summary>
+    /// <param name="bitmap">The bitmap.</param>
+    /// <param name="quality">The quality.</param>
+    /// <returns>The operation result.</returns>
     private static byte[] EncodeToJpeg(SKBitmap bitmap, int quality)
     {
         using var image = SKImage.FromBitmap(bitmap);
@@ -376,6 +485,11 @@ public partial class CalcioUsersService(
         return (variant, uri);
     }
 
+    /// <summary>
+    /// Executes the Get Blob Guid From Path operation.
+    /// </summary>
+    /// <param name="blobPath">The blob Path.</param>
+    /// <returns>The operation result.</returns>
     private static string GetBlobGuidFromPath(string blobPath)
     {
         // Path format: users/{userId}/{guid}/variant.jpg
@@ -383,9 +497,31 @@ public partial class CalcioUsersService(
         return parts.Length >= 3 ? parts[2] : string.Empty;
     }
 
+    /// <summary>
+    /// Executes the Log Photo Uploaded operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="userId">The user Id.</param>
+    /// <param name="photoId">The photo Id.</param>
     [LoggerMessage(Level = LogLevel.Information, Message = "Uploaded photo {PhotoId} for user {UserId}")]
+    /// <summary>
+    /// Executes the log photo uploaded operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="userId">The user id.</param>
+    /// <param name="photoId">The photo id.</param>
     private static partial void LogPhotoUploaded(ILogger logger, long userId, long photoId);
 
+    /// <summary>
+    /// Executes the Log Existing Photo Deleted operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="userId">The user Id.</param>
     [LoggerMessage(Level = LogLevel.Information, Message = "Deleted existing photo for user {UserId}")]
+    /// <summary>
+    /// Executes the log existing photo deleted operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="userId">The user id.</param>
     private static partial void LogExistingPhotoDeleted(ILogger logger, long userId);
 }

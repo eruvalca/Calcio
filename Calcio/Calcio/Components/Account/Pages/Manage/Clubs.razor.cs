@@ -13,7 +13,18 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Calcio.Components.Account.Pages.Manage;
 
+/// <summary>
+/// Represents the Clubs.
+/// </summary>
+/// <param name="clubsService">The clubs Service.</param>
+/// <param name="clubJoinRequestsService">The club Join Requests Service.</param>
+/// <param name="userManager">The user Manager.</param>
+/// <param name="signInManager">The sign In Manager.</param>
+/// <param name="redirectManager">The redirect Manager.</param>
 [Authorize]
+/// <summary>
+/// Represents the clubs class.
+/// </summary>
 public partial class Clubs(
     IClubsService clubsService,
     IClubJoinRequestsService clubJoinRequestsService,
@@ -21,18 +32,49 @@ public partial class Clubs(
     SignInManager<CalcioUserEntity> signInManager,
     IdentityRedirectManager redirectManager)
 {
+    /// <summary>
+    /// Gets or sets the Http Context.
+    /// </summary>
     [CascadingParameter]
+    /// <summary>
+    /// Gets or sets the http context.
+    /// </summary>
     private HttpContext HttpContext { get; set; } = default!;
 
+    /// <summary>
+    /// Gets or sets the Leave Club Input.
+    /// </summary>
     [SupplyParameterFromForm]
+    /// <summary>
+    /// Gets or sets the leave club input.
+    /// </summary>
     private LeaveClubInputModel LeaveClubInput { get; set; } = default!;
 
+    /// <summary>
+    /// Gets or sets the User Id.
+    /// </summary>
     private long UserId { get; set; } = default;
+    /// <summary>
+    /// Gets or sets the User Clubs.
+    /// </summary>
     private List<BaseClubDto> UserClubs { get; set; } = [];
+    /// <summary>
+    /// Gets or sets the All Clubs.
+    /// </summary>
     private List<BaseClubDto> AllClubs { get; set; } = [];
+    /// <summary>
+    /// Gets or sets the Current Join Request.
+    /// </summary>
     private ClubJoinRequestDto? CurrentJoinRequest { get; set; }
+    /// <summary>
+    /// Gets or sets the Is Club Admin.
+    /// </summary>
     private bool IsClubAdmin { get; set; }
 
+    /// <summary>
+    /// Executes the On Initialized Async operation.
+    /// </summary>
+    /// <returns>The operation result.</returns>
     protected override async Task OnInitializedAsync()
     {
         UserId = long.TryParse(userManager.GetUserId(HttpContext.User), out var userId)
@@ -63,6 +105,11 @@ public partial class Clubs(
         }
     }
 
+    /// <summary>
+    /// Executes the Leave Club operation.
+    /// </summary>
+    /// <param name="editContext">The edit Context.</param>
+    /// <returns>The operation result.</returns>
     public async Task LeaveClub(EditContext editContext)
     {
         if (IsClubAdmin || LeaveClubInput.ClubId <= 0)
@@ -106,8 +153,14 @@ public partial class Clubs(
             });
     }
 
+    /// <summary>
+    /// Represents the Leave Club Input Model.
+    /// </summary>
     private sealed class LeaveClubInputModel
     {
+        /// <summary>
+        /// Gets or sets the Club Id.
+        /// </summary>
         public long ClubId { get; set; }
     }
 }

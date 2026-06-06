@@ -5,8 +5,15 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Calcio.Data.Configurations;
 
+/// <summary>
+/// Configures EF Core mapping for Player Entity Configuration.
+/// </summary>
 public class PlayerEntityConfiguration : IEntityTypeConfiguration<PlayerEntity>
 {
+    /// <summary>
+    /// Executes the Configure operation.
+    /// </summary>
+    /// <param name="builder">The builder.</param>
     public void Configure(EntityTypeBuilder<PlayerEntity> builder)
     {
         builder.HasKey(e => e.PlayerId);

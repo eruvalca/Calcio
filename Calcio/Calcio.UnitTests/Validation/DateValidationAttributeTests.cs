@@ -6,9 +6,15 @@ using Shouldly;
 
 namespace Calcio.UnitTests.Validation;
 
+/// <summary>
+/// Contains unit tests for D at eV al id at io nA tt ri bu te behavior.
+/// </summary>
 public class DateValidationAttributeTests
 {
     #region DateNotBeforeTodayAttribute Tests
+    /// <summary>
+    /// Verifies the DateNotBeforeToday_WhenNull_ReturnsValid scenario.
+    /// </summary>
 
     [Fact]
     public void DateNotBeforeToday_WhenNull_ReturnsValid()
@@ -22,6 +28,9 @@ public class DateValidationAttributeTests
         // Assert
         result.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the DateNotBeforeToday_WhenToday_ReturnsValid scenario.
+    /// </summary>
 
     [Fact]
     public void DateNotBeforeToday_WhenToday_ReturnsValid()
@@ -36,6 +45,9 @@ public class DateValidationAttributeTests
         // Assert
         result.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the DateNotBeforeToday_WhenTomorrow_ReturnsValid scenario.
+    /// </summary>
 
     [Fact]
     public void DateNotBeforeToday_WhenTomorrow_ReturnsValid()
@@ -50,6 +62,9 @@ public class DateValidationAttributeTests
         // Assert
         result.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the DateNotBeforeToday_WhenYesterday_ReturnsInvalid scenario.
+    /// </summary>
 
     [Fact]
     public void DateNotBeforeToday_WhenYesterday_ReturnsInvalid()
@@ -64,6 +79,9 @@ public class DateValidationAttributeTests
         // Assert
         result.ShouldBeFalse();
     }
+    /// <summary>
+    /// Verifies the DateNotBeforeToday_WhenFutureDate_ReturnsValid scenario.
+    /// </summary>
 
     [Fact]
     public void DateNotBeforeToday_WhenFutureDate_ReturnsValid()
@@ -78,6 +96,9 @@ public class DateValidationAttributeTests
         // Assert
         result.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the DateNotBeforeToday_WhenInvalidType_ReturnsInvalid scenario.
+    /// </summary>
 
     [Fact]
     public void DateNotBeforeToday_WhenInvalidType_ReturnsInvalid()
@@ -95,6 +116,9 @@ public class DateValidationAttributeTests
     #endregion
 
     #region DateAfterTodayAttribute Tests
+    /// <summary>
+    /// Verifies the DateAfterToday_WhenNull_ReturnsValid scenario.
+    /// </summary>
 
     [Fact]
     public void DateAfterToday_WhenNull_ReturnsValid()
@@ -108,6 +132,9 @@ public class DateValidationAttributeTests
         // Assert
         result.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the DateAfterToday_WhenToday_ReturnsInvalid scenario.
+    /// </summary>
 
     [Fact]
     public void DateAfterToday_WhenToday_ReturnsInvalid()
@@ -122,6 +149,9 @@ public class DateValidationAttributeTests
         // Assert
         result.ShouldBeFalse();
     }
+    /// <summary>
+    /// Verifies the DateAfterToday_WhenTomorrow_ReturnsValid scenario.
+    /// </summary>
 
     [Fact]
     public void DateAfterToday_WhenTomorrow_ReturnsValid()
@@ -136,6 +166,9 @@ public class DateValidationAttributeTests
         // Assert
         result.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the DateAfterToday_WhenYesterday_ReturnsInvalid scenario.
+    /// </summary>
 
     [Fact]
     public void DateAfterToday_WhenYesterday_ReturnsInvalid()
@@ -150,6 +183,9 @@ public class DateValidationAttributeTests
         // Assert
         result.ShouldBeFalse();
     }
+    /// <summary>
+    /// Verifies the DateAfterToday_WhenFutureDate_ReturnsValid scenario.
+    /// </summary>
 
     [Fact]
     public void DateAfterToday_WhenFutureDate_ReturnsValid()
@@ -164,6 +200,9 @@ public class DateValidationAttributeTests
         // Assert
         result.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the DateAfterToday_WhenInvalidType_ReturnsInvalid scenario.
+    /// </summary>
 
     [Fact]
     public void DateAfterToday_WhenInvalidType_ReturnsInvalid()
@@ -181,6 +220,9 @@ public class DateValidationAttributeTests
     #endregion
 
     #region DateAfterAttribute Tests
+    /// <summary>
+    /// Verifies the DateAfter_WhenNull_ReturnsValid scenario.
+    /// </summary>
 
     [Fact]
     public void DateAfter_WhenNull_ReturnsValid()
@@ -196,6 +238,9 @@ public class DateValidationAttributeTests
         // Assert
         result.ShouldBe(ValidationResult.Success);
     }
+    /// <summary>
+    /// Verifies the DateAfter_WhenEndDateAfterStartDate_ReturnsValid scenario.
+    /// </summary>
 
     [Fact]
     public void DateAfter_WhenEndDateAfterStartDate_ReturnsValid()
@@ -215,6 +260,9 @@ public class DateValidationAttributeTests
         // Assert
         result.ShouldBe(ValidationResult.Success);
     }
+    /// <summary>
+    /// Verifies the DateAfter_WhenEndDateEqualsStartDate_ReturnsInvalid scenario.
+    /// </summary>
 
     [Fact]
     public void DateAfter_WhenEndDateEqualsStartDate_ReturnsInvalid()
@@ -234,6 +282,9 @@ public class DateValidationAttributeTests
         result.ErrorMessage.ShouldNotBeNull();
         result.ErrorMessage.ShouldContain("must be after");
     }
+    /// <summary>
+    /// Verifies the DateAfter_WhenEndDateBeforeStartDate_ReturnsInvalid scenario.
+    /// </summary>
 
     [Fact]
     public void DateAfter_WhenEndDateBeforeStartDate_ReturnsInvalid()
@@ -256,6 +307,9 @@ public class DateValidationAttributeTests
         result.ErrorMessage.ShouldNotBeNull();
         result.ErrorMessage.ShouldContain("must be after");
     }
+    /// <summary>
+    /// Verifies the DateAfter_WhenOtherPropertyNotFound_ReturnsError scenario.
+    /// </summary>
 
     [Fact]
     public void DateAfter_WhenOtherPropertyNotFound_ReturnsError()
@@ -274,6 +328,9 @@ public class DateValidationAttributeTests
         result.ErrorMessage.ShouldNotBeNull();
         result.ErrorMessage.ShouldContain("Unknown property");
     }
+    /// <summary>
+    /// Verifies the DateAfter_WhenOtherPropertyIsNull_ReturnsValid scenario.
+    /// </summary>
 
     [Fact]
     public void DateAfter_WhenOtherPropertyIsNull_ReturnsValid()
@@ -293,6 +350,9 @@ public class DateValidationAttributeTests
         // Assert
         result.ShouldBe(ValidationResult.Success);
     }
+    /// <summary>
+    /// Verifies the DateAfter_UsesDisplayNameInErrorMessage scenario.
+    /// </summary>
 
     [Fact]
     public void DateAfter_UsesDisplayNameInErrorMessage()
@@ -321,24 +381,51 @@ public class DateValidationAttributeTests
 
     #region Test Helper Classes
 
+    /// <summary>
+    /// Contains unit tests for T es tD at eM od el behavior.
+    /// </summary>
     private sealed class TestDateModel
     {
+        /// <summary>
+        /// Gets or sets the s ta rt da te value used by validation test models.
+        /// </summary>
         public DateOnly StartDate { get; set; }
+        /// <summary>
+        /// Gets or sets the e nd da te value used by validation test models.
+        /// </summary>
         public DateOnly? EndDate { get; set; }
     }
 
+    /// <summary>
+    /// Contains unit tests for T es tD at eM od el Wi th Nu ll ab le St ar t behavior.
+    /// </summary>
     private sealed class TestDateModelWithNullableStart
     {
+        /// <summary>
+        /// Gets or sets the s ta rt da te value used by validation test models.
+        /// </summary>
         public DateOnly? StartDate { get; set; }
+        /// <summary>
+        /// Gets or sets the e nd da te value used by validation test models.
+        /// </summary>
         public DateOnly? EndDate { get; set; }
     }
 
+    /// <summary>
+    /// Contains unit tests for T es tD at eM od el Wi th Di sp la yN am es behavior.
+    /// </summary>
     private sealed class TestDateModelWithDisplayNames
     {
         [Display(Name = "Season Start Date")]
+        /// <summary>
+        /// Gets or sets the s ta rt da te value used by validation test models.
+        /// </summary>
         public DateOnly StartDate { get; set; }
 
         [Display(Name = "Season End Date")]
+        /// <summary>
+        /// Gets or sets the e nd da te value used by validation test models.
+        /// </summary>
         public DateOnly? EndDate { get; set; }
     }
 

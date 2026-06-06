@@ -2,6 +2,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Calcio.Shared.DTOs.Clubs;
 
+/// <summary>
+/// Represents the input required to create a new club.
+/// </summary>
+/// <param name="Name">The club name entered by the user.</param>
+/// <param name="City">The city where the club is located.</param>
+/// <param name="State">The two-letter U.S. state abbreviation for the club location.</param>
 public record CreateClubDto(
     [Required]
     [StringLength(100, MinimumLength = 2)]

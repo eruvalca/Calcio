@@ -5,8 +5,15 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Calcio.Data.Configurations;
 
+/// <summary>
+/// Configures EF Core mapping for Campaign Entity Configuration.
+/// </summary>
 public class CampaignEntityConfiguration : IEntityTypeConfiguration<CampaignEntity>
 {
+    /// <summary>
+    /// Executes the Configure operation.
+    /// </summary>
+    /// <param name="builder">The builder.</param>
     public void Configure(EntityTypeBuilder<CampaignEntity> builder)
     {
         builder.HasKey(e => e.CampaignId);

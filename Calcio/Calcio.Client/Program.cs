@@ -19,36 +19,50 @@ using Cropper.Blazor.Extensions;
 
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
-var builder = WebAssemblyHostBuilder.CreateDefault(args);
+/// <summary>
+/// Configures and runs the Calcio WebAssembly client application.
+/// </summary>
+internal static class Program
+{
+    /// <summary>
+    /// Registers client-side services and starts the Blazor WebAssembly host.
+    /// </summary>
+    /// <param name="args">Command-line arguments passed at startup.</param>
+    /// <returns>A task that completes when the host shuts down.</returns>
+    public static async Task Main(string[] args)
+    {
+        var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
-builder.Services.AddAuthorizationCore();
-builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddAuthenticationStateDeserialization();
+        builder.Services.AddAuthorizationCore();
+        builder.Services.AddCascadingAuthenticationState();
+        builder.Services.AddAuthenticationStateDeserialization();
 
-builder.Services.AddCropper();
-builder.Services.AddSingleton(TimeProvider.System);
+        builder.Services.AddCropper();
+        builder.Services.AddSingleton(TimeProvider.System);
 
-builder.Services.AddHttpClient<IClubJoinRequestsService, ClubJoinRequestsService>(client =>
-    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+        builder.Services.AddHttpClient<IClubJoinRequestsService, ClubJoinRequestsService>(client =>
+            client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
-builder.Services.AddHttpClient<IClubsService, ClubsService>(client =>
-    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+        builder.Services.AddHttpClient<IClubsService, ClubsService>(client =>
+            client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
-builder.Services.AddHttpClient<ICalcioUsersService, CalcioUsersService>(client =>
-    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+        builder.Services.AddHttpClient<ICalcioUsersService, CalcioUsersService>(client =>
+            client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
-builder.Services.AddHttpClient<ISeasonsService, SeasonsService>(client =>
-    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+        builder.Services.AddHttpClient<ISeasonsService, SeasonsService>(client =>
+            client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
-builder.Services.AddHttpClient<ITeamsService, TeamsService>(client =>
-    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+        builder.Services.AddHttpClient<ITeamsService, TeamsService>(client =>
+            client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
-builder.Services.AddHttpClient<IPlayersService, PlayersService>(client =>
-    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+        builder.Services.AddHttpClient<IPlayersService, PlayersService>(client =>
+            client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
-builder.Services.AddHttpClient<IAccountService, AccountService>(client =>
-    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+        builder.Services.AddHttpClient<IAccountService, AccountService>(client =>
+            client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
-builder.Services.AddScoped<ThemeService>();
+        builder.Services.AddScoped<ThemeService>();
 
-await builder.Build().RunAsync();
+        await builder.Build().RunAsync();
+    }
+}

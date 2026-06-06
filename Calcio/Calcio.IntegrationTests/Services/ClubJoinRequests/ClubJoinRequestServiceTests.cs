@@ -20,10 +20,21 @@ using Shouldly;
 
 namespace Calcio.IntegrationTests.Services.ClubJoinRequests;
 
+/// <summary>
+/// Contains integration tests for club join request service behavior.
+/// </summary>
+/// <param name="factory">Provides dependencies used to build the integration test host.</param>
 public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : BaseDbContextTests(factory)
 {
+    /// <summary>
+    /// Stores the unaffiliated user id value used by this test suite.
+    /// </summary>
     private const long UnaffiliatedUserId = 100;
 
+    /// <summary>
+    /// Initializes shared test data required by this test suite.
+    /// </summary>
+    /// <returns>A value task that represents the asynchronous initialization operation.</returns>
     public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
@@ -70,6 +81,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     #region GetRequestForCurrentUserAsync Tests
 
     [Fact]
+    /// <summary>
+    /// Verifies that get request for current user async when pending request exists returns request.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task GetRequestForCurrentUserAsync_WhenPendingRequestExists_ReturnsRequest()
     {
         // Arrange
@@ -103,6 +118,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that get request for current user async when rejected request exists returns request.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task GetRequestForCurrentUserAsync_WhenRejectedRequestExists_ReturnsRequest()
     {
         // Arrange
@@ -135,6 +154,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that get request for current user async when no request returns not found.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task GetRequestForCurrentUserAsync_WhenNoRequest_ReturnsNotFound()
     {
         // Arrange
@@ -157,6 +180,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     #region CreateJoinRequestAsync Tests
 
     [Fact]
+    /// <summary>
+    /// Verifies that create join request async when club exists and no pending request returns success.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task CreateJoinRequestAsync_WhenClubExistsAndNoPendingRequest_ReturnsSuccess()
     {
         // Arrange
@@ -185,6 +212,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that create join request async when pending request already exists returns conflict.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task CreateJoinRequestAsync_WhenPendingRequestAlreadyExists_ReturnsConflict()
     {
         // Arrange
@@ -217,6 +248,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that create join request async when club does not exist returns not found.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task CreateJoinRequestAsync_WhenClubDoesNotExist_ReturnsNotFound()
     {
         // Arrange
@@ -235,6 +270,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that create join request async when rejected request exists deletes old and creates new.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task CreateJoinRequestAsync_WhenRejectedRequestExists_DeletesOldAndCreatesNew()
     {
         // Arrange
@@ -287,6 +326,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     #region CancelJoinRequestAsync Tests
 
     [Fact]
+    /// <summary>
+    /// Verifies that cancel join request async when pending request exists returns success and deletes request.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task CancelJoinRequestAsync_WhenPendingRequestExists_ReturnsSuccessAndDeletesRequest()
     {
         // Arrange
@@ -323,6 +366,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that cancel join request async when no pending request returns not found.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task CancelJoinRequestAsync_WhenNoPendingRequest_ReturnsNotFound()
     {
         // Arrange
@@ -345,6 +392,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     #region GetPendingRequestsForClubAsync Tests
 
     [Fact]
+    /// <summary>
+    /// Verifies that get pending requests for club async when user is member returns requests.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task GetPendingRequestsForClubAsync_WhenUserIsMember_ReturnsRequests()
     {
         // Arrange
@@ -379,6 +430,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that get pending requests for club async when user is not member returns empty list.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task GetPendingRequestsForClubAsync_WhenUserIsNotMember_ReturnsEmptyList()
     {
         // Arrange
@@ -404,6 +459,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that get pending requests for club async when no requests returns empty list.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task GetPendingRequestsForClubAsync_WhenNoRequests_ReturnsEmptyList()
     {
         // Arrange
@@ -429,6 +488,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     #region UpdateJoinRequestStatusAsync Tests - Approve
 
     [Fact]
+    /// <summary>
+    /// Verifies that update join request status async when approving returns success and updates user club and adds role.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task UpdateJoinRequestStatusAsync_WhenApproving_ReturnsSuccessAndUpdatesUserClubAndAddsRole()
     {
         // Arrange
@@ -476,6 +539,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that update join request status async when approving and request does not exist returns not found.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task UpdateJoinRequestStatusAsync_WhenApprovingAndRequestDoesNotExist_ReturnsNotFound()
     {
         // Arrange
@@ -497,6 +564,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that update join request status async when approving and user is not member returns not found.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task UpdateJoinRequestStatusAsync_WhenApprovingAndUserIsNotMember_ReturnsNotFound()
     {
         // Arrange
@@ -536,6 +607,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     #region UpdateJoinRequestStatusAsync Tests - Reject
 
     [Fact]
+    /// <summary>
+    /// Verifies that update join request status async when rejecting returns success and updates status.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task UpdateJoinRequestStatusAsync_WhenRejecting_ReturnsSuccessAndUpdatesStatus()
     {
         // Arrange
@@ -575,6 +650,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that update join request status async when rejecting and request does not exist returns not found.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task UpdateJoinRequestStatusAsync_WhenRejectingAndRequestDoesNotExist_ReturnsNotFound()
     {
         // Arrange
@@ -596,6 +675,10 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that update join request status async when rejecting and user is not member returns not found.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task UpdateJoinRequestStatusAsync_WhenRejectingAndUserIsNotMember_ReturnsNotFound()
     {
         // Arrange
@@ -634,6 +717,11 @@ public class ClubJoinRequestServiceTests(CustomApplicationFactory factory) : Bas
 
     #region Helpers
 
+    /// <summary>
+    /// Creates the service under test using dependencies from the current scope.
+    /// </summary>
+    /// <param name="services">Specifies the services value for this scenario.</param>
+    /// <returns>The club join requests service produced by the operation.</returns>
     private static ClubJoinRequestsService CreateService(IServiceProvider services)
     {
         var readOnlyFactory = services.GetRequiredService<IDbContextFactory<ReadOnlyDbContext>>();

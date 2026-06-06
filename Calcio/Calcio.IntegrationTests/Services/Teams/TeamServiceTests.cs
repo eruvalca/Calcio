@@ -17,10 +17,21 @@ using Shouldly;
 
 namespace Calcio.IntegrationTests.Services.Teams;
 
+/// <summary>
+/// Contains integration tests for team service behavior.
+/// </summary>
+/// <param name="factory">Provides dependencies used to build the integration test host.</param>
 public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextTests(factory)
 {
+    /// <summary>
+    /// Stores the standard member user id value used by this test suite.
+    /// </summary>
     private const long StandardMemberUserId = 400;
 
+    /// <summary>
+    /// Initializes shared test data required by this test suite.
+    /// </summary>
+    /// <returns>A value task that represents the asynchronous initialization operation.</returns>
     public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
@@ -66,6 +77,10 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
     #region GetTeamsAsync Tests
 
     [Fact]
+    /// <summary>
+    /// Verifies that get teams async when user is member returns teams.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task GetTeamsAsync_WhenUserIsMember_ReturnsTeams()
     {
         // Arrange
@@ -90,6 +105,10 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that get teams async when user is not member returns empty list.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task GetTeamsAsync_WhenUserIsNotMember_ReturnsEmptyList()
     {
         // Arrange
@@ -115,6 +134,10 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that get teams async returns teams ordered by name.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task GetTeamsAsync_ReturnsTeamsOrderedByName()
     {
         // Arrange
@@ -146,6 +169,10 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that get teams async returns only teams for specified club.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task GetTeamsAsync_ReturnsOnlyTeamsForSpecifiedClub()
     {
         // Arrange
@@ -173,6 +200,10 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that get teams async returns correct team properties.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task GetTeamsAsync_ReturnsCorrectTeamProperties()
     {
         // Arrange
@@ -202,6 +233,10 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that get teams async when club does not exist returns empty list.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task GetTeamsAsync_WhenClubDoesNotExist_ReturnsEmptyList()
     {
         // Arrange
@@ -224,6 +259,10 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
     #region CreateTeamAsync Tests
 
     [Fact]
+    /// <summary>
+    /// Verifies that create team async when valid input creates team successfully.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task CreateTeamAsync_WhenValidInput_CreatesTeamSuccessfully()
     {
         // Arrange
@@ -254,6 +293,10 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that create team async sets created by id to current user.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task CreateTeamAsync_SetsCreatedByIdToCurrentUser()
     {
         // Arrange
@@ -281,6 +324,10 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that create team async with graduation year stores graduation year correctly.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task CreateTeamAsync_WithGraduationYear_StoresGraduationYearCorrectly()
     {
         // Arrange
@@ -309,6 +356,10 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that create team async when regular member not admin returns created team.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task CreateTeamAsync_WhenRegularMemberNotAdmin_ReturnsCreatedTeam()
     {
         // Arrange - Use non-admin member to verify authorization changes allow regular members to create teams
@@ -341,6 +392,11 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
 
     #region Helpers
 
+    /// <summary>
+    /// Creates the service under test using dependencies from the current scope.
+    /// </summary>
+    /// <param name="services">Specifies the services value for this scenario.</param>
+    /// <returns>The teams service produced by the operation.</returns>
     private static TeamsService CreateService(IServiceProvider services)
     {
         var readOnlyFactory = services.GetRequiredService<IDbContextFactory<ReadOnlyDbContext>>();

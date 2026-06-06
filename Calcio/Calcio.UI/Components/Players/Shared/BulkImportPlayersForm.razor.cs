@@ -7,31 +7,80 @@ using Microsoft.AspNetCore.Components.Forms;
 
 namespace Calcio.UI.Components.Players.Shared;
 
+/// <summary>
+/// Provides a multi-step workflow to validate and bulk import players from a CSV file.
+/// </summary>
+/// <param name="playersService">The service used to validate and import player data.</param>
 public partial class BulkImportPlayersForm(IPlayersService playersService)
 {
+    /// <summary>
+    /// Defines the maximum accepted import file size in bytes.
+    /// </summary>
     private const long MaxFileSize = 10 * 1024 * 1024; // 10 MB
 
+    /// <summary>
+    /// Gets or sets the club identifier for import operations.
+    /// </summary>
     [Parameter]
     public required long ClubId { get; set; }
 
+    /// <summary>
+    /// Gets or sets the URL to navigate to when the user cancels.
+    /// </summary>
     [Parameter]
     public string CancelUrl { get; set; } = "/";
 
+    /// <summary>
+    /// Gets or sets the current workflow step.
+    /// </summary>
     private int CurrentStep { get; set; } = 1;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether validation or import processing is active.
+    /// </summary>
     private bool IsProcessing { get; set; }
+
+    /// <summary>
+    /// Gets or sets the current error message shown in the UI.
+    /// </summary>
     private string? ErrorMessage { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether column mapping guidance should be shown.
+    /// </summary>
     private bool ShowColumnMappings { get; set; }
 
+    /// <summary>
+    /// Gets or sets the currently selected CSV file.
+    /// </summary>
     private IBrowserFile? SelectedFile { get; set; }
+
+    /// <summary>
+    /// Gets or sets the display name of the selected CSV file.
+    /// </summary>
     private string? SelectedFileName { get; set; }
 
+    /// <summary>
+    /// Gets or sets the latest validation result.
+    /// </summary>
     private BulkValidateResultDto? ValidationResult { get; set; }
+
+    /// <summary>
+    /// Gets or sets the latest import result.
+    /// </summary>
     private BulkImportResultDto? ImportResult { get; set; }
 
+    /// <summary>
+    /// Gets a value indicating whether import can proceed with the current validation result.
+    /// </summary>
     private bool CanImport => ValidationResult is not null
         && ValidationResult.ErrorCount == 0
         && ValidationResult.ValidCount > 0;
 
+    /// <summary>
+    /// Validates the selected file's type and size and stores it for processing.
+    /// </summary>
+    /// <param name="e">File selection event data.</param>
     private void OnFileSelected(InputFileChangeEventArgs e)
     {
         ErrorMessage = null;
@@ -58,6 +107,9 @@ public partial class BulkImportPlayersForm(IPlayersService playersService)
         SelectedFileName = file.Name;
     }
 
+    /// <summary>
+    /// Clears the selected file and related validation errors.
+    /// </summary>
     private void ClearFile()
     {
         SelectedFile = null;
@@ -65,6 +117,10 @@ public partial class BulkImportPlayersForm(IPlayersService playersService)
         ErrorMessage = null;
     }
 
+    /// <summary>
+    /// Validates the selected CSV file against bulk-import rules.
+    /// </summary>
+    /// <returns>A task that completes when validation finishes.</returns>
     private async Task ValidateFile()
     {
         if (SelectedFile is null)
@@ -115,6 +171,10 @@ public partial class BulkImportPlayersForm(IPlayersService playersService)
         }
     }
 
+    /// <summary>
+    /// Executes the player import using previously validated rows.
+    /// </summary>
+    /// <returns>A task that completes when import processing finishes.</returns>
     private async Task ExecuteImport()
     {
         if (ValidationResult?.Rows is null || !CanImport)
@@ -151,6 +211,9 @@ public partial class BulkImportPlayersForm(IPlayersService playersService)
         }
     }
 
+    /// <summary>
+    /// Returns the workflow to step 1 while preserving the selected file.
+    /// </summary>
     private void GoToStep1()
     {
         CurrentStep = 1;
@@ -158,6 +221,9 @@ public partial class BulkImportPlayersForm(IPlayersService playersService)
         ErrorMessage = null;
     }
 
+    /// <summary>
+    /// Resets the workflow to its initial state.
+    /// </summary>
     private void StartOver()
     {
         CurrentStep = 1;
@@ -168,6 +234,11 @@ public partial class BulkImportPlayersForm(IPlayersService playersService)
         ErrorMessage = null;
     }
 
+    /// <summary>
+    /// Formats a byte count using human-readable file size units.
+    /// </summary>
+    /// <param name="bytes">The byte count to format.</param>
+    /// <returns>A formatted file size string.</returns>
     private static string FormatFileSize(long bytes) => bytes switch
     {
         < 1024 => $"{bytes} B",

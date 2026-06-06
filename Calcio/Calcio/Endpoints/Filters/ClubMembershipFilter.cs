@@ -15,6 +15,12 @@ public sealed partial class ClubMembershipFilter(
     IUserClubsCacheService userClubsCacheService,
     ILogger<ClubMembershipFilter> logger) : IEndpointFilter
 {
+    /// <summary>
+    /// Executes the Invoke Async operation.
+    /// </summary>
+    /// <param name="context">The context.</param>
+    /// <param name="next">The next.</param>
+    /// <returns>The operation result.</returns>
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
         if (!context.HttpContext.Request.RouteValues.TryGetValue("clubId", out var clubIdValue)
@@ -41,6 +47,16 @@ public sealed partial class ClubMembershipFilter(
         return await next(context);
     }
 
+    /// <summary>
+    /// Executes the Log Forbidden Club Access operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club Id.</param>
     [LoggerMessage(Level = LogLevel.Warning, Message = "Forbidden access attempt to club {ClubId} by authenticated user")]
+    /// <summary>
+    /// Executes the log forbidden club access operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="clubId">The club id.</param>
     private static partial void LogForbiddenClubAccess(ILogger logger, long clubId);
 }

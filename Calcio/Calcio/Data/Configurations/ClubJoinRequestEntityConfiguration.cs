@@ -5,8 +5,15 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Calcio.Data.Configurations;
 
+/// <summary>
+/// Configures EF Core mapping for Club Join Request Entity Configuration.
+/// </summary>
 public class ClubJoinRequestEntityConfiguration : IEntityTypeConfiguration<ClubJoinRequestEntity>
 {
+    /// <summary>
+    /// Executes the Configure operation.
+    /// </summary>
+    /// <param name="builder">The builder.</param>
     public void Configure(EntityTypeBuilder<ClubJoinRequestEntity> builder)
     {
         builder.HasKey(e => e.ClubJoinRequestId);

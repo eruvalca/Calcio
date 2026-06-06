@@ -5,8 +5,15 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Calcio.Data.Configurations;
 
+/// <summary>
+/// Configures EF Core mapping for Player Photo Entity Configuration.
+/// </summary>
 public sealed class PlayerPhotoEntityConfiguration : IEntityTypeConfiguration<PlayerPhotoEntity>
 {
+    /// <summary>
+    /// Executes the Configure operation.
+    /// </summary>
+    /// <param name="builder">The builder.</param>
     public void Configure(EntityTypeBuilder<PlayerPhotoEntity> builder)
     {
         builder.HasKey(e => e.PlayerPhotoId);

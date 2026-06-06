@@ -7,9 +7,16 @@ using Shouldly;
 
 namespace Calcio.UnitTests.Results;
 
+/// <summary>
+/// Contains unit tests for H tt pR es po ns eM es sa ge Ex te ns io ns behavior.
+/// </summary>
 public class HttpResponseMessageExtensionsTests
 {
     #region Status Code Mapping Tests
+    /// <summary>
+    /// Verifies the ToServiceProblemAsync_WhenNotFound_ReturnsNotFoundProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task ToServiceProblemAsync_WhenNotFound_ReturnsNotFoundProblem()
@@ -24,6 +31,10 @@ public class HttpResponseMessageExtensionsTests
         result.Kind.ShouldBe(ServiceProblemKind.NotFound);
         result.StatusCode.ShouldBe(404);
     }
+    /// <summary>
+    /// Verifies the ToServiceProblemAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task ToServiceProblemAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -38,6 +49,10 @@ public class HttpResponseMessageExtensionsTests
         result.Kind.ShouldBe(ServiceProblemKind.Forbidden);
         result.StatusCode.ShouldBe(403);
     }
+    /// <summary>
+    /// Verifies the ToServiceProblemAsync_WhenConflict_ReturnsConflictProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task ToServiceProblemAsync_WhenConflict_ReturnsConflictProblem()
@@ -52,6 +67,10 @@ public class HttpResponseMessageExtensionsTests
         result.Kind.ShouldBe(ServiceProblemKind.Conflict);
         result.StatusCode.ShouldBe(409);
     }
+    /// <summary>
+    /// Verifies the ToServiceProblemAsync_WhenBadRequest_ReturnsBadRequestProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task ToServiceProblemAsync_WhenBadRequest_ReturnsBadRequestProblem()
@@ -66,6 +85,10 @@ public class HttpResponseMessageExtensionsTests
         result.Kind.ShouldBe(ServiceProblemKind.BadRequest);
         result.StatusCode.ShouldBe(400);
     }
+    /// <summary>
+    /// Verifies the ToServiceProblemAsync_WhenInternalServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task ToServiceProblemAsync_WhenInternalServerError_ReturnsServerErrorProblem()
@@ -80,6 +103,11 @@ public class HttpResponseMessageExtensionsTests
         result.Kind.ShouldBe(ServiceProblemKind.ServerError);
         result.StatusCode.ShouldBe(500);
     }
+    /// <summary>
+    /// Verifies the ToServiceProblemAsync_WhenUnmappedErrorStatus_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <param name="statusCode">The statusCode value used by this test scenario.</param>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Theory]
     [InlineData(HttpStatusCode.ServiceUnavailable)]
@@ -101,6 +129,10 @@ public class HttpResponseMessageExtensionsTests
     #endregion
 
     #region ProblemDetails Extraction Tests
+    /// <summary>
+    /// Verifies the ToServiceProblemAsync_WhenResponseContainsProblemDetails_ExtractsDetail scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task ToServiceProblemAsync_WhenResponseContainsProblemDetails_ExtractsDetail()
@@ -116,6 +148,10 @@ public class HttpResponseMessageExtensionsTests
         result.Kind.ShouldBe(ServiceProblemKind.BadRequest);
         result.Detail.ShouldBe("The file format is not supported.");
     }
+    /// <summary>
+    /// Verifies the ToServiceProblemAsync_WhenResponseContainsFullProblemDetails_ExtractsDetail scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task ToServiceProblemAsync_WhenResponseContainsFullProblemDetails_ExtractsDetail()
@@ -137,6 +173,10 @@ public class HttpResponseMessageExtensionsTests
         // Assert
         result.Detail.ShouldBe("Validation failed for the request.");
     }
+    /// <summary>
+    /// Verifies the ToServiceProblemAsync_WhenResponseContainsEmptyBody_ReturnsNullDetail scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task ToServiceProblemAsync_WhenResponseContainsEmptyBody_ReturnsNullDetail()
@@ -150,6 +190,10 @@ public class HttpResponseMessageExtensionsTests
         // Assert
         result.Detail.ShouldBeNull();
     }
+    /// <summary>
+    /// Verifies the ToServiceProblemAsync_WhenResponseContainsNonJsonBody_ReturnsNullDetail scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task ToServiceProblemAsync_WhenResponseContainsNonJsonBody_ReturnsNullDetail()
@@ -165,6 +209,10 @@ public class HttpResponseMessageExtensionsTests
         result.Kind.ShouldBe(ServiceProblemKind.BadRequest);
         result.Detail.ShouldBeNull();
     }
+    /// <summary>
+    /// Verifies the ToServiceProblemAsync_WhenResponseContainsInvalidJson_ReturnsNullDetail scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task ToServiceProblemAsync_WhenResponseContainsInvalidJson_ReturnsNullDetail()
@@ -180,6 +228,10 @@ public class HttpResponseMessageExtensionsTests
         result.Kind.ShouldBe(ServiceProblemKind.BadRequest);
         result.Detail.ShouldBeNull();
     }
+    /// <summary>
+    /// Verifies the ToServiceProblemAsync_WhenResponseContainsJsonWithoutDetail_ReturnsNullDetail scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task ToServiceProblemAsync_WhenResponseContainsJsonWithoutDetail_ReturnsNullDetail()
@@ -200,7 +252,18 @@ public class HttpResponseMessageExtensionsTests
 
     #region Helper Methods
 
+/// <summary>
+/// Verifies the c re at er es po ns e scenario.
+/// </summary>
+/// <param name="statusCode">The statusCode value used by this test scenario.</param>
+/// <returns>The method result for this test helper.</returns>
     private static HttpResponseMessage CreateResponse(HttpStatusCode statusCode) => new(statusCode);
+    /// <summary>
+    /// Verifies the CreateResponseWithJson scenario.
+    /// </summary>
+    /// <param name="statusCode">The statusCode value used by this test scenario.</param>
+    /// <param name="content">The content value used by this test scenario.</param>
+    /// <returns>The method result for this test helper.</returns>
 
     private static HttpResponseMessage CreateResponseWithJson(HttpStatusCode statusCode, object content)
     {

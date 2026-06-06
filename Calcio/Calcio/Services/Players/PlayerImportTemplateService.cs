@@ -10,6 +10,9 @@ namespace Calcio.Services.Players;
 /// </summary>
 public class PlayerImportTemplateService : IPlayerImportTemplateService
 {
+    /// <summary>
+    /// Stores the Sample Data.
+    /// </summary>
     private static readonly string[] SampleData =
     [
         "John",      // First Name
@@ -21,6 +24,10 @@ public class PlayerImportTemplateService : IPlayerImportTemplateService
         ""           // Tryout Number (optional)
     ];
 
+    /// <summary>
+    /// Executes the Generate Csv Template operation.
+    /// </summary>
+    /// <returns>The operation result.</returns>
     public byte[] GenerateCsvTemplate()
     {
         var sb = new StringBuilder();

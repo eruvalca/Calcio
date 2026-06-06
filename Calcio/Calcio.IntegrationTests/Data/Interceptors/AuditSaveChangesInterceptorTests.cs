@@ -9,11 +9,22 @@ using Shouldly;
 
 namespace Calcio.IntegrationTests.Data.Interceptors;
 
+/// <summary>
+/// Contains integration tests for audit save changes interceptor behavior.
+/// </summary>
+/// <param name="factory">Provides dependencies used to build the integration test host.</param>
 public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) : BaseDbContextTests(factory)
 {
+    /// <summary>
+    /// Stores the original creator id value used by this test suite.
+    /// </summary>
     private const long OriginalCreatorId = 999;
 
     [Fact]
+    /// <summary>
+    /// Verifies that added entity preserves created by id set by service layer.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task AddedEntity_PreservesCreatedById_SetByServiceLayer()
     {
         // Arrange
@@ -40,6 +51,10 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that added entity sets created at timestamp.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task AddedEntity_SetsCreatedAtTimestamp()
     {
         // Arrange
@@ -70,6 +85,10 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that added entity sets modified at timestamp.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task AddedEntity_SetsModifiedAtTimestamp()
     {
         // Arrange
@@ -101,6 +120,10 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that added entity sets modified by id from http context.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task AddedEntity_SetsModifiedByIdFromHttpContext()
     {
         // Arrange
@@ -127,6 +150,10 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that modified entity updates modified at timestamp.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task ModifiedEntity_UpdatesModifiedAtTimestamp()
     {
         // Arrange
@@ -165,6 +192,10 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that modified entity updates modified by id.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task ModifiedEntity_UpdatesModifiedById()
     {
         // Arrange
@@ -204,6 +235,10 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that modified entity protects created at from changes.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task ModifiedEntity_ProtectsCreatedAtFromChanges()
     {
         // Arrange
@@ -245,6 +280,10 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that modified entity protects created by id from changes.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task ModifiedEntity_ProtectsCreatedByIdFromChanges()
     {
         // Arrange
@@ -283,6 +322,10 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that added entity created at and modified at are equal.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task AddedEntity_CreatedAtAndModifiedAtAreEqual()
     {
         // Arrange
@@ -309,6 +352,10 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
     }
 
     [Fact]
+    /// <summary>
+    /// Verifies that save changes with no user throws invalid operation exception.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task SaveChanges_WithNoUser_ThrowsInvalidOperationException()
     {
         // Arrange

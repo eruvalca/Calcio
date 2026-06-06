@@ -4,9 +4,16 @@ using Shouldly;
 
 namespace Calcio.UnitTests.Validation;
 
+/// <summary>
+/// Contains unit tests for P la ye rI mp or tC ol um nM ap pi ng behavior.
+/// </summary>
 public class PlayerImportColumnMappingTests
 {
     #region FindMatchingField Tests - Required Fields
+    /// <summary>
+    /// Verifies the FindMatchingField_FirstNameAliases_ReturnsFirstName scenario.
+    /// </summary>
+    /// <param name="columnName">The columnName value used by this test scenario.</param>
 
     [Theory]
     [InlineData("FirstName")]
@@ -26,6 +33,10 @@ public class PlayerImportColumnMappingTests
         // Assert
         result.ShouldBe("FirstName");
     }
+    /// <summary>
+    /// Verifies the FindMatchingField_LastNameAliases_ReturnsLastName scenario.
+    /// </summary>
+    /// <param name="columnName">The columnName value used by this test scenario.</param>
 
     [Theory]
     [InlineData("LastName")]
@@ -45,6 +56,10 @@ public class PlayerImportColumnMappingTests
         // Assert
         result.ShouldBe("LastName");
     }
+    /// <summary>
+    /// Verifies the FindMatchingField_DateOfBirthAliases_ReturnsDateOfBirth scenario.
+    /// </summary>
+    /// <param name="columnName">The columnName value used by this test scenario.</param>
 
     [Theory]
     [InlineData("DateOfBirth")]
@@ -64,6 +79,10 @@ public class PlayerImportColumnMappingTests
         // Assert
         result.ShouldBe("DateOfBirth");
     }
+    /// <summary>
+    /// Verifies the FindMatchingField_GenderAliases_ReturnsGender scenario.
+    /// </summary>
+    /// <param name="columnName">The columnName value used by this test scenario.</param>
 
     [Theory]
     [InlineData("Gender")]
@@ -83,6 +102,10 @@ public class PlayerImportColumnMappingTests
     #endregion
 
     #region FindMatchingField Tests - Optional Fields
+    /// <summary>
+    /// Verifies the FindMatchingField_GraduationYearAliases_ReturnsGraduationYear scenario.
+    /// </summary>
+    /// <param name="columnName">The columnName value used by this test scenario.</param>
 
     [Theory]
     [InlineData("GraduationYear")]
@@ -102,6 +125,10 @@ public class PlayerImportColumnMappingTests
         // Assert
         result.ShouldBe("GraduationYear");
     }
+    /// <summary>
+    /// Verifies the FindMatchingField_JerseyNumberAliases_ReturnsJerseyNumber scenario.
+    /// </summary>
+    /// <param name="columnName">The columnName value used by this test scenario.</param>
 
     [Theory]
     [InlineData("JerseyNumber")]
@@ -121,6 +148,10 @@ public class PlayerImportColumnMappingTests
         // Assert
         result.ShouldBe("JerseyNumber");
     }
+    /// <summary>
+    /// Verifies the FindMatchingField_TryoutNumberAliases_ReturnsTryoutNumber scenario.
+    /// </summary>
+    /// <param name="columnName">The columnName value used by this test scenario.</param>
 
     [Theory]
     [InlineData("TryoutNumber")]
@@ -142,6 +173,10 @@ public class PlayerImportColumnMappingTests
     #endregion
 
     #region FindMatchingField Tests - Unrecognized
+    /// <summary>
+    /// Verifies the FindMatchingField_UnrecognizedColumn_ReturnsNull scenario.
+    /// </summary>
+    /// <param name="columnName">The columnName value used by this test scenario.</param>
 
     [Theory]
     [InlineData("UnknownColumn")]
@@ -163,6 +198,9 @@ public class PlayerImportColumnMappingTests
     #endregion
 
     #region RequiredFields Tests
+    /// <summary>
+    /// Verifies the RequiredFields_ContainsAllRequiredFields scenario.
+    /// </summary>
 
     [Fact]
     public void RequiredFields_ContainsAllRequiredFields()
@@ -178,6 +216,9 @@ public class PlayerImportColumnMappingTests
     #endregion
 
     #region OptionalFields Tests
+    /// <summary>
+    /// Verifies the OptionalFields_ContainsAllOptionalFields scenario.
+    /// </summary>
 
     [Fact]
     public void OptionalFields_ContainsAllOptionalFields()
@@ -192,6 +233,9 @@ public class PlayerImportColumnMappingTests
     #endregion
 
     #region Template Headers Tests
+    /// <summary>
+    /// Verifies the TemplateHeaders_ContainsAllRequiredAndOptionalFields scenario.
+    /// </summary>
 
     [Fact]
     public void TemplateHeaders_ContainsAllRequiredAndOptionalFields()
@@ -206,6 +250,9 @@ public class PlayerImportColumnMappingTests
         PlayerImportColumnMapping.TemplateHeaders.ShouldContain("tryout_number");
         PlayerImportColumnMapping.TemplateHeaders.Count.ShouldBe(7);
     }
+    /// <summary>
+    /// Verifies the TemplateDisplayHeaders_ContainsHumanReadableHeaders scenario.
+    /// </summary>
 
     [Fact]
     public void TemplateDisplayHeaders_ContainsHumanReadableHeaders()
@@ -224,6 +271,11 @@ public class PlayerImportColumnMappingTests
     #endregion
 
     #region Case Insensitivity Tests
+    /// <summary>
+    /// Verifies the FindMatchingField_IsCaseInsensitive scenario.
+    /// </summary>
+    /// <param name="input">The input value used by this test scenario.</param>
+    /// <param name="expected">The expected value used by this test scenario.</param>
 
     [Theory]
     [InlineData("FIRSTNAME", "FirstName")]

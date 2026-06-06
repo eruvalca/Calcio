@@ -3,10 +3,17 @@ using Calcio.Shared.DTOs.Players;
 
 namespace Calcio.Extensions.Players;
 
+/// <summary>
+/// Provides extension members for Player Entity Extensions.
+/// </summary>
 public static class PlayerEntityExtensions
 {
     extension(PlayerEntity player)
     {
+        /// <summary>
+        /// Executes the To Club Player Dto operation.
+        /// </summary>
+        /// <returns>The operation result.</returns>
         public ClubPlayerDto ToClubPlayerDto()
             => new(
                 PlayerId: player.PlayerId,

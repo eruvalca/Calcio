@@ -13,11 +13,21 @@ using Shouldly;
 
 namespace Calcio.UnitTests.Services.ClubJoinRequests;
 
+/// <summary>
+/// Contains unit tests for C lu bJ oi nR eq ue st Se rv ic e behavior.
+/// </summary>
 public class ClubJoinRequestServiceTests
 {
+    /// <summary>
+    /// Defines the base URL used by mocked HTTP requests in this test class.
+    /// </summary>
     private const string BaseUrl = "http://localhost";
 
     #region GetRequestForCurrentUserAsync Tests
+    /// <summary>
+    /// Verifies the GetRequestForCurrentUserAsync_WhenOk_ReturnsDto scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetRequestForCurrentUserAsync_WhenOk_ReturnsDto()
@@ -45,6 +55,10 @@ public class ClubJoinRequestServiceTests
         dto.RequestingUserId.ShouldBe(expectedDto.RequestingUserId);
         dto.Status.ShouldBe(expectedDto.Status);
     }
+    /// <summary>
+    /// Verifies the GetRequestForCurrentUserAsync_WhenNotFound_ReturnsNotFoundProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetRequestForCurrentUserAsync_WhenNotFound_ReturnsNotFoundProblem()
@@ -66,6 +80,10 @@ public class ClubJoinRequestServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
+    /// <summary>
+    /// Verifies the GetRequestForCurrentUserAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetRequestForCurrentUserAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -87,6 +105,10 @@ public class ClubJoinRequestServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the GetRequestForCurrentUserAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetRequestForCurrentUserAsync_WhenServerError_ReturnsServerErrorProblem()
@@ -112,6 +134,10 @@ public class ClubJoinRequestServiceTests
     #endregion
 
     #region CreateJoinRequestAsync Tests
+    /// <summary>
+    /// Verifies the CreateJoinRequestAsync_WhenCreated_ReturnsSuccess scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateJoinRequestAsync_WhenCreated_ReturnsSuccess()
@@ -134,6 +160,10 @@ public class ClubJoinRequestServiceTests
         // Assert
         result.IsSuccess.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the CreateJoinRequestAsync_WhenClubNotFound_ReturnsNotFoundProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateJoinRequestAsync_WhenClubNotFound_ReturnsNotFoundProblem()
@@ -157,6 +187,10 @@ public class ClubJoinRequestServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
+    /// <summary>
+    /// Verifies the CreateJoinRequestAsync_WhenConflict_ReturnsConflictProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateJoinRequestAsync_WhenConflict_ReturnsConflictProblem()
@@ -180,6 +214,10 @@ public class ClubJoinRequestServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Conflict);
     }
+    /// <summary>
+    /// Verifies the CreateJoinRequestAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateJoinRequestAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -207,6 +245,10 @@ public class ClubJoinRequestServiceTests
     #endregion
 
     #region CancelJoinRequestAsync Tests
+    /// <summary>
+    /// Verifies the CancelJoinRequestAsync_WhenNoContent_ReturnsSuccess scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CancelJoinRequestAsync_WhenNoContent_ReturnsSuccess()
@@ -227,6 +269,10 @@ public class ClubJoinRequestServiceTests
         // Assert
         result.IsSuccess.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the CancelJoinRequestAsync_WhenNotFound_ReturnsNotFoundProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CancelJoinRequestAsync_WhenNotFound_ReturnsNotFoundProblem()
@@ -248,6 +294,10 @@ public class ClubJoinRequestServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
+    /// <summary>
+    /// Verifies the CancelJoinRequestAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CancelJoinRequestAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -273,6 +323,10 @@ public class ClubJoinRequestServiceTests
     #endregion
 
     #region GetPendingRequestsForClubAsync Tests
+    /// <summary>
+    /// Verifies the GetPendingRequestsForClubAsync_WhenOk_ReturnsList scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetPendingRequestsForClubAsync_WhenOk_ReturnsList()
@@ -304,6 +358,10 @@ public class ClubJoinRequestServiceTests
         list[0].RequestingUserFullName.ShouldBe("John Doe");
         list[1].RequestingUserFullName.ShouldBe("Jane Doe");
     }
+    /// <summary>
+    /// Verifies the GetPendingRequestsForClubAsync_WhenEmptyResponse_ReturnsEmptyList scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetPendingRequestsForClubAsync_WhenEmptyResponse_ReturnsEmptyList()
@@ -327,6 +385,10 @@ public class ClubJoinRequestServiceTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBeEmpty();
     }
+    /// <summary>
+    /// Verifies the GetPendingRequestsForClubAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetPendingRequestsForClubAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -350,6 +412,10 @@ public class ClubJoinRequestServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the GetPendingRequestsForClubAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetPendingRequestsForClubAsync_WhenServerError_ReturnsServerErrorProblem()
@@ -377,6 +443,11 @@ public class ClubJoinRequestServiceTests
     #endregion
 
     #region UpdateJoinRequestStatusAsync Tests
+    /// <summary>
+    /// Verifies the UpdateJoinRequestStatusAsync_WhenNoContent_ReturnsSuccess scenario.
+    /// </summary>
+    /// <param name="status">The status value used by this test scenario.</param>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Theory]
     [InlineData(RequestStatus.Approved)]
@@ -402,6 +473,11 @@ public class ClubJoinRequestServiceTests
         // Assert
         result.IsSuccess.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the UpdateJoinRequestStatusAsync_WhenNotFound_ReturnsNotFoundProblem scenario.
+    /// </summary>
+    /// <param name="status">The status value used by this test scenario.</param>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Theory]
     [InlineData(RequestStatus.Approved)]
@@ -428,6 +504,11 @@ public class ClubJoinRequestServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.NotFound);
     }
+    /// <summary>
+    /// Verifies the UpdateJoinRequestStatusAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <param name="status">The status value used by this test scenario.</param>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Theory]
     [InlineData(RequestStatus.Approved)]
@@ -454,6 +535,10 @@ public class ClubJoinRequestServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the UpdateJoinRequestStatusAsync_WhenBadRequest_ReturnsBadRequestProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task UpdateJoinRequestStatusAsync_WhenBadRequest_ReturnsBadRequestProblem()
@@ -478,6 +563,11 @@ public class ClubJoinRequestServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.BadRequest);
     }
+    /// <summary>
+    /// Verifies the UpdateJoinRequestStatusAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <param name="status">The status value used by this test scenario.</param>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Theory]
     [InlineData(RequestStatus.Approved)]

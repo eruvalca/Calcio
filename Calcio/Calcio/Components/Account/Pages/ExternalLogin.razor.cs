@@ -13,6 +13,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Calcio.Components.Account.Pages;
 
+/// <summary>
+/// Represents the External Login.
+/// </summary>
+/// <param name="signInManager">The sign In Manager.</param>
+/// <param name="userManager">The user Manager.</param>
+/// <param name="userStore">The user Store.</param>
+/// <param name="emailSender">The email Sender.</param>
+/// <param name="dbContextFactory">The db Context Factory.</param>
+/// <param name="navigationManager">The navigation Manager.</param>
+/// <param name="redirectManager">The redirect Manager.</param>
+/// <param name="logger">The logger.</param>
 public partial class ExternalLogin(
     SignInManager<CalcioUserEntity> signInManager,
     UserManager<CalcioUserEntity> userManager,
@@ -23,28 +34,74 @@ public partial class ExternalLogin(
     IdentityRedirectManager redirectManager,
     ILogger<ExternalLogin> logger)
 {
+    /// <summary>
+    /// Stores the Login Callback Action.
+    /// </summary>
     public const string LoginCallbackAction = "LoginCallback";
 
+    /// <summary>
+    /// Stores the external Login Info.
+    /// </summary>
     private string? message;
+    /// <summary>
+    /// Stores the external Login Info.
+    /// </summary>
     private ExternalLoginInfo? externalLoginInfo;
 
+    /// <summary>
+    /// Gets or sets the Http Context.
+    /// </summary>
     [CascadingParameter]
+    /// <summary>
+    /// Gets or sets the http context.
+    /// </summary>
     private HttpContext HttpContext { get; set; } = default!;
 
+    /// <summary>
+    /// Gets or sets the Input.
+    /// </summary>
     [SupplyParameterFromForm]
+    /// <summary>
+    /// Gets or sets the input.
+    /// </summary>
     private InputModel Input { get; set; } = default!;
 
+    /// <summary>
+    /// Gets or sets the Remote Error.
+    /// </summary>
     [SupplyParameterFromQuery]
+    /// <summary>
+    /// Gets or sets the remote error.
+    /// </summary>
     private string? RemoteError { get; set; }
 
+    /// <summary>
+    /// Gets or sets the Return Url.
+    /// </summary>
     [SupplyParameterFromQuery]
+    /// <summary>
+    /// Gets or sets the return url.
+    /// </summary>
     private string? ReturnUrl { get; set; }
 
+    /// <summary>
+    /// Gets or sets the Action.
+    /// </summary>
     [SupplyParameterFromQuery]
+    /// <summary>
+    /// Gets or sets the action.
+    /// </summary>
     private string? Action { get; set; }
 
+    /// <summary>
+    /// Gets the Provider Display Name.
+    /// </summary>
     private string? ProviderDisplayName => externalLoginInfo?.ProviderDisplayName;
 
+    /// <summary>
+    /// Executes the On Initialized Async operation.
+    /// </summary>
+    /// <returns>The operation result.</returns>
     protected override async Task OnInitializedAsync()
     {
         Input ??= new();
@@ -78,6 +135,10 @@ public partial class ExternalLogin(
         }
     }
 
+    /// <summary>
+    /// Executes the On Login Callback Async operation.
+    /// </summary>
+    /// <returns>The operation result.</returns>
     private async Task OnLoginCallbackAsync()
     {
         if (externalLoginInfo is null)
@@ -131,6 +192,10 @@ public partial class ExternalLogin(
         }
     }
 
+    /// <summary>
+    /// Executes the On Valid Submit Async operation.
+    /// </summary>
+    /// <returns>The operation result.</returns>
     private async Task OnValidSubmitAsync()
     {
         if (externalLoginInfo is null)
@@ -191,6 +256,10 @@ public partial class ExternalLogin(
         }
     }
 
+    /// <summary>
+    /// Executes the Create User operation.
+    /// </summary>
+    /// <returns>The operation result.</returns>
     private CalcioUserEntity CreateUser()
     {
         try
@@ -204,20 +273,55 @@ public partial class ExternalLogin(
         }
     }
 
+    /// <summary>
+    /// Stores the user Store.
+    /// </summary>
+    /// <returns>The user email store.</returns>
     private IUserEmailStore<CalcioUserEntity> GetEmailStore() => !userManager.SupportsUserEmail
         ? throw new NotSupportedException("The default UI requires a user store with email support.")
         : (IUserEmailStore<CalcioUserEntity>)userStore;
 
+    /// <summary>
+    /// Represents the Input Model.
+    /// </summary>
     private sealed class InputModel
     {
+        /// <summary>
+        /// Gets or sets the Email.
+        /// </summary>
         [Required]
         [EmailAddress]
+        /// <summary>
+        /// Gets or sets the email.
+        /// </summary>
         public string Email { get; set; } = "";
     }
 
+    /// <summary>
+    /// Executes the Log User Logged In With Provider operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="name">The name.</param>
+    /// <param name="loginProvider">The login Provider.</param>
     [LoggerMessage(Level = LogLevel.Information, Message = "{Name} logged in with {LoginProvider} provider.")]
+    /// <summary>
+    /// Executes the log user logged in with provider operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="name">The name.</param>
+    /// <param name="loginProvider">The login provider.</param>
     private static partial void LogUserLoggedInWithProvider(ILogger logger, string? name, string loginProvider);
 
+    /// <summary>
+    /// Executes the Log User Created Account With Provider operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="name">The name.</param>
     [LoggerMessage(Level = LogLevel.Information, Message = "User created an account using {Name} provider.")]
+    /// <summary>
+    /// Executes the log user created account with provider operation.
+    /// </summary>
+    /// <param name="logger">The logger.</param>
+    /// <param name="name">The name.</param>
     private static partial void LogUserCreatedAccountWithProvider(ILogger logger, string name);
 }

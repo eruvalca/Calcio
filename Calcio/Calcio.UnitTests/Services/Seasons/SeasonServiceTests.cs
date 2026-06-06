@@ -12,11 +12,21 @@ using Shouldly;
 
 namespace Calcio.UnitTests.Services.Seasons;
 
+/// <summary>
+/// Contains unit tests for S ea so nS er vi ce behavior.
+/// </summary>
 public class SeasonServiceTests
 {
+    /// <summary>
+    /// Defines the base URL used by mocked HTTP requests in this test class.
+    /// </summary>
     private const string BaseUrl = "http://localhost";
 
     #region GetSeasonsAsync Tests
+    /// <summary>
+    /// Verifies the GetSeasonsAsync_WhenOk_ReturnsList scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetSeasonsAsync_WhenOk_ReturnsList()
@@ -50,6 +60,10 @@ public class SeasonServiceTests
         list[1].Name.ShouldBe("2025-2026");
         list[1].IsComplete.ShouldBeFalse();
     }
+    /// <summary>
+    /// Verifies the GetSeasonsAsync_WhenEmptyResponse_ReturnsEmptyList scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetSeasonsAsync_WhenEmptyResponse_ReturnsEmptyList()
@@ -73,6 +87,10 @@ public class SeasonServiceTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBeEmpty();
     }
+    /// <summary>
+    /// Verifies the GetSeasonsAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetSeasonsAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -96,6 +114,10 @@ public class SeasonServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the GetSeasonsAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetSeasonsAsync_WhenServerError_ReturnsServerErrorProblem()
@@ -119,6 +141,10 @@ public class SeasonServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.ServerError);
     }
+    /// <summary>
+    /// Verifies the GetSeasonsAsync_WhenNullResponse_ReturnsEmptyList scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetSeasonsAsync_WhenNullResponse_ReturnsEmptyList()
@@ -142,6 +168,10 @@ public class SeasonServiceTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBeEmpty();
     }
+    /// <summary>
+    /// Verifies the GetSeasonsAsync_CorrectlyMapsSeasonProperties scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task GetSeasonsAsync_CorrectlyMapsSeasonProperties()
@@ -180,6 +210,10 @@ public class SeasonServiceTests
     #endregion
 
     #region CreateSeasonAsync Tests
+    /// <summary>
+    /// Verifies the CreateSeasonAsync_WhenCreated_ReturnsSuccess scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateSeasonAsync_WhenCreated_ReturnsSuccess()
@@ -203,6 +237,10 @@ public class SeasonServiceTests
         // Assert
         result.IsSuccess.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the CreateSeasonAsync_WhenForbidden_ReturnsForbiddenProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateSeasonAsync_WhenForbidden_ReturnsForbiddenProblem()
@@ -227,6 +265,10 @@ public class SeasonServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Forbidden);
     }
+    /// <summary>
+    /// Verifies the CreateSeasonAsync_WhenConflict_ReturnsConflictProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateSeasonAsync_WhenConflict_ReturnsConflictProblem()
@@ -251,6 +293,10 @@ public class SeasonServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.Conflict);
     }
+    /// <summary>
+    /// Verifies the CreateSeasonAsync_WhenServerError_ReturnsServerErrorProblem scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateSeasonAsync_WhenServerError_ReturnsServerErrorProblem()
@@ -275,6 +321,10 @@ public class SeasonServiceTests
         result.IsProblem.ShouldBeTrue();
         result.Problem.Kind.ShouldBe(ServiceProblemKind.ServerError);
     }
+    /// <summary>
+    /// Verifies the CreateSeasonAsync_WithEndDate_SendsCorrectPayload scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateSeasonAsync_WithEndDate_SendsCorrectPayload()
@@ -308,6 +358,10 @@ public class SeasonServiceTests
         // Assert
         result.IsSuccess.ShouldBeTrue();
     }
+    /// <summary>
+    /// Verifies the CreateSeasonAsync_WithoutEndDate_SendsNullEndDate scenario.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous test operation.</returns>
 
     [Fact]
     public async Task CreateSeasonAsync_WithoutEndDate_SendsNullEndDate()
