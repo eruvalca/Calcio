@@ -60,12 +60,6 @@ public class PlayersServiceTests(CustomApplicationFactory factory) : BaseDbConte
             // Add StandardUser role only (not ClubAdmin)
             await userManager.AddToRoleAsync(standardMember, Roles.StandardUser);
         }
-        else if (existingUser.ClubId != club.ClubId)
-        {
-            // Reset the user's club membership if needed
-            existingUser.ClubId = club.ClubId;
-            await dbContext.SaveChangesAsync();
-        }
     }
     #region GetClubPlayersAsync Tests
 

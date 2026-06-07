@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 
 using Calcio.Data.Contexts;
 using Calcio.Integration.Tests.Data.Contexts;
@@ -26,11 +26,11 @@ public class BulkImportPlayersTests(CustomApplicationFactory factory) : BaseDbCo
 {
     #region ValidateBulkImportAsync Tests
 
-    [Fact]
     /// <summary>
     /// Verifies that validate bulk import async with valid csv returns valid rows.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task ValidateBulkImportAsync_WithValidCsv_ReturnsValidRows()
     {
         // Arrange
@@ -71,11 +71,11 @@ public class BulkImportPlayersTests(CustomApplicationFactory factory) : BaseDbCo
         validation.Rows[1].IsValid.ShouldBeTrue();
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that validate bulk import async with missing required columns returns error.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task ValidateBulkImportAsync_WithMissingRequiredColumns_ReturnsError()
     {
         // Arrange
@@ -103,11 +103,11 @@ public class BulkImportPlayersTests(CustomApplicationFactory factory) : BaseDbCo
         validation.MissingRequiredColumns.ShouldContain("Gender");
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that validate bulk import async with unsupported extension returns bad request.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task ValidateBulkImportAsync_WithUnsupportedExtension_ReturnsBadRequest()
     {
         // Arrange
@@ -133,11 +133,11 @@ public class BulkImportPlayersTests(CustomApplicationFactory factory) : BaseDbCo
         result.Problem.Kind.ShouldBe(ServiceProblemKind.BadRequest);
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that validate bulk import async with invalid data returns row errors.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task ValidateBulkImportAsync_WithInvalidData_ReturnsRowErrors()
     {
         // Arrange
@@ -174,11 +174,11 @@ public class BulkImportPlayersTests(CustomApplicationFactory factory) : BaseDbCo
         validation.Rows[1].Errors.Count.ShouldBeGreaterThanOrEqualTo(2);
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that validate bulk import async with missing graduation year computes from dob.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task ValidateBulkImportAsync_WithMissingGraduationYear_ComputesFromDob()
     {
         // Arrange
@@ -208,11 +208,11 @@ public class BulkImportPlayersTests(CustomApplicationFactory factory) : BaseDbCo
         validation.Rows[0].Warnings.ShouldContain(w => w.Contains("Graduation year computed"));
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that validate bulk import async with duplicates in file adds warning.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task ValidateBulkImportAsync_WithDuplicatesInFile_AddsWarning()
     {
         // Arrange
@@ -247,11 +247,11 @@ public class BulkImportPlayersTests(CustomApplicationFactory factory) : BaseDbCo
 
     #region BulkCreatePlayersAsync Tests
 
-    [Fact]
     /// <summary>
     /// Verifies that bulk create players async with valid rows creates players.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task BulkCreatePlayersAsync_WithValidRows_CreatesPlayers()
     {
         // Arrange
@@ -321,11 +321,11 @@ public class BulkImportPlayersTests(CustomApplicationFactory factory) : BaseDbCo
         createdPlayer.GraduationYear.ShouldBe(2030);
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that bulk create players async with invalid rows skips invalid rows.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task BulkCreatePlayersAsync_WithInvalidRows_SkipsInvalidRows()
     {
         // Arrange
@@ -377,11 +377,11 @@ public class BulkImportPlayersTests(CustomApplicationFactory factory) : BaseDbCo
 
     #region RevalidateBulkImportAsync Tests
 
-    [Fact]
     /// <summary>
     /// Verifies that revalidate bulk import async with corrected data updates validation.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task RevalidateBulkImportAsync_WithCorrectedData_UpdatesValidation()
     {
         // Arrange

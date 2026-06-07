@@ -201,6 +201,46 @@ public class CustomApplicationFactory : WebApplicationFactory<ICalcioMarker>, IA
     }
 
     /// <summary>
+    /// Resets the test database to a clean state by truncating all application tables and
+    /// resetting identity sequences, preserving role definitions and migration history so
+    /// each test method begins with a consistent, empty schema ready to be seeded.
+    /// </summary>
+    /// <returns>A task that completes when the database has been cleared.</returns>
+    public async Task ResetDatabaseAsync()
+    {
+        using var scope = Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
+
+        await dbContext.Database.EnsureCreatedAsync();
+
+        // Truncate all application tables in the public schema with CASCADE and RESTART
+        // IDENTITY so FK-dependent rows are removed in a single pass and sequences reset.
+        // Exclude:
+        //   __EFMigrationsHistory  – tracks applied migrations; must survive resets.
+        //   AspNetRoles            – seeded once at app startup; never change between tests.
+        //   AspNetRoleClaims       – seeded alongside roles; same reasoning.
+        await dbContext.Database.ExecuteSqlRawAsync("""
+            DO $$
+            DECLARE r RECORD;
+            BEGIN
+                FOR r IN (
+                    SELECT tablename
+                    FROM pg_tables
+                    WHERE schemaname = 'public'
+                    AND tablename NOT IN (
+                        '__EFMigrationsHistory',
+                        'AspNetRoles',
+                        'AspNetRoleClaims'
+                    )
+                )
+                LOOP
+                    EXECUTE 'TRUNCATE TABLE "' || r.tablename || '" RESTART IDENTITY CASCADE';
+                END LOOP;
+            END $$;
+            """);
+    }
+
+    /// <summary>
     /// Satisfies <see cref="IAsyncLifetime.InitializeAsync"/> for xUnit v3, delegating to
     /// the public <see cref="InitializeAsync"/> method.
     /// </summary>

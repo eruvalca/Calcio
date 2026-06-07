@@ -33,24 +33,21 @@ public abstract class BaseDbContextTests(CustomApplicationFactory factory) : ICl
     protected const long UserBId = 2;
 
     /// <summary>
-    /// Ensures the test database exists and seeds baseline data for integration tests.
+    /// Resets the test database to a clean baseline and seeds deterministic data for each
+    /// integration test, ensuring no cross-test state pollution regardless of execution order.
     /// </summary>
     /// <returns>A value task that completes when initialization has finished.</returns>
     public virtual async ValueTask InitializeAsync()
     {
+        await Factory.ResetDatabaseAsync();
+
         using var scope = Factory.Services.CreateScope();
 
-        // Set a user for seeding (auditing)
         SetCurrentUser(scope.ServiceProvider, UserAId);
 
         var dbContext = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
 
-        await dbContext.Database.EnsureCreatedAsync();
-
-        if (!await dbContext.Users.AnyAsync())
-        {
-            await SeedDataAsync(dbContext);
-        }
+        await SeedDataAsync(dbContext);
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-using Calcio.Data.Contexts;
+﻿using Calcio.Data.Contexts;
 using Calcio.Entities;
 
 using Microsoft.AspNetCore.Http;
@@ -15,11 +15,11 @@ namespace Calcio.Integration.Tests.Data.Contexts;
 /// <param name="factory">Provides dependencies used to build the integration test host.</param>
 public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbContextTests(factory)
 {
-    [Fact]
     /// <summary>
     /// Verifies that get clubs should return only user clubs.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task GetClubs_ShouldReturnOnlyUserClubs()
     {
         // Arrange
@@ -37,11 +37,11 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         clubs.ShouldAllBe(c => c.CalcioUsers.Any(u => u.Id == UserAId));
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that get seasons should return only user seasons.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task GetSeasons_ShouldReturnOnlyUserSeasons()
     {
         // Arrange
@@ -60,11 +60,11 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         seasons.ShouldAllBe(s => s.Club.CalcioUsers.Any(u => u.Id == UserAId));
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that get campaigns should return only user campaigns.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task GetCampaigns_ShouldReturnOnlyUserCampaigns()
     {
         // Arrange
@@ -83,11 +83,11 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         campaigns.ShouldAllBe(c => c.Club.CalcioUsers.Any(u => u.Id == UserAId));
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that get teams should return only user teams.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task GetTeams_ShouldReturnOnlyUserTeams()
     {
         // Arrange
@@ -106,11 +106,11 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         teams.ShouldAllBe(t => t.Club.CalcioUsers.Any(u => u.Id == UserAId));
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that get players should return only user players.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task GetPlayers_ShouldReturnOnlyUserPlayers()
     {
         // Arrange
@@ -129,11 +129,11 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         players.ShouldAllBe(p => p.Club.CalcioUsers.Any(u => u.Id == UserAId));
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that get notes should return only user notes.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task GetNotes_ShouldReturnOnlyUserNotes()
     {
         // Arrange
@@ -153,11 +153,11 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         notes.ShouldAllBe(n => n.Club.CalcioUsers.Any(u => u.Id == UserAId));
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that get player tags should return only user tags.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task GetPlayerTags_ShouldReturnOnlyUserTags()
     {
         // Arrange
@@ -177,11 +177,11 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         tags.ShouldAllBe(t => t.Club.CalcioUsers.Any(u => u.Id == UserAId));
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that get player campaign assignments should return only user assignments.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task GetPlayerCampaignAssignments_ShouldReturnOnlyUserAssignments()
     {
         // Arrange
@@ -201,11 +201,11 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         assignments.ShouldAllBe(a => a.Club.CalcioUsers.Any(u => u.Id == UserAId));
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that get player photos should return only user photos.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task GetPlayerPhotos_ShouldReturnOnlyUserPhotos()
     {
         // Arrange
@@ -225,11 +225,11 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         photos.ShouldAllBe(p => p.Club.CalcioUsers.Any(u => u.Id == UserAId));
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that query without authenticated user should return empty results.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task QueryWithoutAuthenticatedUser_ShouldReturnEmptyResults()
     {
         // Arrange
@@ -247,11 +247,11 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         clubs.ShouldBeEmpty();
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that delete club with campaigns should cascade dependents.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task DeleteClub_WithCampaigns_ShouldCascadeDependents()
     {
         // Arrange
@@ -289,11 +289,11 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         }
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that delete club with notes should cascade dependents.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task DeleteClub_WithNotes_ShouldCascadeDependents()
     {
         // Arrange
@@ -325,11 +325,11 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         }
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that delete club should cascade entire graph.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task DeleteClub_ShouldCascadeEntireGraph()
     {
         // Arrange
@@ -368,11 +368,11 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         }
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that delete player should cascade dependent entities.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task DeletePlayer_ShouldCascadeDependentEntities()
     {
         // Arrange
@@ -413,11 +413,11 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         }
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that delete campaign should cascade assignments.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task DeleteCampaign_ShouldCascadeAssignments()
     {
         // Arrange
@@ -451,11 +451,11 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         }
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that delete team should cascade assignments.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task DeleteTeam_ShouldCascadeAssignments()
     {
         // Arrange
@@ -491,11 +491,11 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         }
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that get club join requests as club member should return requests for club.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task GetClubJoinRequests_AsClubMember_ShouldReturnRequestsForClub()
     {
         var token = TestContext.Current.CancellationToken;
@@ -524,11 +524,11 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         }
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that get club join requests as requesting user should return own requests.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task GetClubJoinRequests_AsRequestingUser_ShouldReturnOwnRequests()
     {
         var token = TestContext.Current.CancellationToken;
@@ -556,11 +556,11 @@ public class ReadWriteDbContextTests(CustomApplicationFactory factory) : BaseDbC
         }
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that get club join requests as unrelated user should not return requests.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task GetClubJoinRequests_AsUnrelatedUser_ShouldNotReturnRequests()
     {
         var token = TestContext.Current.CancellationToken;

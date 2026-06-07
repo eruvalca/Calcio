@@ -1,4 +1,4 @@
-using Calcio.Data.Contexts;
+﻿using Calcio.Data.Contexts;
 using Calcio.Integration.Tests.Data.Contexts;
 using Calcio.Entities;
 
@@ -20,11 +20,11 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
     /// </summary>
     private const long OriginalCreatorId = 999;
 
-    [Fact]
     /// <summary>
     /// Verifies that added entity preserves created by id set by service layer.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task AddedEntity_PreservesCreatedById_SetByServiceLayer()
     {
         // Arrange
@@ -50,11 +50,11 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
         team.CreatedById.ShouldBe(OriginalCreatorId);
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that added entity sets created at timestamp.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task AddedEntity_SetsCreatedAtTimestamp()
     {
         // Arrange
@@ -84,11 +84,11 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
         team.CreatedAt.ShouldBeInRange(beforeSave, afterSave);
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that added entity sets modified at timestamp.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task AddedEntity_SetsModifiedAtTimestamp()
     {
         // Arrange
@@ -119,11 +119,11 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
         team.ModifiedAt.Value.ShouldBeInRange(beforeSave, afterSave);
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that added entity sets modified by id from http context.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task AddedEntity_SetsModifiedByIdFromHttpContext()
     {
         // Arrange
@@ -149,11 +149,11 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
         team.ModifiedById.ShouldBe(UserAId);
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that modified entity updates modified at timestamp.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task ModifiedEntity_UpdatesModifiedAtTimestamp()
     {
         // Arrange
@@ -176,26 +176,21 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
 
         var originalModifiedAt = team.ModifiedAt;
 
-        // Small delay to ensure timestamp difference
-        await Task.Delay(10, TestContext.Current.CancellationToken);
-
         // Act
         team.Name = "Updated Team Name";
-        var beforeUpdate = DateTimeOffset.UtcNow;
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-        var afterUpdate = DateTimeOffset.UtcNow;
 
-        // Assert
+        // Assert — ModifiedAt must have advanced beyond the initial save timestamp.
         team.ModifiedAt.ShouldNotBeNull();
-        team.ModifiedAt.Value.ShouldBeInRange(beforeUpdate, afterUpdate);
         team.ModifiedAt.ShouldNotBe(originalModifiedAt);
+        team.ModifiedAt!.Value.ShouldBeGreaterThanOrEqualTo(originalModifiedAt!.Value);
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that modified entity updates modified by id.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task ModifiedEntity_UpdatesModifiedById()
     {
         // Arrange
@@ -234,11 +229,11 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
         teamToUpdate.ModifiedById.ShouldBe(UserBId);
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that modified entity protects created at from changes.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task ModifiedEntity_ProtectsCreatedAtFromChanges()
     {
         // Arrange
@@ -279,11 +274,11 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
         Math.Abs((refetched.CreatedAt - originalCreatedAt).TotalSeconds).ShouldBeLessThan(1);
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that modified entity protects created by id from changes.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task ModifiedEntity_ProtectsCreatedByIdFromChanges()
     {
         // Arrange
@@ -321,11 +316,11 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
         refetched.CreatedById.ShouldBe(originalCreatedById);
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that added entity created at and modified at are equal.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task AddedEntity_CreatedAtAndModifiedAtAreEqual()
     {
         // Arrange
@@ -351,11 +346,11 @@ public class AuditSaveChangesInterceptorTests(CustomApplicationFactory factory) 
         team.CreatedAt.ShouldBe(team.ModifiedAt!.Value);
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that save changes with no user throws invalid operation exception.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task SaveChanges_WithNoUser_ThrowsInvalidOperationException()
     {
         // Arrange

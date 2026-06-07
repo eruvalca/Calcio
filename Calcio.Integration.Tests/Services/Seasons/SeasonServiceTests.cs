@@ -1,4 +1,4 @@
-using Bogus;
+﻿using Bogus;
 
 using Calcio.Data.Contexts;
 using Calcio.Integration.Tests.Data.Contexts;
@@ -76,11 +76,11 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
     }
     #region GetSeasonsAsync Tests
 
-    [Fact]
     /// <summary>
     /// Verifies that get seasons async when user is member returns seasons.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task GetSeasonsAsync_WhenUserIsMember_ReturnsSeasons()
     {
         // Arrange
@@ -104,11 +104,11 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
         seasons.ShouldAllBe(s => !string.IsNullOrEmpty(s.Name));
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that get seasons async when user is not member returns empty list.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task GetSeasonsAsync_WhenUserIsNotMember_ReturnsEmptyList()
     {
         // Arrange
@@ -133,11 +133,11 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
         result.Value.ShouldBeEmpty();
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that get seasons async returns seasons ordered by start date descending.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task GetSeasonsAsync_ReturnsSeasonsOrderedByStartDateDescending()
     {
         // Arrange
@@ -167,11 +167,11 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
         }
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that get seasons async returns only seasons for specified club.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task GetSeasonsAsync_ReturnsOnlySeasonsForSpecifiedClub()
     {
         // Arrange
@@ -198,11 +198,11 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
         seasons.Count.ShouldBe(expectedCount);
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that get seasons async returns correct season properties.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task GetSeasonsAsync_ReturnsCorrectSeasonProperties()
     {
         // Arrange
@@ -233,11 +233,11 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
         actualSeason.IsComplete.ShouldBe(expectedSeason.IsComplete);
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that get seasons async when club does not exist returns empty list.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task GetSeasonsAsync_WhenClubDoesNotExist_ReturnsEmptyList()
     {
         // Arrange
@@ -259,11 +259,11 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
 
     #region CreateSeasonAsync Tests
 
-    [Fact]
     /// <summary>
     /// Verifies that create season async when valid input creates season successfully.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task CreateSeasonAsync_WhenValidInput_CreatesSeasonSuccessfully()
     {
         // Arrange
@@ -294,11 +294,11 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
         createdSeason.CreatedById.ShouldBe(UserAId);
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that create season async without end date creates season successfully.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task CreateSeasonAsync_WithoutEndDate_CreatesSeasonSuccessfully()
     {
         // Arrange
@@ -326,11 +326,11 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
         createdSeason.IsComplete.ShouldBeFalse();
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that create season async sets created by id to current user.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task CreateSeasonAsync_SetsCreatedByIdToCurrentUser()
     {
         // Arrange
@@ -357,11 +357,11 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
         createdSeason.CreatedById.ShouldBe(UserAId);
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that create season async with end date in past season is complete.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task CreateSeasonAsync_WithEndDateInPast_SeasonIsComplete()
     {
         // Arrange
@@ -397,11 +397,11 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
         retrievedSeason.IsComplete.ShouldBeTrue();
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that create season async with end date in future season is not complete.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task CreateSeasonAsync_WithEndDateInFuture_SeasonIsNotComplete()
     {
         // Arrange
@@ -429,11 +429,11 @@ public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContex
         createdSeason.IsComplete.ShouldBeFalse();
     }
 
-    [Fact]
     /// <summary>
     /// Verifies that create season async when regular member not admin returns created season.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    [Fact]
     public async Task CreateSeasonAsync_WhenRegularMemberNotAdmin_ReturnsCreatedSeason()
     {
         // Arrange - Use non-admin member to verify authorization changes allow regular members to create seasons

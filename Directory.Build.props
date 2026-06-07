@@ -1,0 +1,6 @@
+<Project>
+  <!-- Enable the new dotnet test integration for Microsoft Testing Platform projects. -->
+  <PropertyGroup>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+  </PropertyGroup>
+</Project>

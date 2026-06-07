@@ -25,6 +25,12 @@ public sealed class ClubPlayersGridTests : BunitContext
 
     #region Helper Methods
 
+    /// <summary>
+    /// A fixed reference date used as the base for player date-of-birth values in test data,
+    /// ensuring tests are deterministic regardless of when they run.
+    /// </summary>
+    private static readonly DateOnly s_fixedBirthBaseDate = new(2010, 1, 1);
+
     private static List<ClubPlayerDto> CreateTestPlayers(int count = 2)
     {
         var players = new List<ClubPlayerDto>();
@@ -36,7 +42,7 @@ public sealed class ClubPlayersGridTests : BunitContext
                 FirstName: $"Player{i}",
                 LastName: $"Test{i}",
                 FullName: $"Player{i} Test{i}",
-                DateOfBirth: DateOnly.FromDateTime(DateTime.Now.AddYears(-10 - i)),
+                DateOfBirth: s_fixedBirthBaseDate.AddYears(-i),
                 Gender: i % 2 == 0 ? Gender.Male : Gender.Female,
                 JerseyNumber: i,
                 TryoutNumber: 100 + i));
@@ -122,7 +128,7 @@ public sealed class ClubPlayersGridTests : BunitContext
                 FirstName: "Player1",
                 LastName: "Test1",
                 FullName: "Player1 Test1",
-                DateOfBirth: DateOnly.FromDateTime(DateTime.Now.AddYears(-10)),
+                DateOfBirth: new DateOnly(2010, 1, 1),
                 Gender: Gender.Male,
                 JerseyNumber: null,
                 TryoutNumber: null)
@@ -148,7 +154,7 @@ public sealed class ClubPlayersGridTests : BunitContext
                 FirstName: "Player1",
                 LastName: "Test1",
                 FullName: "Player1 Test1",
-                DateOfBirth: DateOnly.FromDateTime(DateTime.Now.AddYears(-10)),
+                DateOfBirth: new DateOnly(2010, 1, 1),
                 Gender: null,
                 JerseyNumber: 1,
                 TryoutNumber: 101)
