@@ -1,7 +1,7 @@
 using Bogus;
 
 using Calcio.Data.Contexts;
-using Calcio.IntegrationTests.Data.Contexts;
+using Calcio.Integration.Tests.Data.Contexts;
 using Calcio.Services.Clubs;
 using Calcio.Shared.DTOs.Clubs;
 using Calcio.Entities;
@@ -19,7 +19,7 @@ using Microsoft.Extensions.Logging;
 
 using Shouldly;
 
-namespace Calcio.IntegrationTests.Services.Clubs;
+namespace Calcio.Integration.Tests.Services.Clubs;
 
 /// <summary>
 /// Contains integration tests for clubs service behavior.

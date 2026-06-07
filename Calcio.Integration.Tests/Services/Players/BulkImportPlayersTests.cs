@@ -1,7 +1,7 @@
 using System.Text;
 
 using Calcio.Data.Contexts;
-using Calcio.IntegrationTests.Data.Contexts;
+using Calcio.Integration.Tests.Data.Contexts;
 using Calcio.Services.Players;
 using Calcio.Shared.DTOs.Players.BulkImport;
 using Calcio.Shared.Enums;
@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 
 using Shouldly;
 
-namespace Calcio.IntegrationTests.Services.Players;
+namespace Calcio.Integration.Tests.Services.Players;
 
 /// <summary>
 /// Contains integration tests for bulk import players behavior.

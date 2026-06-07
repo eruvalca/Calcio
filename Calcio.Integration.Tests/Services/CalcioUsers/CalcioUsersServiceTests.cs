@@ -1,7 +1,7 @@
 using Bogus;
 
 using Calcio.Data.Contexts;
-using Calcio.IntegrationTests.Data.Contexts;
+using Calcio.Integration.Tests.Data.Contexts;
 using Calcio.Services.CalcioUsers;
 using Calcio.Entities;
 using Calcio.Shared.Results;
@@ -18,7 +18,7 @@ using Microsoft.Extensions.Logging;
 
 using Shouldly;
 
-namespace Calcio.IntegrationTests.Services.CalcioUsers;
+namespace Calcio.Integration.Tests.Services.CalcioUsers;
 
 public class CalcioUsersServiceTests(CustomApplicationFactory factory) : BaseDbContextTests(factory)
 {

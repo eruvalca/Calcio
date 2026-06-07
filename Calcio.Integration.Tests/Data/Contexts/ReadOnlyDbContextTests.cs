@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Shouldly;
 
-namespace Calcio.IntegrationTests.Data.Contexts;
+namespace Calcio.Integration.Tests.Data.Contexts;
 
 /// <summary>
 /// Contains integration tests for read only db context behavior.

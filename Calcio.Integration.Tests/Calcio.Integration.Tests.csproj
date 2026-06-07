@@ -4,8 +4,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Calcio.IntegrationTests</RootNamespace>
+    <RootNamespace>Calcio.Integration.Tests</RootNamespace>
     <TargetFramework>net10.0</TargetFramework>
+    <IsTestProject>true</IsTestProject>
+    <IsAspireTestProject>true</IsAspireTestProject>
     <!--
     This template uses native xUnit.net command line options when using 'dotnet run' and
     VSTest by default when using 'dotnet test'. For more information on how to enable support
@@ -20,23 +22,23 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+    <Using Include="Shouldly" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Testing" />
     <PackageReference Include="Bogus" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="Shouldly" />
-    <PackageReference Include="Testcontainers.Azurite" />
-    <PackageReference Include="Testcontainers.PostgreSql" />
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.runner.visualstudio" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Calcio\Calcio.csproj" />
+    <ProjectReference Include="..\Calcio.AppHost\Calcio.AppHost.csproj" />
   </ItemGroup>
 
 </Project>

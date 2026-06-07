@@ -1,5 +1,5 @@
 using Calcio.Data.Contexts;
-using Calcio.IntegrationTests.Data.Contexts;
+using Calcio.Integration.Tests.Data.Contexts;
 using Calcio.Entities;
 
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Shouldly;
 
-namespace Calcio.IntegrationTests.Data.Interceptors;
+namespace Calcio.Integration.Tests.Data.Interceptors;
 
 /// <summary>
 /// Contains integration tests for audit save changes interceptor behavior.

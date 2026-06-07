@@ -1,5 +1,5 @@
 ---
-applyTo: "Calcio.Unit.Tests/**/*.cs,Calcio.Unit.Tests/**/*.razor,Calcio.IntegrationTests/**/*.cs"
+applyTo: "Calcio.Unit.Tests/**/*.cs,Calcio.Unit.Tests/**/*.razor,Calcio.Integration.Tests/**/*.cs"
 description: "Calcio unit and integration test conventions, fixtures, libraries, and ServiceResult assertions."
 ---
 
@@ -12,7 +12,7 @@ description: "Calcio unit and integration test conventions, fixtures, libraries,
 
 - When writing code for new features or fixing bugs, include appropriate unit or integration tests for the changed behavior.
 - If the behavior cannot be unit tested due to missing abstractions or static dependencies, add an integration test instead and leave a TODO comment referencing the testability gap.
-- Run and verify all tests in the project(s) directly affected by the change (e.g., Calcio.Unit.Tests and/or Calcio.IntegrationTests) pass before considering the task complete.
+- Run and verify all tests in the project(s) directly affected by the change (e.g., Calcio.Unit.Tests and/or Calcio.Integration.Tests) pass before considering the task complete.
 
 ## Unit Tests
 
@@ -27,7 +27,7 @@ description: "Calcio unit and integration test conventions, fixtures, libraries,
 
 ## Integration Tests
 
-- Integration tests live in `Calcio.IntegrationTests/`.
+- Integration tests live in `Calcio.Integration.Tests/`.
 - Use `CustomApplicationFactory` for test fixture setup.
 - Inherit from `BaseDbContextTests` for database-dependent tests.
 - Create test entities by calling methods on the DbContext obtained from `scope.ServiceProvider` directly inside each test or a shared setup method; do not rely on pre-seeded data from migrations.

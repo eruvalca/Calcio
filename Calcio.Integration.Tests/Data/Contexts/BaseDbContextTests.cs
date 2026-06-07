@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Calcio.IntegrationTests.Data.Contexts;
+namespace Calcio.Integration.Tests.Data.Contexts;
 
 /// <summary>
 /// Provides common fixture initialization and tenant-scoped seed helpers for database integration tests.

@@ -1,9 +1,9 @@
 using Bogus;
 
 using Calcio.Data.Contexts;
-using Calcio.IntegrationTests.Data.Contexts;
-using Calcio.Services.Teams;
-using Calcio.Shared.DTOs.Teams;
+using Calcio.Integration.Tests.Data.Contexts;
+using Calcio.Services.Seasons;
+using Calcio.Shared.DTOs.Seasons;
 using Calcio.Entities;
 using Calcio.Shared.Security;
 
@@ -15,18 +15,18 @@ using Microsoft.Extensions.Logging;
 
 using Shouldly;
 
-namespace Calcio.IntegrationTests.Services.Teams;
+namespace Calcio.Integration.Tests.Services.Seasons;
 
 /// <summary>
-/// Contains integration tests for team service behavior.
+/// Contains integration tests for season service behavior.
 /// </summary>
 /// <param name="factory">Provides dependencies used to build the integration test host.</param>
-public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextTests(factory)
+public class SeasonServiceTests(CustomApplicationFactory factory) : BaseDbContextTests(factory)
 {
     /// <summary>
     /// Stores the standard member user id value used by this test suite.
     /// </summary>
-    private const long StandardMemberUserId = 400;
+    private const long StandardMemberUserId = 500;
 
     /// <summary>
     /// Initializes shared test data required by this test suite.
@@ -74,14 +74,14 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
             await dbContext.SaveChangesAsync();
         }
     }
-    #region GetTeamsAsync Tests
+    #region GetSeasonsAsync Tests
 
     [Fact]
     /// <summary>
-    /// Verifies that get teams async when user is member returns teams.
+    /// Verifies that get seasons async when user is member returns seasons.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public async Task GetTeamsAsync_WhenUserIsMember_ReturnsTeams()
+    public async Task GetSeasonsAsync_WhenUserIsMember_ReturnsSeasons()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -94,22 +94,22 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
         var club = await dbContext.Clubs.FirstAsync(cancellationToken);
 
         // Act
-        var result = await service.GetTeamsAsync(club.ClubId, cancellationToken);
+        var result = await service.GetSeasonsAsync(club.ClubId, cancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var teams = result.Value;
-        teams.ShouldNotBeEmpty();
-        teams.ShouldAllBe(t => t.TeamId > 0);
-        teams.ShouldAllBe(t => !string.IsNullOrEmpty(t.Name));
+        var seasons = result.Value;
+        seasons.ShouldNotBeEmpty();
+        seasons.ShouldAllBe(s => s.SeasonId > 0);
+        seasons.ShouldAllBe(s => !string.IsNullOrEmpty(s.Name));
     }
 
     [Fact]
     /// <summary>
-    /// Verifies that get teams async when user is not member returns empty list.
+    /// Verifies that get seasons async when user is not member returns empty list.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public async Task GetTeamsAsync_WhenUserIsNotMember_ReturnsEmptyList()
+    public async Task GetSeasonsAsync_WhenUserIsNotMember_ReturnsEmptyList()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -126,7 +126,7 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
             .FirstAsync(c => c.CalcioUsers.All(u => u.Id != UserAId), cancellationToken);
 
         // Act
-        var result = await service.GetTeamsAsync(otherClub.ClubId, cancellationToken);
+        var result = await service.GetSeasonsAsync(otherClub.ClubId, cancellationToken);
 
         // Assert - Global query filters return empty result for clubs user doesn't belong to
         result.IsSuccess.ShouldBeTrue();
@@ -135,10 +135,10 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
 
     [Fact]
     /// <summary>
-    /// Verifies that get teams async returns teams ordered by name.
+    /// Verifies that get seasons async returns seasons ordered by start date descending.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public async Task GetTeamsAsync_ReturnsTeamsOrderedByName()
+    public async Task GetSeasonsAsync_ReturnsSeasonsOrderedByStartDateDescending()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -151,29 +151,28 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
         var club = await dbContext.Clubs.FirstAsync(cancellationToken);
 
         // Act
-        var result = await service.GetTeamsAsync(club.ClubId, cancellationToken);
+        var result = await service.GetSeasonsAsync(club.ClubId, cancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var teams = result.Value;
+        var seasons = result.Value;
 
-        if (teams.Count > 1)
+        if (seasons.Count > 1)
         {
-            // Verify ascending order by name
-            for (var i = 0; i < teams.Count - 1; i++)
+            // Verify descending order by start date
+            for (var i = 0; i < seasons.Count - 1; i++)
             {
-                string.Compare(teams[i].Name, teams[i + 1].Name, StringComparison.Ordinal)
-                    .ShouldBeLessThanOrEqualTo(0);
+                seasons[i].StartDate.ShouldBeGreaterThanOrEqualTo(seasons[i + 1].StartDate);
             }
         }
     }
 
     [Fact]
     /// <summary>
-    /// Verifies that get teams async returns only teams for specified club.
+    /// Verifies that get seasons async returns only seasons for specified club.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public async Task GetTeamsAsync_ReturnsOnlyTeamsForSpecifiedClub()
+    public async Task GetSeasonsAsync_ReturnsOnlySeasonsForSpecifiedClub()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -185,26 +184,26 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
 
         var club = await dbContext.Clubs.FirstAsync(cancellationToken);
 
-        // Get count of teams for the specific club from the database
-        var expectedCount = await dbContext.Teams
-            .Where(t => t.ClubId == club.ClubId)
+        // Get count of seasons for the specific club from the database
+        var expectedCount = await dbContext.Seasons
+            .Where(s => s.ClubId == club.ClubId)
             .CountAsync(cancellationToken);
 
         // Act
-        var result = await service.GetTeamsAsync(club.ClubId, cancellationToken);
+        var result = await service.GetSeasonsAsync(club.ClubId, cancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var teams = result.Value;
-        teams.Count.ShouldBe(expectedCount);
+        var seasons = result.Value;
+        seasons.Count.ShouldBe(expectedCount);
     }
 
     [Fact]
     /// <summary>
-    /// Verifies that get teams async returns correct team properties.
+    /// Verifies that get seasons async returns correct season properties.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public async Task GetTeamsAsync_ReturnsCorrectTeamProperties()
+    public async Task GetSeasonsAsync_ReturnsCorrectSeasonProperties()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -215,29 +214,31 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
         var service = CreateService(scope.ServiceProvider);
 
         var club = await dbContext.Clubs.FirstAsync(cancellationToken);
-        var expectedTeam = await dbContext.Teams
-            .Where(t => t.ClubId == club.ClubId)
+        var expectedSeason = await dbContext.Seasons
+            .Where(s => s.ClubId == club.ClubId)
             .FirstAsync(cancellationToken);
 
         // Act
-        var result = await service.GetTeamsAsync(club.ClubId, cancellationToken);
+        var result = await service.GetSeasonsAsync(club.ClubId, cancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var teams = result.Value;
-        var actualTeam = teams.FirstOrDefault(t => t.TeamId == expectedTeam.TeamId);
+        var seasons = result.Value;
+        var actualSeason = seasons.FirstOrDefault(s => s.SeasonId == expectedSeason.SeasonId);
 
-        actualTeam.ShouldNotBeNull();
-        actualTeam.Name.ShouldBe(expectedTeam.Name);
-        actualTeam.GraduationYear.ShouldBe(expectedTeam.GraduationYear);
+        actualSeason.ShouldNotBeNull();
+        actualSeason.Name.ShouldBe(expectedSeason.Name);
+        actualSeason.StartDate.ShouldBe(expectedSeason.StartDate);
+        actualSeason.EndDate.ShouldBe(expectedSeason.EndDate);
+        actualSeason.IsComplete.ShouldBe(expectedSeason.IsComplete);
     }
 
     [Fact]
     /// <summary>
-    /// Verifies that get teams async when club does not exist returns empty list.
+    /// Verifies that get seasons async when club does not exist returns empty list.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public async Task GetTeamsAsync_WhenClubDoesNotExist_ReturnsEmptyList()
+    public async Task GetSeasonsAsync_WhenClubDoesNotExist_ReturnsEmptyList()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -247,7 +248,7 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
         var service = CreateService(scope.ServiceProvider);
 
         // Act
-        var result = await service.GetTeamsAsync(999999, cancellationToken);
+        var result = await service.GetSeasonsAsync(999999, cancellationToken);
 
         // Assert - Global query filters return empty result for non-existent clubs
         result.IsSuccess.ShouldBeTrue();
@@ -256,14 +257,14 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
 
     #endregion
 
-    #region CreateTeamAsync Tests
+    #region CreateSeasonAsync Tests
 
     [Fact]
     /// <summary>
-    /// Verifies that create team async when valid input creates team successfully.
+    /// Verifies that create season async when valid input creates season successfully.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public async Task CreateTeamAsync_WhenValidInput_CreatesTeamSuccessfully()
+    public async Task CreateSeasonAsync_WhenValidInput_CreatesSeasonSuccessfully()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -274,30 +275,31 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
         var service = CreateService(scope.ServiceProvider);
 
         var club = await readOnlyDbContext.Clubs.FirstAsync(cancellationToken);
-        var dto = new CreateTeamDto("New Test Team", 2030);
+        var dto = new CreateSeasonDto("New Test Season", DateOnly.FromDateTime(DateTime.Today.AddDays(1)), DateOnly.FromDateTime(DateTime.Today.AddMonths(3)));
 
         // Act
-        var result = await service.CreateTeamAsync(club.ClubId, dto, cancellationToken);
+        var result = await service.CreateSeasonAsync(club.ClubId, dto, cancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        // Verify the team was created in the database
-        var createdTeam = await readOnlyDbContext.Teams
-            .FirstOrDefaultAsync(t => t.Name == "New Test Team" && t.ClubId == club.ClubId, cancellationToken);
+        // Verify the season was created in the database
+        var createdSeason = await readOnlyDbContext.Seasons
+            .FirstOrDefaultAsync(s => s.Name == "New Test Season" && s.ClubId == club.ClubId, cancellationToken);
 
-        createdTeam.ShouldNotBeNull();
-        createdTeam.Name.ShouldBe(dto.Name);
-        createdTeam.GraduationYear.ShouldBe(dto.GraduationYear);
-        createdTeam.CreatedById.ShouldBe(UserAId);
+        createdSeason.ShouldNotBeNull();
+        createdSeason.Name.ShouldBe(dto.Name);
+        createdSeason.StartDate.ShouldBe(dto.StartDate);
+        createdSeason.EndDate.ShouldBe(dto.EndDate);
+        createdSeason.CreatedById.ShouldBe(UserAId);
     }
 
     [Fact]
     /// <summary>
-    /// Verifies that create team async sets created by id to current user.
+    /// Verifies that create season async without end date creates season successfully.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public async Task CreateTeamAsync_SetsCreatedByIdToCurrentUser()
+    public async Task CreateSeasonAsync_WithoutEndDate_CreatesSeasonSuccessfully()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -308,27 +310,28 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
         var service = CreateService(scope.ServiceProvider);
 
         var club = await readOnlyDbContext.Clubs.FirstAsync(cancellationToken);
-        var dto = new CreateTeamDto("Team With CreatedBy", 2028);
+        var dto = new CreateSeasonDto("Open-Ended Season", DateOnly.FromDateTime(DateTime.Today.AddDays(1)));
 
         // Act
-        var result = await service.CreateTeamAsync(club.ClubId, dto, cancellationToken);
+        var result = await service.CreateSeasonAsync(club.ClubId, dto, cancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        var createdTeam = await readOnlyDbContext.Teams
-            .FirstOrDefaultAsync(t => t.Name == "Team With CreatedBy" && t.ClubId == club.ClubId, cancellationToken);
+        var createdSeason = await readOnlyDbContext.Seasons
+            .FirstOrDefaultAsync(s => s.Name == "Open-Ended Season" && s.ClubId == club.ClubId, cancellationToken);
 
-        createdTeam.ShouldNotBeNull();
-        createdTeam.CreatedById.ShouldBe(UserAId);
+        createdSeason.ShouldNotBeNull();
+        createdSeason.EndDate.ShouldBeNull();
+        createdSeason.IsComplete.ShouldBeFalse();
     }
 
     [Fact]
     /// <summary>
-    /// Verifies that create team async with graduation year stores graduation year correctly.
+    /// Verifies that create season async sets created by id to current user.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public async Task CreateTeamAsync_WithGraduationYear_StoresGraduationYearCorrectly()
+    public async Task CreateSeasonAsync_SetsCreatedByIdToCurrentUser()
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -339,30 +342,101 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
         var service = CreateService(scope.ServiceProvider);
 
         var club = await readOnlyDbContext.Clubs.FirstAsync(cancellationToken);
-        var graduationYear = DateTime.Today.Year + 5;
-        var dto = new CreateTeamDto("Team With Year", graduationYear);
+        var dto = new CreateSeasonDto("Season With CreatedBy", DateOnly.FromDateTime(DateTime.Today.AddDays(1)));
 
         // Act
-        var result = await service.CreateTeamAsync(club.ClubId, dto, cancellationToken);
+        var result = await service.CreateSeasonAsync(club.ClubId, dto, cancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        var createdTeam = await readOnlyDbContext.Teams
-            .FirstOrDefaultAsync(t => t.Name == "Team With Year" && t.ClubId == club.ClubId, cancellationToken);
+        var createdSeason = await readOnlyDbContext.Seasons
+            .FirstOrDefaultAsync(s => s.Name == "Season With CreatedBy" && s.ClubId == club.ClubId, cancellationToken);
 
-        createdTeam.ShouldNotBeNull();
-        createdTeam.GraduationYear.ShouldBe(graduationYear);
+        createdSeason.ShouldNotBeNull();
+        createdSeason.CreatedById.ShouldBe(UserAId);
     }
 
     [Fact]
     /// <summary>
-    /// Verifies that create team async when regular member not admin returns created team.
+    /// Verifies that create season async with end date in past season is complete.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public async Task CreateTeamAsync_WhenRegularMemberNotAdmin_ReturnsCreatedTeam()
+    public async Task CreateSeasonAsync_WithEndDateInPast_SeasonIsComplete()
     {
-        // Arrange - Use non-admin member to verify authorization changes allow regular members to create teams
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+
+        var readOnlyDbContext = scope.ServiceProvider.GetRequiredService<ReadOnlyDbContext>();
+        var readWriteDbContext = scope.ServiceProvider.GetRequiredService<ReadWriteDbContext>();
+        var service = CreateService(scope.ServiceProvider);
+
+        var club = await readOnlyDbContext.Clubs.FirstAsync(cancellationToken);
+
+        // Create a season directly with a past end date for testing IsComplete logic
+        var pastSeason = new SeasonEntity
+        {
+            Name = "Past Season",
+            StartDate = DateOnly.FromDateTime(DateTime.Today.AddMonths(-6)),
+            EndDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
+            ClubId = club.ClubId,
+            CreatedById = UserAId
+        };
+
+        await readWriteDbContext.Seasons.AddAsync(pastSeason, cancellationToken);
+        await readWriteDbContext.SaveChangesAsync(cancellationToken);
+
+        // Act - Retrieve the season and verify IsComplete
+        var retrievedSeason = await readOnlyDbContext.Seasons
+            .FirstOrDefaultAsync(s => s.Name == "Past Season" && s.ClubId == club.ClubId, cancellationToken);
+
+        // Assert
+        retrievedSeason.ShouldNotBeNull();
+        retrievedSeason.IsComplete.ShouldBeTrue();
+    }
+
+    [Fact]
+    /// <summary>
+    /// Verifies that create season async with end date in future season is not complete.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    public async Task CreateSeasonAsync_WithEndDateInFuture_SeasonIsNotComplete()
+    {
+        // Arrange
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var scope = Factory.Services.CreateScope();
+        SetCurrentUser(scope.ServiceProvider, UserAId);
+
+        var readOnlyDbContext = scope.ServiceProvider.GetRequiredService<ReadOnlyDbContext>();
+        var service = CreateService(scope.ServiceProvider);
+
+        var club = await readOnlyDbContext.Clubs.FirstAsync(cancellationToken);
+        var dto = new CreateSeasonDto("Future End Season", DateOnly.FromDateTime(DateTime.Today.AddDays(1)), DateOnly.FromDateTime(DateTime.Today.AddMonths(6)));
+
+        // Act
+        var result = await service.CreateSeasonAsync(club.ClubId, dto, cancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var createdSeason = await readOnlyDbContext.Seasons
+            .FirstOrDefaultAsync(s => s.Name == "Future End Season" && s.ClubId == club.ClubId, cancellationToken);
+
+        createdSeason.ShouldNotBeNull();
+        createdSeason.EndDate.ShouldNotBeNull();
+        createdSeason.IsComplete.ShouldBeFalse();
+    }
+
+    [Fact]
+    /// <summary>
+    /// Verifies that create season async when regular member not admin returns created season.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    public async Task CreateSeasonAsync_WhenRegularMemberNotAdmin_ReturnsCreatedSeason()
+    {
+        // Arrange - Use non-admin member to verify authorization changes allow regular members to create seasons
         var cancellationToken = TestContext.Current.CancellationToken;
         using var scope = Factory.Services.CreateScope();
         SetCurrentUser(scope.ServiceProvider, StandardMemberUserId);
@@ -371,21 +445,21 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
         var service = CreateService(scope.ServiceProvider);
 
         var club = await readOnlyDbContext.Clubs.FirstAsync(cancellationToken);
-        var dto = new CreateTeamDto("Member Created Team", 2029);
+        var dto = new CreateSeasonDto("Member Created Season", DateOnly.FromDateTime(DateTime.Today.AddDays(1)));
 
         // Act
-        var result = await service.CreateTeamAsync(club.ClubId, dto, cancellationToken);
+        var result = await service.CreateSeasonAsync(club.ClubId, dto, cancellationToken);
 
-        // Assert - Regular members can now create teams
+        // Assert - Regular members can now create seasons
         result.IsSuccess.ShouldBeTrue();
 
-        var createdTeam = await readOnlyDbContext.Teams
-            .FirstOrDefaultAsync(t => t.Name == "Member Created Team" && t.ClubId == club.ClubId, cancellationToken);
+        var createdSeason = await readOnlyDbContext.Seasons
+            .FirstOrDefaultAsync(s => s.Name == "Member Created Season" && s.ClubId == club.ClubId, cancellationToken);
 
-        createdTeam.ShouldNotBeNull();
-        createdTeam.Name.ShouldBe(dto.Name);
-        createdTeam.GraduationYear.ShouldBe(dto.GraduationYear);
-        createdTeam.CreatedById.ShouldBe(StandardMemberUserId);
+        createdSeason.ShouldNotBeNull();
+        createdSeason.Name.ShouldBe(dto.Name);
+        createdSeason.StartDate.ShouldBe(dto.StartDate);
+        createdSeason.CreatedById.ShouldBe(StandardMemberUserId);
     }
 
     #endregion
@@ -396,15 +470,15 @@ public class TeamServiceTests(CustomApplicationFactory factory) : BaseDbContextT
     /// Creates the service under test using dependencies from the current scope.
     /// </summary>
     /// <param name="services">Specifies the services value for this scenario.</param>
-    /// <returns>The teams service produced by the operation.</returns>
-    private static TeamsService CreateService(IServiceProvider services)
+    /// <returns>The seasons service produced by the operation.</returns>
+    private static SeasonsService CreateService(IServiceProvider services)
     {
         var readOnlyFactory = services.GetRequiredService<IDbContextFactory<ReadOnlyDbContext>>();
         var readWriteFactory = services.GetRequiredService<IDbContextFactory<ReadWriteDbContext>>();
         var httpContextAccessor = services.GetRequiredService<IHttpContextAccessor>();
-        var logger = services.GetRequiredService<ILogger<TeamsService>>();
+        var logger = services.GetRequiredService<ILogger<SeasonsService>>();
 
-        return new TeamsService(readOnlyFactory, readWriteFactory, httpContextAccessor, logger);
+        return new SeasonsService(readOnlyFactory, readWriteFactory, httpContextAccessor, logger);
     }
 
     #endregion

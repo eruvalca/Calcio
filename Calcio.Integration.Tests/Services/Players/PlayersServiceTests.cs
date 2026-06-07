@@ -1,7 +1,7 @@
 using Bogus;
 
 using Calcio.Data.Contexts;
-using Calcio.IntegrationTests.Data.Contexts;
+using Calcio.Integration.Tests.Data.Contexts;
 using Calcio.Services.Players;
 using Calcio.Entities;
 using Calcio.Shared.Security;
@@ -19,7 +19,7 @@ using Shouldly;
 
 using SkiaSharp;
 
-namespace Calcio.IntegrationTests.Services.Players;
+namespace Calcio.Integration.Tests.Services.Players;
 
 public class PlayersServiceTests(CustomApplicationFactory factory) : BaseDbContextTests(factory)
 {

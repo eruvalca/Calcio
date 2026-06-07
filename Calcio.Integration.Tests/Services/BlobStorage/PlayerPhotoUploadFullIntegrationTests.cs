@@ -20,7 +20,7 @@ using Shouldly;
 
 using SkiaSharp;
 
-namespace Calcio.IntegrationTests.Services.BlobStorage;
+namespace Calcio.Integration.Tests.Services.BlobStorage;
 
 /// <summary>
 /// Full integration tests for player photo upload with actual Azure Blob Storage emulator (Azurite).

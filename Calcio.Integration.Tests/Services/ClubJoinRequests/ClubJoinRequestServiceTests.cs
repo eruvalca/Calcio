@@ -1,7 +1,7 @@
 using Bogus;
 
 using Calcio.Data.Contexts;
-using Calcio.IntegrationTests.Data.Contexts;
+using Calcio.Integration.Tests.Data.Contexts;
 using Calcio.Services.ClubJoinRequests;
 using Calcio.Entities;
 using Calcio.Shared.Enums;
@@ -18,7 +18,7 @@ using Microsoft.Extensions.Logging;
 
 using Shouldly;
 
-namespace Calcio.IntegrationTests.Services.ClubJoinRequests;
+namespace Calcio.Integration.Tests.Services.ClubJoinRequests;
 
 /// <summary>
 /// Contains integration tests for club join request service behavior.
