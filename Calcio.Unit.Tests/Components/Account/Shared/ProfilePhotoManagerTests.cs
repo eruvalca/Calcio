@@ -356,8 +356,10 @@ public sealed class ProfilePhotoManagerTests : BunitContext
         var cut = RenderComponent();
         await cut.InvokeAsync(() => Task.CompletedTask);
 
-        // Assert - The modal component should be rendered (though not visible initially)
-        cut.ShouldNotBeNull();
+        // Assert - The modal is rendered in the DOM but not shown until a photo is selected
+        var modal = cut.Find(".modal");
+        modal.ShouldNotBeNull();
+        modal.ClassList.ShouldNotContain("show");
     }
 
     #endregion

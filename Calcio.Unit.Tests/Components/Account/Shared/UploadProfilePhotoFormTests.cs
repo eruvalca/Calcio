@@ -148,27 +148,24 @@ public sealed class UploadProfilePhotoFormTests : BunitContext
     #region Upload Button State Tests
 
     [Fact]
-    public async Task WhenUploadSucceeds_ShouldNavigateToReturnUrl()
+    public async Task WhenRendered_UploadServiceShouldNotBeCalledOnInitialization()
     {
         // Arrange
         var returnUrl = "/dashboard";
-        var expectedPhoto = new CalcioUserPhotoDto(1, "url", null, null, null);
-
         _mockCalcioUsersService.UploadAccountPhotoAsync(Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<ServiceResult<CalcioUserPhotoDto>>(expectedPhoto));
+            .Returns(Task.FromResult<ServiceResult<CalcioUserPhotoDto>>(new CalcioUserPhotoDto(1, "url", null, null, null)));
 
         var cut = RenderForm(returnUrl);
+        await cut.InvokeAsync(() => Task.CompletedTask);
 
-        // Simulate having a cropped photo (we can't easily trigger the full flow)
-        // Instead, we verify the navigation manager is set up correctly
-        var navManager = Services.GetRequiredService<NavigationManager>();
-
-        // Assert - Initially on test URI
-        navManager.Uri.ShouldContain("http://localhost/");
+        // Assert - upload service must not be called before the user selects and crops a photo.
+        // End-to-end navigation after successful upload is covered by AccountPhotoUploadIntegrationTests.
+        await _mockCalcioUsersService.DidNotReceive().UploadAccountPhotoAsync(
+            Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task WhenUploadFails_ShouldDisplayErrorMessage()
+    public void WhenUploadFails_ErrorMessageShouldNotBeShownBeforeUploadAttempt()
     {
         // Arrange
         _mockCalcioUsersService.UploadAccountPhotoAsync(Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
@@ -176,9 +173,12 @@ public sealed class UploadProfilePhotoFormTests : BunitContext
 
         var cut = RenderForm();
 
-        // Note: Full upload flow testing requires simulating InputFile and cropper modal,
-        // which is complex with bUnit. This test verifies the component structure.
-        cut.ShouldNotBeNull();
+        // Assert - no error shown before the user has attempted an upload.
+        // The upload flow (InputFile → crop → submit) cannot be driven in bUnit because
+        // InputFile requires a real browser file picker. Upload error handling at the
+        // service level is covered by AccountPhotoUploadIntegrationTests.
+        cut.FindAll(".alert-danger").Count.ShouldBe(0);
+        cut.Find("button.btn-primary").GetAttribute("disabled").ShouldNotBeNull();
     }
 
     #endregion
@@ -228,9 +228,10 @@ public sealed class UploadProfilePhotoFormTests : BunitContext
         // Act
         var cut = RenderForm();
 
-        // Assert - The modal component should be rendered (though not visible initially)
-        cut.ShouldNotBeNull();
-        // ImageCropperModal is rendered but hidden by default
+        // Assert - The modal is rendered in the DOM but not shown until a photo is selected
+        var modal = cut.Find(".modal");
+        modal.ShouldNotBeNull();
+        modal.ClassList.ShouldNotContain("show");
     }
 
     #endregion
@@ -246,9 +247,9 @@ public sealed class UploadProfilePhotoFormTests : BunitContext
         // Act
         var cut = RenderForm(returnUrl);
 
-        // Assert - Component should render successfully with the parameter
-        cut.ShouldNotBeNull();
+        // Assert - Component renders with the parameter; file input and disabled upload button present
         cut.Find("#photo").ShouldNotBeNull();
+        cut.Find("button.btn-primary").GetAttribute("disabled").ShouldNotBeNull();
     }
 
     [Fact]
@@ -258,8 +259,8 @@ public sealed class UploadProfilePhotoFormTests : BunitContext
         var cut = RenderForm(returnUrl: null);
 
         // Assert
-        cut.ShouldNotBeNull();
         cut.Find("#photo").ShouldNotBeNull();
+        cut.Find("button.btn-primary").GetAttribute("disabled").ShouldNotBeNull();
     }
 
     #endregion

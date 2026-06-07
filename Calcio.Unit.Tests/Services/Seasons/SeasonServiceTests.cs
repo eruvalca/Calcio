@@ -357,6 +357,7 @@ public class SeasonServiceTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        mockHttp.VerifyNoOutstandingExpectation();
     }
     /// <summary>
     /// Verifies the CreateSeasonAsync_WithoutEndDate_SendsNullEndDate scenario.
@@ -392,6 +393,7 @@ public class SeasonServiceTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        mockHttp.VerifyNoOutstandingExpectation();
     }
 
     #endregion

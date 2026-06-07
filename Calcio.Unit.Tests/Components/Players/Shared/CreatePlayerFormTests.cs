@@ -195,7 +195,7 @@ public sealed class CreatePlayerFormTests : BunitContext
         var clubId = 1L;
 
         _mockPlayersService.CreatePlayerAsync(Arg.Any<long>(), Arg.Any<CreatePlayerDto>(), Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<ServiceResult<PlayerCreatedDto>>(ServiceProblem.ServerError("Creation failed")));
+            .Returns(Task.FromResult<ServiceResult<PlayerCreatedDto>>(ServiceProblem.ServerError()));
 
         var cut = RenderForm(clubId);
         FillValidPlayerData(cut);
@@ -208,6 +208,7 @@ public sealed class CreatePlayerFormTests : BunitContext
         {
             var errorAlert = cut.Find(".alert-danger");
             errorAlert.ShouldNotBeNull();
+            errorAlert.TextContent.ShouldContain("unexpected error");
         });
     }
 

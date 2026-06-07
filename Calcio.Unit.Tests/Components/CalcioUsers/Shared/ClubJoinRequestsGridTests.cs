@@ -18,41 +18,15 @@ namespace Calcio.UnitTests.Components.CalcioUsers.Shared;
 
 /// <summary>
 /// Unit tests for the ClubJoinRequestsGrid Blazor component using bUnit.
-/// 
-/// KEY BUNIT CONCEPTS:
-/// 
-/// 1. BunitContext - The core bUnit class that provides the test environment.
-///    It manages component lifecycle, services, and rendering.
-///    
-/// 2. Render&lt;T&gt; - Renders a component and returns an IRenderedComponent&lt;T&gt;
-///    that you can use to interact with and assert against the component.
-///    
-/// 3. Find/FindAll - CSS selector-based methods to locate elements in the rendered markup.
-/// 
-/// 4. Click/Change/Submit - Methods to simulate user interactions.
-/// 
-/// 5. WaitForState/WaitForAssertion - Methods to handle async operations in components.
-/// 
-/// 6. Services - DI container for injecting mock services into components.
 /// </summary>
 public sealed class ClubJoinRequestsGridTests : BunitContext
 {
-    // Mock dependencies - we use NSubstitute to create test doubles
     private readonly IClubJoinRequestsService _mockClubJoinRequestService;
 
     public ClubJoinRequestsGridTests()
     {
-        // BEST PRACTICE: Set up mocks in constructor for reuse across tests
         _mockClubJoinRequestService = Substitute.For<IClubJoinRequestsService>();
-
-        // BUNIT FEATURE: Register services in the test context's DI container
-        // These will be injected into components just like in the real app
         Services.AddSingleton(_mockClubJoinRequestService);
-
-        // BUNIT FEATURE: Configure JSInterop to handle calls from third-party components
-        // QuickGrid uses JS interop for virtualization. We set up a catch-all handler
-        // that allows any JS call to succeed. This is common when testing components
-        // that use JS-dependent third-party libraries.
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
@@ -60,7 +34,6 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
 
     /// <summary>
     /// Creates test data for join requests.
-    /// BEST PRACTICE: Use factory methods to create test data consistently.
     /// </summary>
     private static List<ClubJoinRequestWithUserDto> CreateTestJoinRequests(int count = 2)
         => [
@@ -77,13 +50,10 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
 
     /// <summary>
     /// Renders the component with specified parameters.
-    /// BEST PRACTICE: Create helper methods for common rendering scenarios.
     /// </summary>
     private IRenderedComponent<ClubJoinRequestsGrid> RenderGrid(
         long clubId = 100,
         List<ClubJoinRequestWithUserDto>? joinRequests = null)
-            // BUNIT FEATURE: Parameters can be passed as a lambda
-            // This is type-safe and catches errors at compile time
             => Render<ClubJoinRequestsGrid>(parameters => parameters
                 .Add(p => p.ClubId, clubId)
                 .Add(p => p.JoinRequests, joinRequests ?? []));
@@ -93,8 +63,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
     #region Initial Rendering Tests
 
     /// <summary>
-    /// TEST: Verify the component renders the empty state correctly.
-    /// CONCEPT: Testing initial render state with no data.
+    /// Verifies the component renders the empty state correctly.
     /// </summary>
     [Fact]
     public void WhenNoJoinRequests_ShouldDisplayEmptyMessage()
@@ -103,18 +72,13 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
         var cut = RenderGrid(joinRequests: []);
 
         // Assert
-        // BUNIT FEATURE: Find uses CSS selectors just like JavaScript
         var emptyMessage = cut.Find(".text-muted");
         emptyMessage.TextContent.ShouldBe("No pending join requests.");
-
-        // BEST PRACTICE: Also verify things that should NOT be present
-        // FindAll returns empty collection if nothing matches (unlike Find which throws)
         cut.FindAll("table").ShouldBeEmpty();
     }
 
     /// <summary>
-    /// TEST: Verify the component renders join requests in a grid.
-    /// CONCEPT: Testing that data is rendered correctly.
+    /// Verifies the component renders join requests in a grid.
     /// </summary>
     [Fact]
     public void WhenJoinRequestsExist_ShouldDisplayGrid()
@@ -126,21 +90,15 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
         var cut = RenderGrid(joinRequests: requests);
 
         // Assert
-        // Verify the grid is rendered
         cut.Find("table").ShouldNotBeNull();
-
-        // BUNIT FEATURE: FindAll returns all matching elements
         var rows = cut.FindAll("tbody tr");
         rows.Count.ShouldBe(2);
-
-        // Verify first request's data is displayed
         cut.Markup.ShouldContain("Test User 1");
         cut.Markup.ShouldContain("user1@test.com");
     }
 
     /// <summary>
-    /// TEST: Verify each request has approve and reject buttons.
-    /// CONCEPT: Testing UI elements exist for interaction.
+    /// Verifies each request has approve and reject buttons.
     /// </summary>
     [Fact]
     public void WhenJoinRequestsExist_ShouldDisplayActionButtons()
@@ -167,8 +125,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
     #region Approve Modal Tests
 
     /// <summary>
-    /// TEST: Verify clicking approve shows confirmation modal.
-    /// CONCEPT: Testing user interaction triggers UI changes.
+    /// Verifies that clicking approve shows the confirmation modal.
     /// </summary>
     [Fact]
     public void WhenApproveClicked_ShouldShowConfirmationModal()
@@ -178,22 +135,17 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
         var cut = RenderGrid(joinRequests: requests);
 
         // Act
-        // BUNIT FEATURE: Click simulates a user clicking the element
         cut.Find("button.btn-outline-success").Click();
 
         // Assert
-        // The modal should now be visible
         var modal = cut.Find(".modal");
         modal.ShouldNotBeNull();
-
-        // Verify modal content
         cut.Markup.ShouldContain("Approve Join Request");
         cut.Markup.ShouldContain("Test User 1");
     }
 
     /// <summary>
-    /// TEST: Verify cancel button closes the approve modal.
-    /// CONCEPT: Testing modal dismissal.
+    /// Verifies that clicking cancel closes the approve modal.
     /// </summary>
     [Fact]
     public void WhenApproveCancelClicked_ShouldHideModal()
@@ -212,8 +164,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
     }
 
     /// <summary>
-    /// TEST: Verify clicking X button closes the approve modal.
-    /// CONCEPT: Testing alternative modal dismissal.
+    /// Verifies that clicking the X button closes the approve modal.
     /// </summary>
     [Fact]
     public void WhenApproveModalCloseButtonClicked_ShouldHideModal()
@@ -231,8 +182,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
     }
 
     /// <summary>
-    /// TEST: Verify confirming approval calls the service.
-    /// CONCEPT: Testing component calls injected service correctly.
+    /// Verifies that confirming approval calls the service with the correct parameters.
     /// </summary>
     [Fact]
     public async Task WhenApproveConfirmed_ShouldCallService()
@@ -241,27 +191,22 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
         var requests = CreateTestJoinRequests(1);
         var cut = RenderGrid(clubId: 100, joinRequests: requests);
 
-        // Setup mock to return success
         _mockClubJoinRequestService
             .UpdateJoinRequestStatusAsync(100, 1, RequestStatus.Approved, Arg.Any<CancellationToken>())
             .Returns(new ServiceResult<Success>(new Success()));
 
-        // Open the modal
         cut.Find("button.btn-outline-success").Click();
 
         // Act
-        // Find and click the confirm button (the success-styled button in footer)
         await cut.Find(".modal-footer button.btn-success").ClickAsync(new());
 
         // Assert
-        // BEST PRACTICE: Verify the service was called with correct parameters
         await _mockClubJoinRequestService.Received(1)
             .UpdateJoinRequestStatusAsync(100, 1, RequestStatus.Approved, Arg.Any<CancellationToken>());
     }
 
     /// <summary>
-    /// TEST: Verify error message displays when approval fails with NotFound.
-    /// CONCEPT: Testing error handling and UI feedback.
+    /// Verifies that an error message is displayed when approval fails with NotFound.
     /// </summary>
     [Fact]
     public async Task WhenApproveReturnsNotFound_ShouldDisplayError()
@@ -280,7 +225,6 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
         await cut.Find(".modal-footer button.btn-success").ClickAsync(new());
 
         // Assert
-        // BUNIT FEATURE: WaitForAssertion handles async state updates
         cut.WaitForAssertion(() =>
         {
             var alert = cut.Find(".alert-danger");
@@ -289,8 +233,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
     }
 
     /// <summary>
-    /// TEST: Verify error message displays when approval fails with Forbidden.
-    /// CONCEPT: Testing different error scenarios.
+    /// Verifies that an error message is displayed when approval fails with Forbidden.
     /// </summary>
     [Fact]
     public async Task WhenApproveReturnsForbidden_ShouldDisplayError()
@@ -317,8 +260,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
     }
 
     /// <summary>
-    /// TEST: Verify error message displays when approval fails with generic error.
-    /// CONCEPT: Testing fallback error handling.
+    /// Verifies that a generic error message is displayed when approval fails with a server error.
     /// </summary>
     [Fact]
     public async Task WhenApproveReturnsServerError_ShouldDisplayGenericError()
@@ -349,7 +291,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
     #region Reject Modal Tests
 
     /// <summary>
-    /// TEST: Verify clicking reject shows confirmation modal.
+    /// Verifies that clicking reject shows the confirmation modal.
     /// </summary>
     [Fact]
     public void WhenRejectClicked_ShouldShowConfirmationModal()
@@ -369,7 +311,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
     }
 
     /// <summary>
-    /// TEST: Verify cancel button closes the reject modal.
+    /// Verifies that clicking cancel closes the reject modal.
     /// </summary>
     [Fact]
     public void WhenRejectCancelClicked_ShouldHideModal()
@@ -387,7 +329,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
     }
 
     /// <summary>
-    /// TEST: Verify confirming rejection calls the service.
+    /// Verifies that confirming rejection calls the service with the correct parameters.
     /// </summary>
     [Fact]
     public async Task WhenRejectConfirmed_ShouldCallService()
@@ -411,7 +353,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
     }
 
     /// <summary>
-    /// TEST: Verify error message displays when rejection fails.
+    /// Verifies that an error message is displayed when rejection fails with NotFound.
     /// </summary>
     [Fact]
     public async Task WhenRejectReturnsNotFound_ShouldDisplayError()
@@ -442,8 +384,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
     #region Button State Tests
 
     /// <summary>
-    /// TEST: Verify buttons are disabled while processing.
-    /// CONCEPT: Testing UI state during async operations.
+    /// Verifies that buttons are disabled while an action is being processed.
     /// </summary>
     [Fact]
     public async Task WhenProcessing_ShouldDisableButtons()
@@ -476,8 +417,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
     }
 
     /// <summary>
-    /// TEST: Verify spinner is shown while processing.
-    /// CONCEPT: Testing loading indicators.
+    /// Verifies that a loading spinner is shown while an action is being processed.
     /// </summary>
     [Fact]
     public async Task WhenProcessing_ShouldShowSpinner()
@@ -509,8 +449,7 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
     #region Multiple Requests Tests
 
     /// <summary>
-    /// TEST: Verify correct request is processed when multiple exist.
-    /// CONCEPT: Testing data binding with multiple items.
+    /// Verifies that the correct request is processed when multiple requests exist.
     /// </summary>
     [Fact]
     public async Task WhenMultipleRequests_ShouldProcessCorrectOne()
@@ -525,14 +464,13 @@ public sealed class ClubJoinRequestsGridTests : BunitContext
 
         // Act - Click approve on the second request
         var approveButtons = cut.FindAll("button.btn-outline-success");
-        approveButtons[1].Click(); // Second request (index 1)
+        approveButtons[1].Click();
 
-        // Verify the modal shows the correct user
         cut.Markup.ShouldContain("Test User 2");
 
         await cut.Find(".modal-footer button.btn-success").ClickAsync(new());
 
-        // Assert - Verify the correct request ID was used
+        // Assert
         await _mockClubJoinRequestService.Received(1)
             .UpdateJoinRequestStatusAsync(100, 2, RequestStatus.Approved, Arg.Any<CancellationToken>());
     }

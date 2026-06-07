@@ -351,6 +351,7 @@ public class TeamServiceTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        mockHttp.VerifyNoOutstandingExpectation();
     }
 
     #endregion
